@@ -827,15 +827,18 @@
   .bottomnav {
     display: none !important;
   }
-  /* 时间线：左侧垂直轴线 + 圆点 */
+  /* 时间线：左侧垂直轴线 + 圆点
+     坐标关系：wrap 左内边距 8px → 卡片内容起点 x=8+44=52
+     轴线 x=24（中心 24.5），圆点 卡片内 left:11 → x=8+11=19..30（中心 24.5）与轴线对齐
+     圆点右缘 30 < 内容起点 52 → 不与日期文字重叠 */
   .timeline-wrap {
     position: relative;
-    padding-left: 16px;
+    padding-left: 8px;
   }
   .timeline-wrap::before {
     content: "";
     position: absolute;
-    left: 20px;
+    left: 24px;
     top: 60px;
     bottom: 24px;
     width: 1px;
@@ -847,10 +850,13 @@
       transparent
     );
   }
+  .timeline-item {
+    padding-left: 44px;
+  }
   .timeline-item::before {
     content: "";
     position: absolute;
-    left: 14px;
+    left: 11px;
     top: 26px;
     width: 11px;
     height: 11px;
