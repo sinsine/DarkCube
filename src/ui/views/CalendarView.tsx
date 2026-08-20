@@ -20,23 +20,24 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
   const touchX = useRef<number | null>(null)
   const touchY = useRef<number | null>(null)
   const animTimer = useRef<number | undefined>(undefined)
-  const suppressTimer = useRef<number | undefined>(undefined)
   const [dragX, setDragX] = useState(0)
   const [dragging, setDragging] = useState(false)
-  // 滑动翻页后不再播放渐显动画（只保留滑动过渡）
+  // 滑动翻页后不再播放渐显动画（只保留滑动过渡）；
+  // 通过「在挂载时一次性决定」避免动画类中途切换导致的二次播放
   const [suppressAnim, setSuppressAnim] = useState(false)
 
   useEffect(() => {
     return () => {
       if (animTimer.current !== undefined) clearTimeout(animTimer.current)
-      if (suppressTimer.current !== undefined) clearTimeout(suppressTimer.current)
     }
   }, [])
 
   const grid = useMemo(() => buildMonthGrid(cursor.year, cursor.month), [cursor])
   const hasEntry = useMemo(() => new Set(entries.map((e) => e.date)), [entries])
 
+  /** 切换月份：按钮导航恢复渐显动画；滑动翻页会在之后覆盖为抑制 */
   function move(delta: number) {
+    setSuppressAnim(false)
     setCursor((c) => {
       const d = new Date(c.year, c.month - 1 + delta, 1)
       return { year: d.getFullYear(), month: d.getMonth() + 1 }
@@ -44,6 +45,7 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
   }
 
   function backToToday() {
+    setSuppressAnim(false)
     const t = today.split('-').map(Number)
     setCursor({ year: t[0], month: t[1] })
   }
@@ -79,10 +81,8 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
       setDragX(dir * -width)
       animTimer.current = window.setTimeout(() => {
         move(dir)
-        // 滑动翻页后：新月份只做滑动过渡，不播放渐显动画
+        // 覆盖 move 的恢复：滑动翻页的新月份只做滑动过渡，不播放渐显动画
         setSuppressAnim(true)
-        if (suppressTimer.current !== undefined) clearTimeout(suppressTimer.current)
-        suppressTimer.current = window.setTimeout(() => setSuppressAnim(false), 500)
         setDragging(true) // 无过渡，先放到反方向
         setDragX(dir * width)
         requestAnimationFrame(() => {

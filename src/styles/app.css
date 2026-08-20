@@ -401,21 +401,26 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px 24px;
+  max-width: 100%;
 }
 .meta-group {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1 1 0;
   min-width: 0;
+  max-width: 100%;
 }
-/* 选项横向可滑动单行（隐藏滚动条） */
+/* 选项横向可滑动单行（隐藏滚动条，仅限背景框内滑动） */
 .meta-group__scroll {
   display: flex;
   align-items: center;
   gap: 6px;
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -791,6 +796,15 @@
 .row__title {
   font-size: 14.5px;
   color: var(--ink-0);
+}
+.link-about-title {
+  text-decoration: none;
+  transition: opacity var(--dur-fast);
+}
+.link-about-title:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  opacity: 0.85;
 }
 .row__desc {
   font-size: 12.5px;

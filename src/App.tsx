@@ -7,6 +7,7 @@ import { friendlyGitHubError } from './core/github/api'
 import { LiquidBackground } from './ui/components/LiquidBackground'
 import { TopBar, BottomNav } from './ui/components/TopBar'
 import { LoginDialog } from './ui/components/LoginDialog'
+import { DisclaimerDialog } from './ui/components/DisclaimerDialog'
 import { CalendarView } from './ui/views/CalendarView'
 import { EditorView } from './ui/views/EditorView'
 import { TimelineView } from './ui/views/TimelineView'
@@ -29,9 +30,18 @@ export default function App() {
   const [lastSyncMsg, setLastSyncMsg] = useState('')
   const [online, setOnline] = useState(navigator.onLine)
   const [installEvt, setInstallEvt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>(() =>
     localStorage.getItem('darkcube-theme') === 'dark' ? 'dark' : 'light'
   )
+
+  // 首次使用弹出免责声明（仅一次）
+  useEffect(() => {
+    if (!localStorage.getItem('darkcube-disclaimer-seen')) {
+      localStorage.setItem('darkcube-disclaimer-seen', '1')
+      setDisclaimerOpen(true)
+    }
+  }, [])
 
   const syncStateRef = useRef<SyncState | undefined>(undefined)
   syncStateRef.current = syncState
@@ -292,6 +302,7 @@ export default function App() {
               theme={theme}
               onToggleTheme={toggleTheme}
               onEntriesChanged={refreshEntries}
+              onShowDisclaimer={() => setDisclaimerOpen(true)}
             />
           )}
         </main>
@@ -305,6 +316,7 @@ export default function App() {
         initial={settings}
         onSaved={handleSaved}
       />
+      <DisclaimerDialog open={disclaimerOpen} onClose={() => setDisclaimerOpen(false)} />
     </div>
   )
 }

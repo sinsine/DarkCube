@@ -2,8 +2,16 @@
 
 export const UPDATE_REPO = 'sinsine/DarkCube'
 
+/** 项目 GitHub 主界面 */
+export const GITHUB_URL = `https://github.com/${UPDATE_REPO}`
+
 /** 最新 Releases 界面（github.com 会 302 重定向到最新版） */
 export const RELEASES_URL = `https://github.com/${UPDATE_REPO}/releases/latest`
+
+/** 指定版本的 Releases 页 */
+export function releaseUrl(tag: string): string {
+  return `https://github.com/${UPDATE_REPO}/releases/tag/${tag}`
+}
 
 export interface ReleaseInfo {
   tag_name: string

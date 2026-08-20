@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import type { GitHubSettings, SyncState } from '../../core/types'
 import { todayStr } from '../../core/date'
 import { db } from '../../core/db'
-import { RELEASES_URL, checkLatestRelease, isNewer, type ReleaseInfo } from '../../core/update'
+import { GITHUB_URL, RELEASES_URL, checkLatestRelease, isNewer, type ReleaseInfo } from '../../core/update'
 import { version } from '../../../package.json'
-import { DisclaimerDialog } from '../components/DisclaimerDialog'
+import { ChangelogDialog } from '../components/ChangelogDialog'
 
 interface SettingsViewProps {
   settings: GitHubSettings | null
@@ -23,6 +23,8 @@ interface SettingsViewProps {
   onToggleTheme: () => void
   /** 导入等数据变更后通知上层刷新条目 */
   onEntriesChanged: () => void
+  /** 打开免责声明（由 App 统一管理，用于首次使用弹窗） */
+  onShowDisclaimer: () => void
 }
 
 function formatSyncTime(ts?: number): string {
@@ -76,10 +78,11 @@ export function SettingsView({
   onInstall,
   theme,
   onToggleTheme,
-  onEntriesChanged
+  onEntriesChanged,
+  onShowDisclaimer
 }: SettingsViewProps) {
   const [release, setRelease] = useState<ReleaseInfo | null>(null)
-  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
+  const [changelogOpen, setChangelogOpen] = useState(false)
   const [importMsg, setImportMsg] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -305,8 +308,16 @@ export function SettingsView({
               墨
             </span>
             <div>
-              <div className="row__title">墨辰DarkCube v{version}</div>
-              <div className="row__desc">本地优先 · GitHub 私有仓库云存档 · 黑白液态玻璃</div>
+              <a
+                className="row__title link-about-title"
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noreferrer"
+                title="打开项目 GitHub 主页"
+              >
+                墨辰DarkCube v{version} ↗
+              </a>
+              <div className="row__desc">本地优先 · GitHub 私有仓库云存档</div>
             </div>
           </div>
           <div className="row">
@@ -325,6 +336,9 @@ export function SettingsView({
             </a>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+            <button className="btn btn--sm" onClick={() => setChangelogOpen(true)}>
+              📜 历史更新日志
+            </button>
             <a
               className="link"
               href="https://space.bilibili.com/518517303"
@@ -333,7 +347,7 @@ export function SettingsView({
             >
               作者 B 站主页 ↗
             </a>
-            <button className="btn btn--sm" onClick={() => setDisclaimerOpen(true)}>
+            <button className="btn btn--sm" onClick={onShowDisclaimer}>
               📄 免责声明
             </button>
           </div>
@@ -345,7 +359,7 @@ export function SettingsView({
         </section>
       </div>
 
-      <DisclaimerDialog open={disclaimerOpen} onClose={() => setDisclaimerOpen(false)} />
+      <ChangelogDialog open={changelogOpen} onClose={() => setChangelogOpen(false)} />
     </div>
   )
 }
