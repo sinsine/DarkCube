@@ -33,7 +33,9 @@ export async function getBranchRef(
     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/ref/heads/${encodeURIComponent(branch)}`,
     token
   )
-  return (await res.json()) as GhRef
+  // 注意：GitHub 响应里 commit SHA 在 object.sha，没有顶层 sha 字段
+  const j = (await res.json()) as { ref: string; object: { sha: string; type: string } }
+  return { ref: j.ref, sha: j.object.sha }
 }
 
 export async function getCommit(

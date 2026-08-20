@@ -196,6 +196,9 @@ export async function syncNow(
     : (prev?.deleted ?? [])
 
   if (dirtyEntries.length > 0 || pendingConflicts.length > 0 || tombstones.length > 0) {
+    if (!remoteRefSha) {
+      throw new Error('缺少远端分支引用，无法提交（请重试同步）')
+    }
     const items: TreeItem[] = []
     const pushedShas = new Map<string, string>()
 
