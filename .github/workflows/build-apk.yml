@@ -37,6 +37,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 从 package.json 同步 Android 版本号，避免 APK 版本与发布版本不一致
+      - name: Sync Android version
+        run: node scripts/sync-android-version.mjs
+
       - name: Build web assets
         run: npm run build
 
@@ -50,6 +54,17 @@ jobs:
       - name: Build APK (debug)
         working-directory: android
         run: ./gradlew assembleDebug
+
+      - name: Show APK version
+        working-directory: android
+        run: |
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 2>/dev/null | tail -1)
+          if [ -n "$AAPT" ]; then
+            "$AAPT" dump badging "$APK" | grep -E "^package:" | head -2
+          else
+            echo "aapt2 not found"
+          fi
 
       - name: Upload APK to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
