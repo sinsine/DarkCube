@@ -44,6 +44,7 @@ export interface GhUser {
 }
 
 export interface GhRepo {
+  name: string
   full_name: string
   private: boolean
   default_branch: string
@@ -74,16 +75,46 @@ export async function verifyLogin(
   return { user, repo: repoInfo }
 }
 
+/** 创建私有仓库（自动初始化「云存档」） */
+export async function createRepo(token: string, name: string): Promise<GhRepo> {
+  const res = await ghApiFetch('/user/repos', token, {
+    method: 'POST',
+    body: JSON.stringify({
+      name,
+      private: true,
+      description: '墨辰日记云存档（自动创建）',
+      auto_init: false
+    })
+  })
+  return (await res.json()) as GhRepo
+}
+
+/** 仓库不存在则自动创建，存在则复用 */
+export async function ensureRepo(token: string, owner: string, name: string): Promise<GhRepo> {
+  try {
+    return await getRepo(token, owner, name)
+  } catch (e) {
+    if (e instanceof GitHubError && e.status === 404) {
+      return createRepo(token, name)
+    }
+    throw e
+  }
+}
+
 /** 把 GitHubError 转成用户可读的中文提示 */
 export function friendlyGitHubError(e: unknown): string {
   if (e instanceof GitHubError) {
     switch (e.status) {
+      case 400:
+        return '请求参数错误，请检查输入'
       case 401:
         return 'Token 无效或已过期，请重新生成后输入'
       case 403:
         return '访问被拒绝：请检查 Token 是否勾选「Contents 读写」权限'
       case 404:
         return '仓库不存在，或该 Token 没有访问此仓库的权限'
+      case 422:
+        return '仓库名已存在或创建失败，请更换仓库名'
       default:
         return e.message
     }

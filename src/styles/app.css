@@ -9,8 +9,8 @@
   z-index: var(--z-bg);
   overflow: hidden;
   background:
-    radial-gradient(1100px 700px at 82% -10%, #161616 0%, transparent 60%),
-    radial-gradient(900px 600px at -10% 110%, #131313 0%, transparent 55%),
+    radial-gradient(1100px 700px at 82% -10%, var(--bg-glow-1) 0%, transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, var(--bg-glow-2) 0%, transparent 55%),
     var(--bg-0);
 }
 .blob {
@@ -23,7 +23,7 @@
 .blob-1 {
   width: 520px;
   height: 520px;
-  background: radial-gradient(circle, #2a2a2a 0%, transparent 70%);
+  background: radial-gradient(circle, var(--blob-1) 0%, transparent 70%);
   top: -140px;
   left: -100px;
   animation: drift-1 26s ease-in-out infinite alternate;
@@ -31,7 +31,7 @@
 .blob-2 {
   width: 640px;
   height: 640px;
-  background: radial-gradient(circle, #202020 0%, transparent 70%);
+  background: radial-gradient(circle, var(--blob-2) 0%, transparent 70%);
   bottom: -200px;
   right: -140px;
   animation: drift-2 32s ease-in-out infinite alternate;
@@ -39,7 +39,7 @@
 .blob-3 {
   width: 380px;
   height: 380px;
-  background: radial-gradient(circle, #303030 0%, transparent 70%);
+  background: radial-gradient(circle, var(--blob-3) 0%, transparent 70%);
   top: 42%;
   left: 58%;
   animation: drift-3 22s ease-in-out infinite alternate;
@@ -59,7 +59,7 @@
   padding: 7px 14px;
   border-radius: 10px;
   border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--banner-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   font-size: 12.5px;
@@ -285,7 +285,7 @@
 .editor__body {
   min-height: 420px;
   resize: vertical;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--field-bg);
   border: 1px solid var(--line);
   border-radius: var(--radius-m);
   padding: var(--sp-4);
@@ -305,6 +305,39 @@
   font-family: var(--font-ui);
 }
 
+/* ---------- Markdown 工具栏 ---------- */
+.md-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--field-bg);
+}
+.md-btn {
+  min-width: 34px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  color: var(--ink-1);
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+.md-btn:hover {
+  background: var(--glass-bg-hover);
+  color: var(--ink-0);
+  border-color: var(--line);
+}
+.md-btn:active {
+  transform: scale(0.94);
+}
+
 /* 编辑器工具栏 */
 .editor__toolbar {
   display: flex;
@@ -317,7 +350,7 @@
   padding: 3px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--field-bg);
 }
 .seg__item {
   padding: 5px 18px;
@@ -358,7 +391,7 @@
   min-height: 420px;
   padding: var(--sp-4) var(--sp-5);
   border-radius: var(--radius-m);
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--field-bg);
   border: 1px solid var(--line);
   overflow-wrap: break-word;
 }
@@ -410,14 +443,14 @@
 .md-body code {
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
   font-size: 0.88em;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--code-bg);
   padding: 0.12em 0.4em;
   border-radius: 6px;
 }
 .md-body pre {
   margin: 0.8em 0;
   padding: 1em 1.2em;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--field-bg-strong);
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow-x: auto;
@@ -601,7 +634,7 @@
     margin: 0 calc(var(--sp-3) * -1);
     padding: 8px var(--sp-3) calc(8px + env(safe-area-inset-bottom));
     gap: 4px;
-    background: rgba(10, 10, 10, 0.6);
+    background: var(--nav-bg);
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
     border-top: 1px solid var(--line);

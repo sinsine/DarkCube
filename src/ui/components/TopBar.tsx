@@ -7,6 +7,8 @@ interface TopBarProps {
   settings: GitHubSettings | null
   loggedIn: boolean
   onOpenLogin: () => void
+  theme: 'dark' | 'light'
+  onToggleTheme: () => void
 }
 
 const NAV_ITEMS: { id: ViewId; label: string }[] = [
@@ -15,8 +17,17 @@ const NAV_ITEMS: { id: ViewId; label: string }[] = [
   { id: 'settings', label: '设置' }
 ]
 
-/** 顶栏：品牌 + 桌面导航 + 写日记 + 登录状态 */
-export function TopBar({ view, onNavigate, onWrite, settings, loggedIn, onOpenLogin }: TopBarProps) {
+/** 顶栏：品牌 + 桌面导航 + 写日记 + 主题切换 + 登录状态 */
+export function TopBar({
+  view,
+  onNavigate,
+  onWrite,
+  settings,
+  loggedIn,
+  onOpenLogin,
+  theme,
+  onToggleTheme
+}: TopBarProps) {
   return (
     <header className="glass-panel topbar">
       <div className="brand">
@@ -37,6 +48,14 @@ export function TopBar({ view, onNavigate, onWrite, settings, loggedIn, onOpenLo
       </nav>
 
       <div className="topbar__right">
+        <button
+          className="icon-btn"
+          onClick={onToggleTheme}
+          title={theme === 'dark' ? '切换日间模式' : '切换夜间模式'}
+          aria-label="切换主题"
+        >
+          {theme === 'dark' ? '☀' : '☾'}
+        </button>
         <button className="btn btn--primary topbar__write" onClick={onWrite}>
           写日记
         </button>

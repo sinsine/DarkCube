@@ -87,7 +87,7 @@
 /* ---------- 输入 ---------- */
 .input {
   width: 100%;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--field-bg);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 10px 14px;
@@ -171,7 +171,7 @@
   font-size: 13px;
   line-height: 1.55;
   border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--note-bg);
   color: var(--ink-1);
 }
 .note--error {
@@ -223,6 +223,32 @@
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
+/* ---------- 链接 ---------- */
+.link {
+  color: var(--ink-0);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 13px;
+  transition: opacity var(--dur-fast);
+}
+.link:hover {
+  opacity: 0.75;
+}
+
+/* ---------- 设备码展示（网页登录） ---------- */
+.device-code {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  padding: 14px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  background: var(--field-bg);
+  user-select: all;
+}
+
 /* ---------- 开关 ---------- */
 .switch {
   position: relative;
@@ -230,7 +256,7 @@
   height: 24px;
   border-radius: 99px;
   border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--field-bg);
   transition: background var(--dur) var(--ease);
   flex-shrink: 0;
 }

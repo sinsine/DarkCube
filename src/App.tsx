@@ -29,6 +29,9 @@ export default function App() {
   const [lastSyncMsg, setLastSyncMsg] = useState('')
   const [online, setOnline] = useState(navigator.onLine)
   const [installEvt, setInstallEvt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [theme, setTheme] = useState<'dark' | 'light'>(() =>
+    localStorage.getItem('darkcube-theme') === 'light' ? 'light' : 'dark'
+  )
 
   const syncStateRef = useRef<SyncState | undefined>(undefined)
   syncStateRef.current = syncState
@@ -69,6 +72,16 @@ export default function App() {
       refreshSyncState()
     }
   }, [settings, refreshSyncState])
+
+  // 主题：日间 / 夜间
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('darkcube-theme', theme)
+  }, [theme])
+
+  const toggleTheme = useCallback(() => {
+    setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+  }, [])
 
   // 网络状态
   useEffect(() => {
@@ -145,6 +158,16 @@ export default function App() {
     setSettings(next)
   }, [settings])
 
+  const handleSaveSettings = useCallback(
+    async (patch: Partial<GitHubSettings>) => {
+      if (!settings) return
+      const next: GitHubSettings = { ...settings, ...patch }
+      await saveSettings(next)
+      setSettings(next)
+    },
+    [settings]
+  )
+
   const openEditor = useCallback((date: string) => {
     setSelectedDate(date)
     setView('editor')
@@ -166,6 +189,8 @@ export default function App() {
           settings={settings}
           loggedIn={loggedIn}
           onOpenLogin={() => setLoginOpen(true)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
 
         <main className="app-main">
@@ -196,6 +221,9 @@ export default function App() {
               onToggleAutoSync={() => void handleToggleAutoSync()}
               canInstall={installEvt !== null}
               onInstall={() => void handleInstall()}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              onSaveSettings={handleSaveSettings}
             />
           )}
         </main>

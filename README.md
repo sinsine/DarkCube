@@ -7,6 +7,10 @@
 ## ✨ 功能
 
 - **写日记**：一天一篇，Markdown 语法，实时预览，字数统计，自动保存（防抖 600ms）
+- **图形化 Markdown 辅助**：编辑器上方工具栏一键插入 标题 / 加粗 / 斜体 / 删除线 / 引用 / 列表 / 待办 / 代码 / 链接 / 分割线（作用于当前选区）
+- **两种 GitHub 登录**：手动 Token，或**网页辅助登录**（打开 GitHub 网页输码授权，免填 Token）
+- **自动创建仓库**：登录后自动创建私有仓库（默认 `darkcube-diary`，已存在则复用），无需手动建仓
+- **日间 / 夜间模式**：黑白玻璃界面一键反转
 - **日历视图**：月历上墨点标记有日记的日子，今日高亮
 - **时间线**：倒序浏览全部日记
 - **GitHub 云存档**：日记以 Markdown 明文同步到你自己的**私有仓库**（`diary/entries/YYYY/MM/YYYY-MM-DD.md`），GitHub 网页上可直接阅读
@@ -40,39 +44,43 @@ npm run build      # 输出到 dist/（含 service worker 与 manifest）
 npm run preview    # 本地预览生产构建
 ```
 
-## ☁️ GitHub 配置（5 分钟）
+## ☁️ GitHub 配置
 
-### 1. 创建日记仓库（私有）
+### 方式 A：网页辅助登录（推荐，免填 Token）
 
-GitHub → New repository → 填仓库名（如 `my-diary`）→ **Private** → 不要勾选 "Add a README"（保持空仓库，应用首次同步会自动初始化）。
+需要一次性准备两样东西：
 
-> 空仓库也没关系：应用第一次同步时会自动写入 README 并创建首个 commit。
+**1. 创建 OAuth App（约 2 分钟）**
 
-### 2. 生成细粒度 Token（PAT）
+1. 打开 [https://github.com/settings/applications/new](https://github.com/settings/applications/new)
+2. 填写：
+   - **Application name**：`DarkCube Diary`
+   - **Homepage URL**：`https://github.com`
+   - **Authorization callback URL**：`https://github.com`（Device Flow 用不到回调，随便填合法 URL 即可）
+   - 勾选 **Enable Device Flow**
+3. 创建后复制 **Client ID**（`Iv1.` 开头）。Device Flow **不需要 Client Secret**；若 GitHub 报错提示凭据错误，可在设置页补填 Secret。
 
-1. GitHub → 头像 → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**
-2. 设置：
-   - **Repository access**：Only select repositories → 勾选你的日记仓库
-   - **Permissions** → **Contents**：**Read and write**（其他权限保持默认）
-3. 生成后复制 `github_pat_...` 开头的 Token（只显示一次，请妥善保存）
+**2. 部署中转 Worker（约 5 分钟，免费）**
 
-### 3. 应用内登录
+GitHub 出于安全原因不允许浏览器直连 device flow 接口（无 CORS），需要自建一个仅做转发的中转服务：
 
-打开应用 → 顶栏 **「登录 GitHub」** → 填写：
+1. 打开 [Cloudflare](https://dash.cloudflare.com) → Workers & Pages → 创建 Worker
+2. 把本仓库 [server/device-flow-worker.js](server/device-flow-worker.js) 的内容粘贴进去 → 部署
+3. 复制生成的地址（如 `https://xxx.workers.dev`）
 
-| 字段 | 示例 |
-|---|---|
-| GitHub 用户名 / 组织 | `zhang-san` |
-| 仓库名 | `my-diary` |
-| Personal Access Token | `github_pat_...` |
+**3. 应用内配置**
 
-点击 **「验证并登录」**，应用会实际调用 GitHub API 校验身份与仓库权限。Token 只保存在本机浏览器（IndexedDB）。
+打开应用 → 设置 → **网页登录（OAuth）** → 填入 Client ID 与中转地址 → 保存。
+之后点顶栏「登录 GitHub」→ 选「网页登录」→ 开始 → 打开 GitHub 授权页 → 输入设备码 → 授权 → 自动完成登录。
 
-### 4. 同步
+### 方式 B：手动 Token
 
-- **立即同步**：设置 → 同步 → 立即同步
-- **自动同步**：设置 → 打开「自动同步」，打开应用或恢复联网时自动拉取与推送
-- 同步是一次 git 提交：`sync: N entries`，历史干净可回溯
+1. 打开 [https://github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new) 生成**细粒度 Token**：
+   - **Repository access**：All repositories（或 Select repositories 勾选日记仓库）
+   - **Permissions** → **Contents**：**Read and write**
+2. 应用内「登录 GitHub」→ 手动 Token → 粘贴 Token → 登录
+
+> 两种方式都不需要手动创建仓库：登录成功后应用会**自动创建私有仓库**（默认 `darkcube-diary`，可在登录弹窗中修改；已存在则直接复用）。
 
 ## 📲 部署到 GitHub Pages（电脑 + 安卓安装）
 
@@ -111,25 +119,30 @@ GitHub → New repository → 填仓库名（如 `my-diary`）→ **Private** �
 ├── .github/workflows/deploy.yml   # GitHub Pages 自动部署
 ├── public/icons/                  # PWA 图标（脚本生成）
 ├── scripts/gen-icons.mjs          # 纯 Node 图标生成器
+├── server/device-flow-worker.js   # 网页登录中转（Cloudflare Worker）
 ├── src/
 │   ├── core/
 │   │   ├── types.ts               # 数据模型
 │   │   ├── db.ts                  # Dexie 存储
 │   │   ├── date.ts                # 日期/月历工具
-│   │   ├── markdown.ts            # 渲染/标题/字数
-│   │   ├── github/api.ts          # GitHub REST 客户端（认证/仓库）
+│   │   ├── markdown.ts            # 渲染/标题/字数/工具栏转换
+│   │   ├── github/api.ts          # GitHub REST 客户端（认证/仓库/自动建仓）
 │   │   ├── github/git.ts          # Git Data API（ref/tree/blob/commit）
+│   │   ├── github/oauth.ts        # Device Flow 客户端（经中转）
 │   │   └── sync/engine.ts         # 同步引擎（拉取/推送/冲突/墓碑）
 │   ├── ui/
-│   │   ├── components/            # 顶栏/登录面板/液体背景
+│   │   ├── components/            # 顶栏/登录面板/工具栏/液体背景
 │   │   └── views/                 # 日历/编辑器/时间线/设置
-│   └── styles/                    # 黑白玻璃设计系统
+│   └── styles/                    # 黑白玻璃设计系统（含日间模式）
 └── vite.config.ts
 ```
 
 ## 🗺 路线图
 
-- [ ] OAuth Device Flow 一键登录（免手动生成 Token）
+- [x] 图形化 Markdown 辅助工具栏
+- [x] 网页辅助登录（Device Flow）
+- [x] 自动创建仓库
+- [x] 日间模式
 - [ ] 内容加密后上传（口令派生密钥 AES-GCM）
 - [ ] 图片/附件
 - [ ] 标签分类与搜索

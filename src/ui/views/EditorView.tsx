@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
 import { formatDateCN, pad2 } from '../../core/date'
-import { countWords, deriveTitle, renderMarkdown } from '../../core/markdown'
+import { countWords, deriveTitle, renderMarkdown, transformMarkdown, type MdOp } from '../../core/markdown'
 import { db } from '../../core/db'
+import { MarkdownToolbar } from '../components/MarkdownToolbar'
 
 interface EditorViewProps {
   date: string
@@ -23,6 +24,7 @@ export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorVi
   const [status, setStatus] = useState<SaveStatus>(entry ? 'saved' : 'idle')
   const timer = useRef<number | undefined>(undefined)
   const textRef = useRef(text)
+  const taRef = useRef<HTMLTextAreaElement | null>(null)
   textRef.current = text
 
   // 日期变化：先立即落盘旧日期的未保存内容
@@ -48,6 +50,21 @@ export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorVi
     setStatus('saving')
     if (timer.current !== undefined) clearTimeout(timer.current)
     timer.current = window.setTimeout(() => void doSave(date, v), SAVE_DELAY)
+  }
+
+  /** 图形化工具栏：对当前选区应用 Markdown 操作并保留焦点 */
+  function applyMd(op: MdOp) {
+    const ta = taRef.current
+    if (!ta) return
+    const { value, start, end } = transformMarkdown(text, ta.selectionStart, ta.selectionEnd, op)
+    setText(value)
+    setStatus('saving')
+    if (timer.current !== undefined) clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => void doSave(date, value), SAVE_DELAY)
+    requestAnimationFrame(() => {
+      ta.focus()
+      ta.setSelectionRange(start, end)
+    })
   }
 
   async function doSave(saveDate: string, body: string) {
@@ -138,8 +155,11 @@ export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorVi
           )}
         </div>
 
+        {mode === 'edit' && <MarkdownToolbar onApply={applyMd} />}
+
         {mode === 'edit' ? (
           <textarea
+            ref={taRef}
             className="editor__body"
             value={text}
             onChange={(e) => handleChange(e.target.value)}

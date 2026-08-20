@@ -1,5 +1,5 @@
 /* ============================================================
-   墨辰日记 · 设计令牌 — 纯黑白灰
+   墨辰日记 · 设计令牌 — 纯黑白灰（暗色为默认）
    ============================================================ */
 :root {
   /* 色板：近黑背景 → 灰阶 → 白 */
@@ -19,6 +19,24 @@
   --glass-bg-hover: rgba(255, 255, 255, 0.08);
   --glass-bg-active: rgba(255, 255, 255, 0.12);
   --glass-blur: 20px;
+
+  /* 输入区 / 内嵌面板背景 */
+  --field-bg: rgba(0, 0, 0, 0.28);
+  --field-bg-strong: rgba(0, 0, 0, 0.4);
+  --note-bg: rgba(0, 0, 0, 0.22);
+  --nav-bg: rgba(10, 10, 10, 0.6);
+  --banner-bg: rgba(0, 0, 0, 0.55);
+  --scroll-thumb: rgba(255, 255, 255, 0.14);
+  --scroll-thumb-hover: rgba(255, 255, 255, 0.26);
+  --focus-ring: rgba(255, 255, 255, 0.55);
+  --code-bg: rgba(255, 255, 255, 0.08);
+
+  /* 液态背景 */
+  --bg-glow-1: #161616;
+  --bg-glow-2: #131313;
+  --blob-1: #2a2a2a;
+  --blob-2: #202020;
+  --blob-3: #303030;
 
   --danger: #d98a8a; /* 柔和的灰玫瑰红，仅用于错误/危险语义 */
 
@@ -55,4 +73,44 @@
   --dur-fast: 0.15s;
   --dur: 0.25s;
   --dur-slow: 0.45s;
+}
+
+/* ---------- 日间模式：黑白反转 ---------- */
+:root[data-theme='light'] {
+  --bg-0: #f4f4f4;
+  --bg-1: #ececec;
+  --bg-2: #e0e0e0;
+
+  --ink-0: #141414;
+  --ink-1: #4d4d4d;
+  --ink-2: #767676;
+  --ink-3: #a8a8a8;
+
+  --line: rgba(0, 0, 0, 0.09);
+  --line-strong: rgba(0, 0, 0, 0.2);
+
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-hover: rgba(255, 255, 255, 0.8);
+  --glass-bg-active: rgba(0, 0, 0, 0.07);
+
+  --field-bg: rgba(255, 255, 255, 0.65);
+  --field-bg-strong: rgba(255, 255, 255, 0.85);
+  --note-bg: rgba(0, 0, 0, 0.04);
+  --nav-bg: rgba(244, 244, 244, 0.72);
+  --banner-bg: rgba(244, 244, 244, 0.8);
+  --scroll-thumb: rgba(0, 0, 0, 0.16);
+  --scroll-thumb-hover: rgba(0, 0, 0, 0.3);
+  --focus-ring: rgba(0, 0, 0, 0.5);
+  --code-bg: rgba(0, 0, 0, 0.06);
+
+  --bg-glow-1: #ffffff;
+  --bg-glow-2: #e6e6e6;
+  --blob-1: #e8e8e8;
+  --blob-2: #dcdcdc;
+  --blob-3: #f0f0f0;
+
+  --danger: #b55454;
+
+  --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.1);
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.07);
 }

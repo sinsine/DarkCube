@@ -1,7 +1,7 @@
 {
   "name": "darkcube-diary",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "墨辰日记 — 黑白玻璃风格的本地优先日记，GitHub 私有仓库云存档",
   "scripts": {
