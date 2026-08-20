@@ -1,0 +1,162 @@
+import { useEffect, useRef, useState } from 'react'
+import type { DiaryEntry } from '../../core/types'
+import { formatDateCN, pad2 } from '../../core/date'
+import { countWords, deriveTitle, renderMarkdown } from '../../core/markdown'
+import { db } from '../../core/db'
+
+interface EditorViewProps {
+  date: string
+  entry: DiaryEntry | null
+  onChangeDate: (date: string) => void
+  /** 保存完成后通知上层刷新条目列表 */
+  onEntrySaved: () => void
+}
+
+type SaveStatus = 'idle' | 'saving' | 'saved'
+type Mode = 'edit' | 'preview'
+
+const SAVE_DELAY = 600
+
+export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorViewProps) {
+  const [text, setText] = useState(entry?.body ?? '')
+  const [mode, setMode] = useState<Mode>('edit')
+  const [status, setStatus] = useState<SaveStatus>(entry ? 'saved' : 'idle')
+  const timer = useRef<number | undefined>(undefined)
+  const textRef = useRef(text)
+  textRef.current = text
+
+  // 日期变化：先立即落盘旧日期的未保存内容
+  useEffect(() => {
+    return () => {
+      if (timer.current !== undefined) {
+        clearTimeout(timer.current)
+        void doSave(date, textRef.current)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date])
+
+  // 载入新日期的内容
+  useEffect(() => {
+    setText(entry?.body ?? '')
+    setStatus(entry ? 'saved' : 'idle')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date])
+
+  function handleChange(v: string) {
+    setText(v)
+    setStatus('saving')
+    if (timer.current !== undefined) clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => void doSave(date, v), SAVE_DELAY)
+  }
+
+  async function doSave(saveDate: string, body: string) {
+    timer.current = undefined
+    try {
+      if (body.trim() === '') {
+        const exists = await db.entries.get(saveDate)
+        if (exists) {
+          // 若该日记曾同步过，记墓碑防止远端文件被重新拉回
+          if (exists.blobSha) {
+            const st = await db.syncState.get(1)
+            const deleted = [...(st?.deleted ?? []).filter((d) => d !== saveDate), saveDate]
+            await db.syncState.put({ ...(st ?? { id: 1 }), deleted })
+          }
+          await db.entries.delete(saveDate)
+        }
+      } else {
+        await db.entries.put({
+          date: saveDate,
+          title: deriveTitle(body),
+          body,
+          updatedAt: Date.now(),
+          dirty: true
+        })
+      }
+      setStatus('saved')
+      onEntrySaved()
+    } catch {
+      setStatus('saved')
+    }
+  }
+
+  function shift(delta: number) {
+    const [y, m, d] = date.split('-').map(Number)
+    const dt = new Date(y, m - 1, d + delta)
+    onChangeDate(`${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`)
+  }
+
+  const words = countWords(text)
+  const statusLabel = status === 'saving' ? '保存中…' : status === 'saved' ? '已保存' : ''
+
+  return (
+    <div className="view">
+      <div className="glass-panel editor-wrap">
+        <div className="editor__date">
+          <button className="icon-btn" onClick={() => shift(-1)} aria-label="前一天">
+            ‹
+          </button>
+          <span className="editor__date-text">{formatDateCN(date)}</span>
+          <button className="icon-btn" onClick={() => shift(1)} aria-label="后一天">
+            ›
+          </button>
+          <span style={{ flex: 1 }} />
+          {entry ? (
+            <span className="chip">
+              <span className="chip__dot chip__dot--on" />
+              已有日记
+            </span>
+          ) : (
+            <span className="chip">
+              <span className="chip__dot" />
+              新日记
+            </span>
+          )}
+        </div>
+
+        <div className="editor__toolbar">
+          <div className="seg" role="tablist" aria-label="编辑模式">
+            <button
+              className={`seg__item${mode === 'edit' ? ' seg__item--active' : ''}`}
+              onClick={() => setMode('edit')}
+            >
+              编辑
+            </button>
+            <button
+              className={`seg__item${mode === 'preview' ? ' seg__item--active' : ''}`}
+              onClick={() => setMode('preview')}
+            >
+              预览
+            </button>
+          </div>
+          <span style={{ flex: 1 }} />
+          {words > 0 && <span className="editor__meta">{words} 字</span>}
+          {statusLabel && (
+            <span className={`editor__status${status === 'saving' ? ' editor__status--busy' : ''}`}>
+              {statusLabel}
+            </span>
+          )}
+        </div>
+
+        {mode === 'edit' ? (
+          <textarea
+            className="editor__body"
+            value={text}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder={'在这里写下今天的思绪…\n\n支持 Markdown：\n# 标题\n**加粗** · *斜体* · - 列表 · > 引用'}
+            spellCheck={false}
+          />
+        ) : (
+          <div
+            className="editor__preview md-body"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }}
+          />
+        )}
+
+        {text.trim() === '' && (
+          <div className="note">内容将自动保存在本机（IndexedDB），登录 GitHub 后可同步到私有仓库。</div>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,28 @@
+{
+  "name": "darkcube-diary",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "墨辰日记 — 黑白玻璃风格的本地优先日记，GitHub 私有仓库云存档",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "icons": "node scripts/gen-icons.mjs"
+  },
+  "dependencies": {
+    "dexie": "^4.0.11",
+    "dompurify": "^3.4.14",
+    "marked": "^15.0.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}

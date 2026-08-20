@@ -1,0 +1,289 @@
+/* ============================================================
+   墨辰日记 · 液态玻璃组件
+   ============================================================ */
+
+/* ---------- 玻璃面板 ---------- */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-glass);
+}
+
+.glass-panel--flat {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--glass-bg);
+  color: var(--ink-0);
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: nowrap;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.btn:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--line-strong);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 主按钮：白底黑字，黑白反转 */
+.btn--primary {
+  background: var(--ink-0);
+  color: var(--bg-0);
+  border-color: transparent;
+  font-weight: 600;
+}
+.btn--primary:hover {
+  background: #ffffff;
+  border-color: transparent;
+}
+
+/* 危险按钮：柔灰玫瑰红 */
+.btn--danger {
+  color: var(--danger);
+  border-color: rgba(217, 138, 138, 0.35);
+  background: rgba(217, 138, 138, 0.06);
+}
+.btn--danger:hover {
+  background: rgba(217, 138, 138, 0.12);
+  border-color: rgba(217, 138, 138, 0.55);
+}
+
+.btn--sm {
+  padding: 6px 13px;
+  font-size: 13px;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* ---------- 输入 ---------- */
+.input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--ink-0);
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.input::placeholder {
+  color: var(--ink-3);
+}
+.input:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.07);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field__label {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  letter-spacing: 0.05em;
+}
+
+/* ---------- 弹窗 ---------- */
+.dialog-mask {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fade-in var(--dur) var(--ease);
+}
+.dialog {
+  width: min(440px, 100%);
+  padding: var(--sp-5);
+  animation: pop-in var(--dur) var(--ease);
+}
+.dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+.dialog__title {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.dialog__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--ink-2);
+  font-size: 18px;
+  border: 1px solid transparent;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+.dialog__close:hover {
+  background: var(--glass-bg-hover);
+  color: var(--ink-0);
+  border-color: var(--line);
+}
+
+/* ---------- 提示条 ---------- */
+.note {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--ink-1);
+}
+.note--error {
+  border-color: rgba(217, 138, 138, 0.4);
+  background: rgba(217, 138, 138, 0.07);
+  color: var(--danger);
+}
+.note--ok {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink-0);
+}
+
+/* ---------- 胶囊状态片 ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 13px;
+  color: var(--ink-1);
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.chip:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--line-strong);
+}
+.chip__avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  object-fit: cover;
+  background: var(--bg-2);
+}
+.chip__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-2);
+}
+.chip__dot--on {
+  background: var(--ink-0);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* ---------- 开关 ---------- */
+.switch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 99px;
+  border: 1px solid var(--line-strong);
+  background: rgba(0, 0, 0, 0.35);
+  transition: background var(--dur) var(--ease);
+  flex-shrink: 0;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink-2);
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.switch[aria-checked="true"] {
+  background: var(--ink-0);
+}
+.switch[aria-checked="true"]::after {
+  transform: translateX(18px);
+  background: var(--bg-0);
+}
+.switch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- 分隔线 ---------- */
+.hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: var(--sp-5) 0;
+}
+
+/* ---------- 空状态 ---------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-7) var(--sp-5);
+  text-align: center;
+  color: var(--ink-2);
+}
+.empty__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--glass-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--ink-1);
+}

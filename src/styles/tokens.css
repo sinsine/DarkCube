@@ -1,0 +1,58 @@
+/* ============================================================
+   墨辰日记 · 设计令牌 — 纯黑白灰
+   ============================================================ */
+:root {
+  /* 色板：近黑背景 → 灰阶 → 白 */
+  --bg-0: #0a0a0a;
+  --bg-1: #111111;
+  --bg-2: #181818;
+
+  --ink-0: #f5f5f5;   /* 主文字 */
+  --ink-1: #b8b8b8;   /* 次级文字 */
+  --ink-2: #7a7a7a;   /* 弱化文字 */
+  --ink-3: #4a4a4a;   /* 极弱 / 占位 */
+
+  --line: rgba(255, 255, 255, 0.08);        /* 玻璃描边 */
+  --line-strong: rgba(255, 255, 255, 0.18); /* 强调描边 */
+
+  --glass-bg: rgba(255, 255, 255, 0.045);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-bg-active: rgba(255, 255, 255, 0.12);
+  --glass-blur: 20px;
+
+  --danger: #d98a8a; /* 柔和的灰玫瑰红，仅用于错误/危险语义 */
+
+  /* 字体 */
+  --font-ui: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", Georgia, "Times New Roman", serif;
+
+  /* 几何 */
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 20px;
+  --radius-pill: 999px;
+
+  --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.35);
+
+  /* 间距 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* 层级 */
+  --z-bg: 0;
+  --z-app: 10;
+  --z-dialog: 100;
+  --z-toast: 200;
+
+  /* 动效 */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 0.15s;
+  --dur: 0.25s;
+  --dur-slow: 0.45s;
+}
