@@ -48,10 +48,20 @@ npm run preview    # 本地预览生产构建
 
 ### 生成细粒度 Token（PAT）
 
-1. 打开 [https://github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new) 生成**细粒度 Token**：
-   - **Repository access**：All repositories（或 Select repositories 勾选日记仓库）
-   - **Permissions** → **Contents**：**Read and write**
+1. 打开 [https://github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new) 生成**细粒度 Token**，关键选项：
+
+   | 选项 | 取值 | 原因 |
+   |---|---|---|
+   | Resource owner | 你的账号 | — |
+   | Expiration | 90 天（或自定义） | GitHub 建议定期轮换 |
+   | **Repository access** | **All repositories** ⚠️ | 自动创建的新仓库不在「已选仓库」列表里，选 Only select repositories 将无法自动建仓 |
+   | **Contents** | **Read and write** | 同步日记必需（git blobs / trees / commits / refs / 文件读写） |
+   | **Administration** | **Read and write** | 自动创建私有仓库必需（`POST /user/repos`） |
+   | Metadata | Read-only | 自动包含、不可取消 |
+
 2. 生成后复制 `github_pat_...` 开头的 Token（只显示一次，请妥善保存）
+
+> **不需要自动建仓的最小权限方案**：先在 GitHub 手动建好私有仓库 → Repository access 选 **Only select repositories** 并勾选该仓库 → 只勾 **Contents: Read and write**。登录时仓库名填已建好的那个。
 
 ### 应用内登录
 
