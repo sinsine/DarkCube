@@ -823,14 +823,28 @@
     padding-top: calc(var(--sp-3) + env(safe-area-inset-top));
   }
 
-  /* 品牌：只显示「墨辰」，隐藏图标与版本号 */
+  /* 品牌：只显示「墨辰 + 版本号」，隐藏图标 */
   .brand__logo,
-  .brand__name--full,
-  .brand__version {
+  .brand__name--full {
     display: none;
   }
   .brand__name--short {
     display: inline;
+  }
+  .brand__version {
+    display: inline;
+    font-size: 10px;
+    margin-left: 3px;
+    letter-spacing: 0.02em;
+  }
+
+  /* 竖屏隐藏右侧滚动条（横向滑动仍可用） */
+  .app-main {
+    scrollbar-width: none;
+  }
+  .app-main::-webkit-scrollbar {
+    display: none;
+    width: 0;
   }
 
   /* 登录后仅显示头像 */

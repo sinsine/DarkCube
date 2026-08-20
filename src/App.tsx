@@ -74,8 +74,9 @@ export default function App() {
     } finally {
       setSyncing(false)
       refreshSyncState()
+      refreshEntries() // 拉取的新内容立即刷新到界面，无需重启
     }
-  }, [settings, refreshSyncState])
+  }, [settings, refreshSyncState, refreshEntries])
 
   // 主题：日间 / 夜间
   useEffect(() => {

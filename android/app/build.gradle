@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+// 读取签名配置（keystore.properties 仅存在于 CI/本机，不提交到仓库）
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+def hasSigning = keystoreProps.containsKey('storeFile')
+
 android {
     namespace = "com.darkcube.diary"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +24,20 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (hasSigning) {
+                storeFile rootProject.file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            // 有稳定签名用 release 签名（支持覆盖安装），否则退回 debug 签名
+            signingConfig hasSigning ? signingConfigs.release : signingConfigs.debug
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

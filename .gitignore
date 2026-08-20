@@ -4,3 +4,6 @@ dev-dist
 *.local
 .DS_Store
 Thumbs.db
+# 签名文件不入库
+android/darkcube-release.keystore
+android/keystore.properties

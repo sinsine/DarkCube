@@ -51,14 +51,35 @@ jobs:
       - name: Fix gradlew permissions
         run: chmod +x android/gradlew
 
-      - name: Build APK (debug)
+      # 从 Secrets 还原稳定签名，实现后续版本可覆盖安装
+      - name: Prepare release signing keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.DARKCUBE_KEYSTORE_B64 }}
+          STORE_PASS: ${{ secrets.DARKCUBE_KEYSTORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.DARKCUBE_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.DARKCUBE_KEY_ALIAS }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > android/darkcube-release.keystore
+            cat > android/keystore.properties <<EOF
+            storeFile=darkcube-release.keystore
+            storePassword=$STORE_PASS
+            keyAlias=$KEY_ALIAS
+            keyPassword=$KEY_PASS
+            EOF
+            echo "release keystore 已还原"
+          else
+            echo "未配置签名 Secrets，将使用 debug 签名"
+          fi
+
+      - name: Build APK (release)
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleRelease
 
       - name: Show APK version
         working-directory: android
         run: |
-          APK="app/build/outputs/apk/debug/app-debug.apk"
+          APK="app/build/outputs/apk/release/app-release.apk"
           AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 2>/dev/null | tail -1)
           if [ -n "$AAPT" ]; then
             "$AAPT" dump badging "$APK" | grep -E "^package:" | head -2
@@ -72,7 +93,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          APK="android/app/build/outputs/apk/release/app-release.apk"
           NAME="DarkCubeDiary-${TAG}.apk"
           cp "$APK" "/tmp/$NAME"
           gh release upload "$TAG" "/tmp/$NAME" --clobber || \
@@ -82,5 +103,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: darkcube-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
