@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import type { GitHubSettings, SyncState } from '../../core/types'
 import { todayStr } from '../../core/date'
 import { db } from '../../core/db'
+import { RELEASES_URL, checkLatestRelease, isNewer, type ReleaseInfo } from '../../core/update'
+import { version } from '../../../package.json'
 
 interface SettingsViewProps {
   settings: GitHubSettings | null
@@ -69,6 +72,18 @@ export function SettingsView({
   theme,
   onToggleTheme
 }: SettingsViewProps) {
+  const [release, setRelease] = useState<ReleaseInfo | null>(null)
+
+  // 进入设置页时检查一次最新版本
+  useEffect(() => {
+    let alive = true
+    void checkLatestRelease().then((r) => {
+      if (alive && r) setRelease(r)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   return (
     <div className="view">
@@ -199,9 +214,24 @@ export function SettingsView({
               墨
             </span>
             <div>
-              <div className="row__title">墨辰日记 v1.2.0</div>
+              <div className="row__title">墨辰DarkCube v{version}</div>
               <div className="row__desc">本地优先 · GitHub 私有仓库云存档 · 黑白液态玻璃</div>
             </div>
+          </div>
+          <div className="row">
+            <div className="row__main">
+              <div className="row__title">检查更新</div>
+              <div className="row__desc">
+                {release
+                  ? isNewer(release.tag_name, version)
+                    ? `发现新版本 ${release.tag_name}，点击右侧前往下载`
+                    : `已是最新版本（${release.tag_name}）`
+                  : '前往 GitHub Releases 查看最新版本'}
+              </div>
+            </div>
+            <a className="btn btn--sm" href={RELEASES_URL} target="_blank" rel="noreferrer">
+              最新 Releases ↗
+            </a>
           </div>
           <a
             className="link"

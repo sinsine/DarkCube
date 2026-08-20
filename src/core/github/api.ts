@@ -82,7 +82,7 @@ export async function createRepo(token: string, name: string): Promise<GhRepo> {
     body: JSON.stringify({
       name,
       private: true,
-      description: '墨辰日记云存档（自动创建）',
+      description: '墨辰DarkCube云存档（自动创建）',
       auto_init: false
     })
   })

@@ -91,6 +91,17 @@
   animation: slide-up var(--dur) var(--ease);
 }
 
+/* 液态光斑：轻微旋转让流动更自然 */
+@keyframes drift-1 {
+  to { transform: translate(100px, 70px) scale(1.18) rotate(10deg); }
+}
+@keyframes drift-2 {
+  to { transform: translate(-120px, -60px) scale(1.12) rotate(-8deg); }
+}
+@keyframes drift-3 {
+  to { transform: translate(-70px, 100px) scale(1.22) rotate(6deg); }
+}
+
 /* ---------- 顶栏 ---------- */
 .topbar {
   display: flex;
@@ -231,6 +242,7 @@
   gap: 3px;
   font-size: 14px;
   color: var(--ink-1);
+  animation: rise-in 0.3s var(--ease) backwards;
   transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
 }
 .day-cell:hover {
@@ -551,31 +563,79 @@
 
 /* ---------- 时间线视图 ---------- */
 .timeline-wrap {
-  max-width: 720px;
+  max-width: 760px;
   margin: 0 auto;
   padding: var(--sp-5) var(--sp-5) var(--sp-6);
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-4);
+}
+.timeline-year {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.timeline-year__head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--banner-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+}
+.timeline-year__title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.timeline-year__count {
+  font-size: 12px;
+  color: var(--ink-3);
 }
 .timeline-item {
-  display: block;
+  display: flex;
+  gap: 16px;
   width: 100%;
   text-align: left;
-  padding: var(--sp-4) var(--sp-5);
+  padding: 14px 18px;
+  position: relative;
+  animation: rise-in 0.35s var(--ease) backwards;
   transition: background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast);
 }
 .timeline-item:hover {
   background: var(--glass-bg-hover);
   border-color: var(--line-strong);
+  transform: translateY(-1px);
 }
 .timeline-item:active {
-  transform: scale(0.995);
+  transform: translateY(0) scale(0.995);
 }
 .timeline-item__date {
-  font-size: 12px;
-  color: var(--ink-2);
-  letter-spacing: 0.06em;
+  flex-shrink: 0;
+  width: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.timeline-item__day {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-0);
+}
+.timeline-item__week {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+.timeline-item__content {
+  flex: 1;
+  min-width: 0;
 }
 .timeline-item__title {
   font-size: 16px;
@@ -746,10 +806,56 @@
     filter: blur(60px);
     opacity: 0.4;
   }
+  /* 时间线移动端：日期与内容上下排列，隐藏轴线 */
+  .timeline-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .timeline-item__date {
+    width: auto;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .timeline-wrap::before,
+  .timeline-item::before {
+    display: none;
+  }
 }
 
 @media (min-width: 721px) {
   .bottomnav {
     display: none !important;
+  }
+  /* 时间线：左侧垂直轴线 + 圆点 */
+  .timeline-wrap {
+    position: relative;
+    padding-left: 16px;
+  }
+  .timeline-wrap::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 60px;
+    bottom: 24px;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--line-strong) 4%,
+      var(--line-strong) 96%,
+      transparent
+    );
+  }
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 26px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--ink-0);
+    box-shadow: 0 0 0 3px var(--bg-0), 0 0 0 4px var(--line);
   }
 }

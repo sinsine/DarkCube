@@ -33,7 +33,7 @@ export function TopBar({
     <header className="glass-panel topbar">
       <div className="brand">
         <span className="brand__logo">墨</span>
-        <span>墨辰日记</span>
+        <span>墨辰DarkCube</span>
         <span className="brand__version">v{version}</span>
       </div>
 

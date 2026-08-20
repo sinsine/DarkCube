@@ -14,6 +14,13 @@ export function formatDateCN(dateStr: string): string {
   return `${y} 年 ${m} 月 ${d} 日`
 }
 
+/** YYYY-MM-DD → 「周五」等中文星期 */
+export function weekdayCN(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const w = new Date(y, m - 1, d).getDay()
+  return `周${'日一二三四五六'[w]}`
+}
+
 /** 月历标题 */
 export function monthTitle(year: number, month: number): string {
   return `${year} 年 ${month} 月`

@@ -1,9 +1,9 @@
 {
   "name": "darkcube-diary",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
-  "description": "墨辰日记 — 黑白玻璃风格的本地优先日记，GitHub 私有仓库云存档",
+  "description": "墨辰DarkCube — 黑白玻璃风格的本地优先日记，GitHub 私有仓库云存档",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
@@ -31,7 +31,7 @@
   },
   "build": {
     "appId": "com.darkcube.diary",
-    "productName": "墨辰日记",
+    "productName": "墨辰DarkCube",
     "directories": {
       "output": "D:/Data/Documents/软件工程/成品",
       "buildResources": "build"

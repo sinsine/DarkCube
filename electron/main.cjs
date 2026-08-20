@@ -9,7 +9,7 @@ function createWindow() {
     height: 780,
     minWidth: 380,
     minHeight: 560,
-    title: '墨辰日记',
+    title: '墨辰DarkCube',
     backgroundColor: '#f4f4f4',
     autoHideMenuBar: true,
     webPreferences: {

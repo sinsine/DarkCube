@@ -1,6 +1,6 @@
-# 墨辰日记 · DarkCube Diary
+# 墨辰DarkCube
 
-> 黑白液态玻璃风格的**本地优先**日记应用（PWA）——电脑与安卓双端互通，GitHub 私有仓库作为云存档，无需任何第三方服务器。
+> 黑白液态玻璃风格的**本地优先**日记应用（PWA + Windows 桌面版）——电脑与安卓双端互通，GitHub 私有仓库作为云存档，无需任何第三方服务器。
 
 ![PWA](https://img.shields.io/badge/PWA-可安装-0a0a0a) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-0a0a0a) ![License](https://img.shields.io/badge/license-MIT-f5f5f5)
 
@@ -12,8 +12,9 @@
 - **GitHub 登录**：手动 Token 登录（可一键打开 GitHub 生成 Token 页面）；登录弹窗内置**新手教程**（[docs/login-tutorial.md](docs/login-tutorial.md)）
 - **自动创建仓库**：登录后自动创建私有仓库（默认 `darkcube-diary`，已存在则复用），无需手动建仓
 - **日间 / 夜间模式**：黑白玻璃界面一键反转（**默认日间模式**）
-- **日历视图**：月历上墨点标记有日记的日子，今日高亮
-- **时间线**：倒序浏览全部日记
+- **日历视图**：月历上墨点标记有日记的日子，今日高亮，支持**上一年/下一年跨年移动**
+- **时间线**：按**年份分组**浏览（年份吸顶），桌面端带时间轴连线，倒序展示日期/星期/标题/摘要/天气心情
+- **检查更新**：设置 → 关于 自动检测 GitHub Releases 最新版，一键跳转下载
 - **GitHub 云存档**：日记以 Markdown 明文同步到你自己的**私有仓库**（`diary/entries/YYYY/MM/YYYY-MM-DD.md`），GitHub 网页上可直接阅读
 - **双端互通**：PWA 应用，电脑（Chrome/Edge）与安卓（Chrome）均可安装使用，两端共享同一份数据
 - **离线可用**：本地优先（IndexedDB），断网照常写日记，联网后自动同步

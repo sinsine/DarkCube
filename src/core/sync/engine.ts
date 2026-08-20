@@ -18,9 +18,9 @@ import {
 } from '../github/git'
 
 /** 首次初始化时写入仓库的说明文件 */
-const README_CONTENT = `# 墨辰日记
+const README_CONTENT = `# 墨辰DarkCube
 
-本仓库由「墨辰日记」应用自动管理，作为云存档。
+本仓库由「墨辰DarkCube」应用自动管理，作为云存档。
 
 - \`diary/entries/YYYY/MM/YYYY-MM-DD.md\`：每日一篇 Markdown 日记
 - \`diary/entries/**/*.conflict.md\`：同步冲突时自动保留的本地旧内容
@@ -115,7 +115,7 @@ export async function syncNow(
       // 确实为空仓库：git database 接口全部不可用，必须用 PUT /contents 初始化
       // （一次调用即完成「创建文件 + 首个提交 + 默认分支」）
       try {
-        await step('初始化空仓库', () => putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰日记'))
+        await step('初始化空仓库', () => putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰DarkCube'))
       } catch (e2) {
         // 可能刚被其他设备初始化（README 已存在 → 422）：重新确认
         if ((await resolveRef()) !== 'ok') throw e2

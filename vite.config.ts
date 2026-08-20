@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
-        name: '墨辰日记',
-        short_name: '墨辰',
+        name: '墨辰DarkCube',
+        short_name: '墨辰DarkCube',
         description: '黑白玻璃风格的本地优先日记，GitHub 私有仓库云存档',
         lang: 'zh-CN',
         theme_color: '#0a0a0a',

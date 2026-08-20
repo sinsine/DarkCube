@@ -1,5 +1,5 @@
 import type { DiaryEntry } from '../../core/types'
-import { formatDateCN } from '../../core/date'
+import { weekdayCN } from '../../core/date'
 import { MOOD_OPTIONS, WEATHER_OPTIONS, metaBy } from '../../core/meta'
 
 interface TimelineViewProps {
@@ -13,10 +13,30 @@ function excerpt(body: string): string {
   return plain.length > 90 ? `${plain.slice(0, 90)}…` : plain
 }
 
+/** YYYY-MM-DD → 「1 月 15 日」 */
+function dayLabel(date: string): string {
+  const [, m, d] = date.split('-').map(Number)
+  return `${m} 月 ${d} 日`
+}
+
+interface YearGroup {
+  year: string
+  items: DiaryEntry[]
+}
+
 export function TimelineView({ entries, conflictCount, onOpen }: TimelineViewProps) {
   const sorted = [...entries].sort((a, b) => (a.date < b.date ? 1 : -1))
 
-  if (sorted.length === 0 && !conflictCount) {
+  // 按年份分组
+  const groups: YearGroup[] = []
+  for (const e of sorted) {
+    const year = e.date.slice(0, 4)
+    const last = groups[groups.length - 1]
+    if (last && last.year === year) last.items.push(e)
+    else groups.push({ year, items: [e] })
+  }
+
+  if (groups.length === 0 && !conflictCount) {
     return (
       <div className="view">
         <div className="glass-panel timeline-wrap">
@@ -30,6 +50,8 @@ export function TimelineView({ entries, conflictCount, onOpen }: TimelineViewPro
     )
   }
 
+  let animIndex = 0
+
   return (
     <div className="view">
       <div className="timeline-wrap">
@@ -39,30 +61,52 @@ export function TimelineView({ entries, conflictCount, onOpen }: TimelineViewPro
             .conflict.md 文件
           </div>
         ) : null}
-        {sorted.map((e) => (
-          <button
-            key={e.date}
-            className="timeline-item glass-panel--flat"
-            onClick={() => onOpen(e.date)}
-          >
-            <div className="timeline-item__date">{formatDateCN(e.date)}</div>
-            {(e.weather || e.mood) && (
-              <div className="timeline-item__meta">
-                {e.weather && (
-                  <span>
-                    {metaBy(WEATHER_OPTIONS, e.weather)?.icon} {metaBy(WEATHER_OPTIONS, e.weather)?.label}
-                  </span>
-                )}
-                {e.mood && (
-                  <span>
-                    {metaBy(MOOD_OPTIONS, e.mood)?.icon} {metaBy(MOOD_OPTIONS, e.mood)?.label}
-                  </span>
-                )}
-              </div>
-            )}
-            <div className="timeline-item__title">{e.title || '（无标题）'}</div>
-            {e.body && <div className="timeline-item__excerpt">{excerpt(e.body)}</div>}
-          </button>
+
+        {groups.map((g) => (
+          <section key={g.year} className="timeline-year">
+            <div className="timeline-year__head">
+              <span className="timeline-year__title">{g.year} 年</span>
+              <span className="timeline-year__count">{g.items.length} 篇</span>
+            </div>
+
+            {g.items.map((e) => {
+              const delay = Math.min(animIndex * 50, 420)
+              animIndex++
+              const w = metaBy(WEATHER_OPTIONS, e.weather)
+              const m = metaBy(MOOD_OPTIONS, e.mood)
+              return (
+                <button
+                  key={e.date}
+                  className="timeline-item glass-panel--flat"
+                  onClick={() => onOpen(e.date)}
+                  style={{ animationDelay: `${delay}ms` }}
+                >
+                  <div className="timeline-item__date">
+                    <div className="timeline-item__day">{dayLabel(e.date)}</div>
+                    <div className="timeline-item__week">{weekdayCN(e.date)}</div>
+                  </div>
+                  <div className="timeline-item__content">
+                    {(w || m) && (
+                      <div className="timeline-item__meta">
+                        {w && (
+                          <span>
+                            {w.icon} {w.label}
+                          </span>
+                        )}
+                        {m && (
+                          <span>
+                            {m.icon} {m.label}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="timeline-item__title">{e.title || '（无标题）'}</div>
+                    {e.body && <div className="timeline-item__excerpt">{excerpt(e.body)}</div>}
+                  </div>
+                </button>
+              )
+            })}
+          </section>
         ))}
       </div>
     </div>

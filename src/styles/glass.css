@@ -42,9 +42,10 @@
 .btn:hover {
   background: var(--glass-bg-hover);
   border-color: var(--line-strong);
+  transform: translateY(-1px);
 }
 .btn:active {
-  transform: scale(0.97);
+  transform: translateY(0) scale(0.97);
 }
 .btn:disabled {
   opacity: 0.42;

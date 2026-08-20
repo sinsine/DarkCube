@@ -36,6 +36,9 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
         <div className="calendar__head">
           <div className="calendar__title">{monthTitle(grid.year, grid.month)}</div>
           <div className="calendar__nav">
+            <button className="icon-btn" onClick={() => move(-12)} aria-label="上一年" title="上一年">
+              ‹‹
+            </button>
             <button className="icon-btn" onClick={() => move(-1)} aria-label="上个月">
               ‹
             </button>
@@ -44,6 +47,9 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
             </button>
             <button className="icon-btn" onClick={() => move(1)} aria-label="下个月">
               ›
+            </button>
+            <button className="icon-btn" onClick={() => move(12)} aria-label="下一年" title="下一年">
+              ››
             </button>
           </div>
         </div>
@@ -70,6 +76,7 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
                 className={cls}
                 onClick={() => onPickDate(date)}
                 title={formatDateCN(date)}
+                style={{ animationDelay: `${Math.min(i * 15, 320)}ms` }}
               >
                 <span>{Number(date.slice(8, 10))}</span>
                 {hasEntry.has(date) && <span className="day-dot" />}
