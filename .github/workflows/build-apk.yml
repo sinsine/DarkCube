@@ -61,12 +61,7 @@ jobs:
         run: |
           if [ -n "$KEYSTORE_B64" ]; then
             echo "$KEYSTORE_B64" | base64 -d > android/darkcube-release.keystore
-            cat > android/keystore.properties <<EOF
-            storeFile=darkcube-release.keystore
-            storePassword=$STORE_PASS
-            keyAlias=$KEY_ALIAS
-            keyPassword=$KEY_PASS
-            EOF
+            printf 'storeFile=darkcube-release.keystore\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' "$STORE_PASS" "$KEY_ALIAS" "$KEY_PASS" > android/keystore.properties
             echo "release keystore 已还原"
           else
             echo "未配置签名 Secrets，将使用 debug 签名"
