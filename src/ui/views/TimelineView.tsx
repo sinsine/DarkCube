@@ -1,5 +1,6 @@
 import type { DiaryEntry } from '../../core/types'
 import { weekdayCN } from '../../core/date'
+import { firstSentence } from '../../core/markdown'
 import { MOOD_OPTIONS, WEATHER_OPTIONS, metaBy } from '../../core/meta'
 
 interface TimelineViewProps {
@@ -100,7 +101,9 @@ export function TimelineView({ entries, conflictCount, onOpen }: TimelineViewPro
                         )}
                       </div>
                     )}
-                    <div className="timeline-item__title">{e.title || '（无标题）'}</div>
+                    <div className="timeline-item__title">
+                      {e.body ? firstSentence(e.body) || '（无标题）' : e.title || '（无标题）'}
+                    </div>
                     {e.body && <div className="timeline-item__excerpt">{excerpt(e.body)}</div>}
                   </div>
                 </button>

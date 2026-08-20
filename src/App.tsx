@@ -163,8 +163,11 @@ export default function App() {
     setSettings(next)
   }, [settings])
 
-  const openEditor = useCallback((date: string) => {
+  const [editorInitialMode, setEditorInitialMode] = useState<'edit' | 'preview'>('edit')
+
+  const openEditor = useCallback((date: string, mode: 'edit' | 'preview' = 'edit') => {
     setSelectedDate(date)
+    setEditorInitialMode(mode)
     setView('editor')
   }, [])
 
@@ -196,12 +199,17 @@ export default function App() {
             <EditorView
               date={selectedDate}
               entry={entry}
+              initialMode={editorInitialMode}
               onChangeDate={setSelectedDate}
               onEntrySaved={refreshEntries}
             />
           )}
           {view === 'timeline' && (
-            <TimelineView entries={entries} conflictCount={conflictCount} onOpen={openEditor} />
+            <TimelineView
+              entries={entries}
+              conflictCount={conflictCount}
+              onOpen={(d) => openEditor(d, 'preview')}
+            />
           )}
           {view === 'settings' && (
             <SettingsView
@@ -218,6 +226,7 @@ export default function App() {
               onInstall={() => void handleInstall()}
               theme={theme}
               onToggleTheme={toggleTheme}
+              onEntriesChanged={refreshEntries}
             />
           )}
         </main>

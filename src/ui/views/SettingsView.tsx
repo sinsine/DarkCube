@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { GitHubSettings, SyncState } from '../../core/types'
 import { todayStr } from '../../core/date'
 import { db } from '../../core/db'
@@ -20,6 +20,8 @@ interface SettingsViewProps {
   onInstall: () => void
   theme: 'dark' | 'light'
   onToggleTheme: () => void
+  /** 导入等数据变更后通知上层刷新条目 */
+  onEntriesChanged: () => void
 }
 
 function formatSyncTime(ts?: number): string {
@@ -71,10 +73,13 @@ export function SettingsView({
   canInstall,
   onInstall,
   theme,
-  onToggleTheme
+  onToggleTheme,
+  onEntriesChanged
 }: SettingsViewProps) {
   const [release, setRelease] = useState<ReleaseInfo | null>(null)
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
+  const [importMsg, setImportMsg] = useState('')
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   // 进入设置页时检查一次最新版本
   useEffect(() => {
@@ -86,6 +91,52 @@ export function SettingsView({
       alive = false
     }
   }, [])
+
+  /** 导入备份 JSON：合并日记与冲突记录（覆盖同名日期），标记待同步 */
+  async function handleImport(file: File) {
+    setImportMsg('')
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text) as { entries?: unknown[]; conflicts?: unknown[] }
+      if (!Array.isArray(data?.entries)) {
+        setImportMsg('文件格式不正确：缺少 entries 数组（请使用本应用导出的备份）')
+        return
+      }
+      let n = 0
+      for (const raw of data.entries) {
+        const e = raw as { date?: unknown; title?: unknown; body?: unknown; updatedAt?: unknown; weather?: unknown; mood?: unknown }
+        if (typeof e?.date !== 'string') continue
+        await db.entries.put({
+          date: e.date,
+          title: typeof e.title === 'string' ? e.title : '',
+          body: typeof e.body === 'string' ? e.body : '',
+          updatedAt: typeof e.updatedAt === 'number' ? e.updatedAt : Date.now(),
+          weather: typeof e.weather === 'string' ? e.weather : undefined,
+          mood: typeof e.mood === 'string' ? e.mood : undefined,
+          blobSha: undefined,
+          dirty: true
+        })
+        n++
+      }
+      if (Array.isArray(data.conflicts)) {
+        for (const raw of data.conflicts) {
+          const c = raw as { date?: unknown; title?: unknown; body?: unknown; updatedAt?: unknown; synced?: unknown }
+          if (typeof c?.date !== 'string') continue
+          await db.conflicts.put({
+            date: c.date,
+            title: typeof c.title === 'string' ? c.title : '',
+            body: typeof c.body === 'string' ? c.body : '',
+            updatedAt: typeof c.updatedAt === 'number' ? c.updatedAt : Date.now(),
+            synced: Boolean(c.synced)
+          })
+        }
+      }
+      setImportMsg(`导入完成：${n} 篇日记（覆盖同名日期）`)
+      onEntriesChanged()
+    } catch {
+      setImportMsg('导入失败：文件不是有效的 JSON 备份')
+    }
+  }
 
   return (
     <div className="view">
@@ -182,6 +233,27 @@ export function SettingsView({
               导出
             </button>
           </div>
+          <div className="row">
+            <div className="row__main">
+              <div className="row__title">导入备份</div>
+              <div className="row__desc">从 JSON 备份恢复日记（覆盖同名日期，下次同步自动上传）</div>
+            </div>
+            <button className="btn btn--sm" onClick={() => fileInputRef.current?.click()}>
+              导入
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) void handleImport(f)
+                e.target.value = ''
+              }}
+            />
+          </div>
+          {importMsg && <div className="note">{importMsg}</div>}
           <div className="row">
             <div className="row__main">
               <div className="row__title">清空本地数据</div>

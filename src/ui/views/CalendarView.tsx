@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
 import { WEEKDAYS, buildMonthGrid, formatDateCN, monthTitle, todayStr } from '../../core/date'
 
@@ -15,9 +15,19 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
     return { year: t[0], month: t[1] }
   })
 
-  // 滑动翻页手势
+  // 滑动翻页手势 + 左右滑动动画
+  const gridRef = useRef<HTMLDivElement | null>(null)
   const touchX = useRef<number | null>(null)
   const touchY = useRef<number | null>(null)
+  const animTimer = useRef<number | undefined>(undefined)
+  const [dragX, setDragX] = useState(0)
+  const [dragging, setDragging] = useState(false)
+
+  useEffect(() => {
+    return () => {
+      if (animTimer.current !== undefined) clearTimeout(animTimer.current)
+    }
+  }, [])
 
   const grid = useMemo(() => buildMonthGrid(cursor.year, cursor.month), [cursor])
   const hasEntry = useMemo(() => new Set(entries.map((e) => e.date)), [entries])
@@ -37,6 +47,17 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
   function onTouchStart(e: React.TouchEvent) {
     touchX.current = e.touches[0].clientX
     touchY.current = e.touches[0].clientY
+    setDragging(true)
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (touchX.current === null || touchY.current === null) return
+    const dx = e.touches[0].clientX - touchX.current
+    const dy = e.touches[0].clientY - touchY.current
+    // 横向为主时跟随手指拖动
+    if (Math.abs(dx) > Math.abs(dy)) {
+      setDragX(Math.max(-260, Math.min(260, dx)))
+    }
   }
 
   function onTouchEnd(e: React.TouchEvent) {
@@ -45,9 +66,24 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
     const dy = e.changedTouches[0].clientY - touchY.current
     touchX.current = null
     touchY.current = null
-    // 水平滑动且横向占优才翻页：左滑下月、右滑上月
+    setDragging(false)
+
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) {
-      move(dx < 0 ? 1 : -1)
+      const dir = dx < 0 ? 1 : -1 // 左滑→下月，右滑→上月
+      const width = gridRef.current?.clientWidth ?? 320
+      // 先滑出屏幕，再切换月份并反向滑入
+      setDragX(dir * -width)
+      animTimer.current = window.setTimeout(() => {
+        move(dir)
+        setDragging(true) // 无过渡，先放到反方向
+        setDragX(dir * width)
+        requestAnimationFrame(() => {
+          setDragging(false)
+          setDragX(0)
+        })
+      }, 230)
+    } else {
+      setDragX(0) // 回弹
     }
   }
 
@@ -56,6 +92,7 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
       <div
         className="glass-panel calendar-wrap"
         onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
         <div className="calendar__head">
@@ -87,7 +124,11 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
           ))}
         </div>
 
-        <div className="calendar__grid">
+        <div
+          ref={gridRef}
+          className={`calendar__grid${dragging ? ' calendar__grid--dragging' : ''}`}
+          style={{ transform: `translateX(${dragX}px)` }}
+        >
           {grid.cells.map((date, i) => {
             if (!date) return <div key={`blank-${i}`} className="day-cell day-cell--blank" />
             const cls = [

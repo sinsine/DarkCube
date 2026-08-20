@@ -9,13 +9,21 @@ export function renderMarkdown(src: string): string {
   return DOMPurify.sanitize(html)
 }
 
-/** 从正文提取标题：取首个 # 一级标题；无则返回空串 */
+/** 从正文提取标题：优先首个 # 标题，否则取第一句话 */
 export function deriveTitle(body: string): string {
   for (const line of body.split('\n')) {
     const m = line.match(/^#\s+(.+?)\s*$/)
     if (m) return m[1].trim()
   }
-  return ''
+  return firstSentence(body)
+}
+
+/** 正文的第一句话（去 Markdown 符号，按句读切分，超长截断） */
+export function firstSentence(body: string): string {
+  const plain = body.replace(/[#>*_`~\-[\]]/g, ' ').replace(/\s+/g, ' ').trim()
+  if (!plain) return ''
+  const sentence = plain.split(/[。！？!?；;]/)[0]?.trim() ?? ''
+  return sentence.length > 28 ? `${sentence.slice(0, 28)}…` : sentence
 }
 
 /** 字数统计：中文按字计，英文/数字按词计 */
