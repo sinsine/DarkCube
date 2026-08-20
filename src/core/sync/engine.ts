@@ -3,7 +3,7 @@
 import { db } from '../db'
 import type { GitHubSettings, SyncResult, SyncState } from '../types'
 import { deriveTitle } from '../markdown'
-import { GitHubError, getRepo } from '../github/api'
+import { friendlyGitHubError, GitHubError, getRepo } from '../github/api'
 import {
   createBlob,
   createCommit,
@@ -45,6 +45,27 @@ function parseEntryPath(path: string): string | null {
   return m ? m[1] : null
 }
 
+/** 同步失败：携带出错的具体步骤，便于定位 */
+export class SyncStepError extends Error {
+  step: string
+
+  constructor(step: string, cause: unknown) {
+    super(friendlyGitHubError(cause))
+    this.name = 'SyncStepError'
+    this.step = step
+  }
+}
+
+/** 给单个 GitHub 调用标注步骤，失败时抛出带上下文的错误 */
+async function step<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (e) {
+    if (e instanceof GitHubError) throw new SyncStepError(label, e)
+    throw e
+  }
+}
+
 /** 执行一次完整同步。成功返回结果对象，失败抛出错误（由调用方转成用户提示） */
 export async function syncNow(
   settings: GitHubSettings,
@@ -57,7 +78,7 @@ export async function syncNow(
   // ---- 1. 远端 ref（空仓库用 Contents API 初始化） ----
   let remoteRefSha: string | null = null
   try {
-    const ref = await getBranchRef(token, owner, repo, branch)
+    const ref = await step('读取分支', () => getBranchRef(token, owner, repo, branch))
     remoteRefSha = ref.sha
   } catch (e) {
     // 404：分支不存在；409 + "empty"：仓库还没有任何提交（GitHub 对空仓库返回 409 Conflict）
@@ -66,7 +87,7 @@ export async function syncNow(
     if (!emptyRepo) throw e
 
     // 配置的分支名可能与仓库实际默认分支不一致：先探测真实默认分支
-    const repoInfo = await getRepo(token, owner, repo)
+    const repoInfo = await step('读取仓库信息', () => getRepo(token, owner, repo))
     const actualBranch = repoInfo.default_branch
     // 守卫后已确认存在；闭包内 TS 不保留收窄，用别名固定类型
     const ghToken = token
@@ -76,7 +97,7 @@ export async function syncNow(
     /** 探测默认分支是否存在；'missing' 表示确实没有分支（空仓库） */
     async function resolveRef(): Promise<'ok' | 'missing' | 'error'> {
       try {
-        const ref = await getBranchRef(ghToken, ghOwner, ghRepoName, actualBranch)
+        const ref = await step('探测分支', () => getBranchRef(ghToken, ghOwner, ghRepoName, actualBranch))
         remoteRefSha = ref.sha
         branch = actualBranch
         return 'ok'
@@ -94,7 +115,7 @@ export async function syncNow(
       // 确实为空仓库：git database 接口全部不可用，必须用 PUT /contents 初始化
       // （一次调用即完成「创建文件 + 首个提交 + 默认分支」）
       try {
-        await putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰日记')
+        await step('初始化空仓库', () => putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰日记'))
       } catch (e2) {
         // 可能刚被其他设备初始化（README 已存在 → 422）：重新确认
         if ((await resolveRef()) !== 'ok') throw e2
@@ -114,9 +135,10 @@ export async function syncNow(
   const remoteEntries = new Map<string, string>() // date → blob sha
   const needPull = prev?.remoteRefSha !== remoteRefSha
   if (needPull && remoteRefSha) {
-    const commit = await getCommit(token, owner, repo, remoteRefSha)
+    const refSha = remoteRefSha // 闭包内 TS 不保留收窄
+    const commit = await step('读取提交', () => getCommit(token, owner, repo, refSha))
     remoteTreeSha = commit.tree.sha
-    const tree = await getTreeRecursive(token, owner, repo, remoteTreeSha)
+    const tree = await step('读取文件列表', () => getTreeRecursive(token, owner, repo, remoteTreeSha))
     const deletedDates = new Set(prev?.deleted ?? [])
 
     for (const item of tree) {
@@ -128,7 +150,7 @@ export async function syncNow(
     for (const [date, remoteSha] of remoteEntries) {
       const local = await db.entries.get(date)
       if (!local) {
-        const content = await getRawFile(token, owner, repo, entryPath(date), branch)
+        const content = await step('下载日记', () => getRawFile(token, owner, repo, entryPath(date), branch))
         await db.entries.put({
           date,
           title: deriveTitle(content),
@@ -139,7 +161,7 @@ export async function syncNow(
         })
         pulled++
       } else if (local.blobSha !== remoteSha) {
-        const content = await getRawFile(token, owner, repo, entryPath(date), branch)
+        const content = await step('下载日记', () => getRawFile(token, owner, repo, entryPath(date), branch))
         if (local.dirty) {
           // 两端都改过 → 远端为权威，本地旧内容进冲突备份（稍后上传 .conflict.md）
           await db.conflicts.put({
@@ -160,6 +182,8 @@ export async function syncNow(
           updatedAt: Date.now()
         })
         pulled++
+      } else {
+        // 两端内容一致（blobSha 相同），无需处理
       }
     }
   }
@@ -176,22 +200,22 @@ export async function syncNow(
     const pushedShas = new Map<string, string>()
 
     for (const e of dirtyEntries) {
-      const blob = await createBlob(token, owner, repo, e.body)
+      const blob = await step('上传日记', () => createBlob(token, owner, repo, e.body))
       pushedShas.set(e.date, blob.sha)
       items.push({ path: entryPath(e.date), mode: '100644', type: 'blob', sha: blob.sha })
     }
     for (const c of pendingConflicts) {
-      const blob = await createBlob(token, owner, repo, c.body)
+      const blob = await step('上传冲突备份', () => createBlob(token, owner, repo, c.body))
       items.push({ path: conflictPath(c.date), mode: '100644', type: 'blob', sha: blob.sha })
     }
     for (const d of tombstones) {
       items.push({ path: entryPath(d), mode: '100644', type: 'blob', sha: null })
     }
 
-    const tree = await createTree(token, owner, repo, remoteTreeSha || null, items)
+    const tree = await step('构建提交树', () => createTree(token, owner, repo, remoteTreeSha || null, items))
     const commitMsg = `sync: ${dirtyEntries.length} entries${pendingConflicts.length > 0 ? `, ${pendingConflicts.length} conflicts` : ''}`
-    const commit = await createCommit(token, owner, repo, commitMsg, tree.sha, [remoteRefSha!])
-    await updateBranchRef(token, owner, repo, branch, commit.sha)
+    const commit = await step('创建提交', () => createCommit(token, owner, repo, commitMsg, tree.sha, [remoteRefSha!]))
+    await step('更新分支', () => updateBranchRef(token, owner, repo, branch, commit.sha))
 
     // 更新本地 blob SHA / 清除 dirty / 标记冲突已上传
     for (const [date, sha] of pushedShas) {

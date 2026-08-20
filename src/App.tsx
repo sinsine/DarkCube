@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { db, loadSettings, saveSettings } from './core/db'
 import type { DiaryEntry, GitHubSettings, SyncState, ViewId } from './core/types'
 import { todayStr } from './core/date'
-import { syncNow } from './core/sync/engine'
+import { syncNow, SyncStepError } from './core/sync/engine'
 import { friendlyGitHubError } from './core/github/api'
 import { LiquidBackground } from './ui/components/LiquidBackground'
 import { TopBar, BottomNav } from './ui/components/TopBar'
@@ -66,7 +66,11 @@ export default function App() {
           : `完成：拉取 ${result.pulled} · 推送 ${result.pushed}`
       )
     } catch (e) {
-      setLastSyncMsg(friendlyGitHubError(e))
+      setLastSyncMsg(
+        e instanceof SyncStepError
+          ? `同步失败（${e.step}）：${e.message}`
+          : `同步失败：${friendlyGitHubError(e)}`
+      )
     } finally {
       setSyncing(false)
       refreshSyncState()
