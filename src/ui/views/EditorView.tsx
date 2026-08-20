@@ -159,33 +159,37 @@ export function EditorView({ date, entry, initialMode, onChangeDate, onEntrySave
           <div className="editor__meta-row">
             <div className="meta-group">
               <span className="meta-group__label">天气</span>
-              {WEATHER_OPTIONS.map((w) => (
-                <button
-                  key={w.id}
-                  className={`meta-chip${entry?.weather === w.id ? ' meta-chip--active' : ''}`}
-                  onClick={() => void setMeta('weather', entry?.weather === w.id ? undefined : w.id)}
-                  title={w.label}
-                  aria-pressed={entry?.weather === w.id}
-                >
-                  <span aria-hidden="true">{w.icon}</span>
-                  <span className="meta-chip__label">{w.label}</span>
-                </button>
-              ))}
+              <div className="meta-group__scroll">
+                {WEATHER_OPTIONS.map((w) => (
+                  <button
+                    key={w.id}
+                    className={`meta-chip${entry?.weather === w.id ? ' meta-chip--active' : ''}`}
+                    onClick={() => void setMeta('weather', entry?.weather === w.id ? undefined : w.id)}
+                    title={w.label}
+                    aria-pressed={entry?.weather === w.id}
+                  >
+                    <span aria-hidden="true">{w.icon}</span>
+                    <span className="meta-chip__label">{w.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="meta-group">
               <span className="meta-group__label">心情</span>
-              {MOOD_OPTIONS.map((m) => (
-                <button
-                  key={m.id}
-                  className={`meta-chip${entry?.mood === m.id ? ' meta-chip--active' : ''}`}
-                  onClick={() => void setMeta('mood', entry?.mood === m.id ? undefined : m.id)}
-                  title={m.label}
-                  aria-pressed={entry?.mood === m.id}
-                >
-                  <span aria-hidden="true">{m.icon}</span>
-                  <span className="meta-chip__label">{m.label}</span>
-                </button>
-              ))}
+              <div className="meta-group__scroll">
+                {MOOD_OPTIONS.map((m) => (
+                  <button
+                    key={m.id}
+                    className={`meta-chip${entry?.mood === m.id ? ' meta-chip--active' : ''}`}
+                    onClick={() => void setMeta('mood', entry?.mood === m.id ? undefined : m.id)}
+                    title={m.label}
+                    aria-pressed={entry?.mood === m.id}
+                  >
+                    <span aria-hidden="true">{m.icon}</span>
+                    <span className="meta-chip__label">{m.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         ) : (entry?.weather || entry?.mood) ? (

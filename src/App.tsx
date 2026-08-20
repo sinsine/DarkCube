@@ -59,7 +59,9 @@ export default function App() {
     setSyncing(true)
     setLastSyncMsg('同步中…')
     try {
-      const result = await syncNow(settings, syncStateRef.current)
+      // 从数据库读取最新状态（墓碑可能刚被删除操作写入，React 状态未同步）
+      const latest = await db.syncState.get(1)
+      const result = await syncNow(settings, latest)
       setLastSyncMsg(
         result.conflicts > 0
           ? `完成：拉取 ${result.pulled} · 推送 ${result.pushed} · 冲突 ${result.conflicts}（旧内容已备份为 .conflict.md）`
@@ -84,7 +86,8 @@ export default function App() {
     setSyncing(true)
     setLastSyncMsg('上传中…')
     try {
-      const r = await pushOnly(settings, syncStateRef.current)
+      const latest = await db.syncState.get(1)
+      const r = await pushOnly(settings, latest)
       setLastSyncMsg(`上传完成：推送 ${r.pushed} 篇`)
     } catch (e) {
       setLastSyncMsg(
@@ -105,7 +108,8 @@ export default function App() {
     setSyncing(true)
     setLastSyncMsg('下载中…')
     try {
-      const r = await pullOnly(settings, syncStateRef.current)
+      const latest = await db.syncState.get(1)
+      const r = await pullOnly(settings, latest)
       setLastSyncMsg(`下载完成：拉取 ${r.pulled} 篇${r.conflicts ? ` · 冲突 ${r.conflicts}（旧内容已备份）` : ''}`)
     } catch (e) {
       setLastSyncMsg(

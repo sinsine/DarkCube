@@ -28,7 +28,7 @@ interface YearGroup {
   items: DiaryEntry[]
 }
 
-const SWIPE_WIDTH = 76
+const SWIPE_WIDTH = 80
 
 interface TimelineItemProps {
   entry: DiaryEntry
@@ -92,7 +92,11 @@ function TimelineItem({
 
   return (
     <div className="timeline-item-swipe">
-      <button className="swipe-delete" onClick={handleDelete} aria-label="删除日记">
+      <button
+        className={`swipe-delete${swiped ? ' swipe-delete--open' : ''}`}
+        onClick={handleDelete}
+        aria-label="删除日记"
+      >
         删除
       </button>
       <button

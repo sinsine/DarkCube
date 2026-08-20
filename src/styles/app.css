@@ -405,14 +405,30 @@
 .meta-group {
   display: flex;
   align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+/* 选项横向可滑动单行（隐藏滚动条） */
+.meta-group__scroll {
+  display: flex;
+  align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.meta-group__scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
 }
 .meta-group__label {
   font-size: 12.5px;
   color: var(--ink-2);
   letter-spacing: 0.05em;
   margin-right: 2px;
+  flex-shrink: 0;
 }
 .meta-chip {
   display: inline-flex;
@@ -424,6 +440,7 @@
   background: var(--field-bg);
   color: var(--ink-1);
   font-size: 13px;
+  flex-shrink: 0;
   transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
 }
 .meta-chip:hover {
@@ -664,10 +681,10 @@
 }
 .swipe-delete {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 76px;
+  top: 8px;
+  bottom: 8px;
+  right: -80px; /* 默认藏在容器外（overflow hidden 裁剪），不占位、不透红 */
+  width: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -675,7 +692,11 @@
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 0 var(--radius-m) var(--radius-m) 0;
+  border-radius: 14px; /* 四周圆角 */
+  transition: right var(--dur) var(--ease);
+}
+.swipe-delete--open {
+  right: 8px;
 }
 .timeline-item--swiped {
   box-shadow: var(--shadow-soft);
