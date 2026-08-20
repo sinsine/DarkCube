@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
-import { weekdayCN } from '../../core/date'
 import { firstSentence } from '../../core/markdown'
-import { MOOD_OPTIONS, WEATHER_OPTIONS, metaBy } from '../../core/meta'
+import { metaBy, MOOD_OPTIONS, WEATHER_OPTIONS } from '../../core/meta'
+import { formatWeekday, getLang, t } from '../../core/i18n'
 
 interface TimelineViewProps {
   entries: DiaryEntry[]
@@ -17,9 +17,17 @@ function excerpt(body: string): string {
   return plain.length > 90 ? `${plain.slice(0, 90)}…` : plain
 }
 
-/** YYYY-MM-DD → 「1 月 15 日」 */
+/** YYYY-MM-DD → 语言化的「月 日」 */
 function dayLabel(date: string): string {
   const [, m, d] = date.split('-').map(Number)
+  const lang = getLang()
+  if (lang === 'en') {
+    return new Date(Number(date.slice(0, 4)), m - 1, d).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+  if (lang === 'ja') return `${m}月${d}日`
   return `${m} 月 ${d} 日`
 }
 
@@ -40,7 +48,7 @@ interface TimelineItemProps {
   onDelete: () => void
 }
 
-/** 单条时间线卡片：左滑露出删除按钮 */
+/** 单条时间线卡片：左滑露出删除按钮（纵向滚动不会误触发） */
 function TimelineItem({
   entry: e,
   swiped,
@@ -52,6 +60,7 @@ function TimelineItem({
 }: TimelineItemProps) {
   const [dx, setDx] = useState(0)
   const startX = useRef<number | null>(null)
+  const startY = useRef<number | null>(null)
 
   const w = metaBy(WEATHER_OPTIONS, e.weather)
   const m = metaBy(MOOD_OPTIONS, e.mood)
@@ -59,18 +68,28 @@ function TimelineItem({
 
   function onPointerDown(ev: React.PointerEvent) {
     startX.current = ev.clientX
+    startY.current = ev.clientY
   }
 
   function onPointerMove(ev: React.PointerEvent) {
-    if (startX.current === null) return
-    const d = ev.clientX - startX.current
-    if (d < 0) setDx(Math.max(-SWIPE_WIDTH, d))
+    if (startX.current === null || startY.current === null) return
+    const dxNow = ev.clientX - startX.current
+    const dyNow = ev.clientY - startY.current
+    // 纵向位移占优 → 判定为滚动，取消滑动（修复上下滑动误触发左滑删除）
+    if (Math.abs(dyNow) > Math.abs(dxNow) * 1.2) {
+      startX.current = null
+      startY.current = null
+      setDx(0)
+      return
+    }
+    if (dxNow < 0) setDx(Math.max(-SWIPE_WIDTH, dxNow))
   }
 
   function onPointerUp(ev: React.PointerEvent) {
     if (startX.current === null) return
     const d = ev.clientX - startX.current
     startX.current = null
+    startY.current = null
     setDx(0)
     if (d < -40) onSwipeOpen()
     else if (d > 40) onSwipeClose()
@@ -85,7 +104,7 @@ function TimelineItem({
   }
 
   function handleDelete() {
-    if (window.confirm('确定删除这篇日记？此操作会同步删除云端备份，且不可恢复。')) {
+    if (window.confirm(t('timeline.confirmDelete'))) {
       onDelete()
     }
   }
@@ -95,9 +114,9 @@ function TimelineItem({
       <button
         className={`swipe-delete${swiped ? ' swipe-delete--open' : ''}`}
         onClick={handleDelete}
-        aria-label="删除日记"
+        aria-label={t('timeline.delete')}
       >
-        删除
+        {t('timeline.delete')}
       </button>
       <button
         className={`timeline-item glass-panel--flat${swiped ? ' timeline-item--swiped' : ''}`}
@@ -112,6 +131,7 @@ function TimelineItem({
         onPointerLeave={() => {
           if (startX.current !== null) {
             startX.current = null
+            startY.current = null
             setDx(0)
           }
         }}
@@ -120,25 +140,25 @@ function TimelineItem({
       >
         <div className="timeline-item__date">
           <div className="timeline-item__day">{dayLabel(e.date)}</div>
-          <div className="timeline-item__week">{weekdayCN(e.date)}</div>
+          <div className="timeline-item__week">{formatWeekday(e.date)}</div>
         </div>
         <div className="timeline-item__content">
           {(w || m) && (
             <div className="timeline-item__meta">
               {w && (
                 <span>
-                  {w.icon} {w.label}
+                  {w.icon} {t(`weather.${w.id}`)}
                 </span>
               )}
               {m && (
                 <span>
-                  {m.icon} {m.label}
+                  {m.icon} {t(`mood.${m.id}`)}
                 </span>
               )}
             </div>
           )}
           <div className="timeline-item__title">
-            {e.body ? firstSentence(e.body) || '（无标题）' : e.title || '（无标题）'}
+            {e.body ? firstSentence(e.body) || t('timeline.untitled') : e.title || t('timeline.untitled')}
           </div>
           {e.body && <div className="timeline-item__excerpt">{excerpt(e.body)}</div>}
         </div>
@@ -166,8 +186,8 @@ export function TimelineView({ entries, conflictCount, onOpen, onDelete }: Timel
         <div className="glass-panel timeline-wrap">
           <div className="empty">
             <div className="empty__icon">墨</div>
-            <div>还没有日记</div>
-            <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>点击「写日记」留下第一篇</div>
+            <div>{t('timeline.empty')}</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-3)' }}>{t('timeline.emptyHint')}</div>
           </div>
         </div>
       </div>
@@ -180,17 +200,14 @@ export function TimelineView({ entries, conflictCount, onOpen, onDelete }: Timel
     <div className="view">
       <div className="timeline-wrap">
         {conflictCount ? (
-          <div className="note">
-            ⚠ {conflictCount} 篇冲突备份：同步时本地被远端覆盖的内容已保留为仓库中的
-            .conflict.md 文件
-          </div>
+          <div className="note">{t('timeline.conflicts', { n: conflictCount })}</div>
         ) : null}
 
         {groups.map((g) => (
           <section key={g.year} className="timeline-year">
             <div className="timeline-year__head">
               <span className="timeline-year__title">{g.year} 年</span>
-              <span className="timeline-year__count">{g.items.length} 篇</span>
+              <span className="timeline-year__count">{t('timeline.count', { n: g.items.length })}</span>
             </div>
 
             {g.items.map((e) => {

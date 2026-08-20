@@ -1,5 +1,6 @@
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
+import { getLang } from './i18n'
 
 marked.setOptions({ gfm: true, breaks: true })
 
@@ -18,11 +19,21 @@ export function deriveTitle(body: string): string {
   return firstSentence(body)
 }
 
-/** 正文的第一句话（去 Markdown 符号，按句读切分，超长截断） */
+/**
+ * 正文的第一句话（语言感知）：
+ * - 无论语言，回车换行都视为断句；
+ * - 若书面语言不使用空格分词（中日文），则空格也视为断句；
+ * - 英语按句子标点断句。
+ */
 export function firstSentence(body: string): string {
   const plain = body.replace(/[#>*_`~\-[\]]/g, ' ').replace(/\s+/g, ' ').trim()
   if (!plain) return ''
-  const sentence = plain.split(/[。！？!?；;]/)[0]?.trim() ?? ''
+  const breakOnSpace = getLang() === 'en' ? false : true
+  // 先按换行取第一行
+  const firstLine = plain.split('\n')[0]?.trim() ?? ''
+  if (!firstLine) return ''
+  const re = breakOnSpace ? /[。！？!?；;，,\s]/ : /[。！？!?；;.!?]/
+  const sentence = firstLine.split(re)[0]?.trim() ?? ''
   return sentence.length > 28 ? `${sentence.slice(0, 28)}…` : sentence
 }
 

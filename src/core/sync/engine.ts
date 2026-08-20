@@ -5,6 +5,7 @@ import type { GitHubSettings, SyncResult, SyncState } from '../types'
 import { deriveTitle } from '../markdown'
 import { friendlyGitHubError, GitHubError, getRepo } from '../github/api'
 import { parseContent, serializeContent } from './frontmatter'
+import { t } from '../i18n'
 import {
   createBlob,
   createCommit,
@@ -72,12 +73,12 @@ async function resolveBranch(
   settings: GitHubSettings
 ): Promise<{ branch: string; remoteRefSha: string | null }> {
   const { owner, repo, token, defaultBranch } = settings
-  if (!owner || !repo || !token) throw new Error('请先登录 GitHub')
+  if (!owner || !repo || !token) throw new Error(t('errors.notLoggedIn'))
   let branch = defaultBranch || 'main'
   let remoteRefSha: string | null = null
 
   try {
-    const ref = await step('读取分支', () => getBranchRef(token, owner, repo, branch))
+    const ref = await step('step.readBranch', () => getBranchRef(token, owner, repo, branch))
     remoteRefSha = ref.sha
   } catch (e) {
     // 404：分支不存在；409 + "empty"：仓库还没有任何提交（GitHub 对空仓库返回 409 Conflict）
@@ -86,7 +87,7 @@ async function resolveBranch(
     if (!emptyRepo) throw e
 
     // 配置的分支名可能与仓库实际默认分支不一致：先探测真实默认分支
-    const repoInfo = await step('读取仓库信息', () => getRepo(token, owner, repo))
+    const repoInfo = await step('step.readRepo', () => getRepo(token, owner, repo))
     const actualBranch = repoInfo.default_branch
     // 守卫后已确认存在；闭包内 TS 不保留收窄，用别名固定类型
     const ghToken = token
@@ -96,7 +97,7 @@ async function resolveBranch(
     /** 探测默认分支是否存在；'missing' 表示确实没有分支（空仓库） */
     async function resolveRef(): Promise<'ok' | 'missing' | 'error'> {
       try {
-        const ref = await step('探测分支', () => getBranchRef(ghToken, ghOwner, ghRepoName, actualBranch))
+        const ref = await step('step.probeBranch', () => getBranchRef(ghToken, ghOwner, ghRepoName, actualBranch))
         remoteRefSha = ref.sha
         branch = actualBranch
         return 'ok'
@@ -114,13 +115,13 @@ async function resolveBranch(
       // 确实为空仓库：git database 接口全部不可用，必须用 PUT /contents 初始化
       // （一次调用即完成「创建文件 + 首个提交 + 默认分支」）
       try {
-        await step('初始化空仓库', () => putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰DarkCube'))
+        await step('step.initRepo', () => putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰DarkCube'))
       } catch (e2) {
         // 可能刚被其他设备初始化（README 已存在 → 422）：重新确认
         if ((await resolveRef()) !== 'ok') throw e2
       }
       if ((await resolveRef()) !== 'ok') {
-        throw new Error('仓库初始化失败，请稍后重试')
+        throw new Error(t('errors.initFailed'))
       }
     }
   }
@@ -134,7 +135,7 @@ export async function pullOnly(
   prev: SyncState | undefined
 ): Promise<SyncResult> {
   const { owner, repo, token } = settings
-  if (!owner || !repo || !token) throw new Error('请先登录 GitHub')
+  if (!owner || !repo || !token) throw new Error(t('errors.notLoggedIn'))
   const { branch, remoteRefSha } = await resolveBranch(settings)
 
   let pulled = 0
@@ -146,9 +147,9 @@ export async function pullOnly(
   const needPull = prev?.remoteRefSha !== remoteRefSha
   if (needPull && remoteRefSha) {
     const refSha = remoteRefSha // 闭包内 TS 不保留收窄
-    const commit = await step('读取提交', () => getCommit(token, owner, repo, refSha))
+    const commit = await step('step.readCommit', () => getCommit(token, owner, repo, refSha))
     remoteTreeSha = commit.tree.sha
-    const tree = await step('读取文件列表', () => getTreeRecursive(token, owner, repo, remoteTreeSha))
+    const tree = await step('step.readTree', () => getTreeRecursive(token, owner, repo, remoteTreeSha))
     const deletedDates = new Set(prev?.deleted ?? [])
 
     for (const item of tree) {
@@ -160,7 +161,7 @@ export async function pullOnly(
     for (const [date, remoteSha] of remoteEntries) {
       const local = await db.entries.get(date)
       if (!local) {
-        const content = await step('下载日记', () => getRawFile(token, owner, repo, entryPath(date), branch))
+        const content = await step('step.download', () => getRawFile(token, owner, repo, entryPath(date), branch))
         const parsed = parseContent(content)
         await db.entries.put({
           date,
@@ -174,7 +175,7 @@ export async function pullOnly(
         })
         pulled++
       } else if (local.blobSha !== remoteSha) {
-        const content = await step('下载日记', () => getRawFile(token, owner, repo, entryPath(date), branch))
+        const content = await step('step.download', () => getRawFile(token, owner, repo, entryPath(date), branch))
         const parsed = parseContent(content)
         if (local.dirty) {
           // 两端都改过 → 远端为权威，本地旧内容进冲突备份（稍后随上传推送 .conflict.md）
@@ -220,7 +221,7 @@ export async function pushOnly(
   prev: SyncState | undefined
 ): Promise<SyncResult> {
   const { owner, repo, token } = settings
-  if (!owner || !repo || !token) throw new Error('请先登录 GitHub')
+  if (!owner || !repo || !token) throw new Error(t('errors.notLoggedIn'))
   const resolved = await resolveBranch(settings)
   const branch = resolved.branch
   let remoteRefSha: string | null = resolved.remoteRefSha
@@ -231,14 +232,14 @@ export async function pushOnly(
   // 确定 base tree：远端有变化或墓碑存在时，取当前提交的树
   if (remoteRefSha && (prev?.remoteRefSha !== remoteRefSha || !remoteTreeSha || (prev?.deleted?.length ?? 0) > 0)) {
     const refSha = remoteRefSha
-    const commit = await step('读取提交', () => getCommit(token, owner, repo, refSha))
+    const commit = await step('step.readCommit', () => getCommit(token, owner, repo, refSha))
     remoteTreeSha = commit.tree.sha
   }
 
   // 墓碑只推远端确实存在的日记文件（避免删除不存在的路径报错）
   let tombstones = prev?.deleted ?? []
   if (tombstones.length > 0 && remoteRefSha && remoteTreeSha) {
-    const tree = await step('读取文件列表', () => getTreeRecursive(token, owner, repo, remoteTreeSha))
+    const tree = await step('step.readTree', () => getTreeRecursive(token, owner, repo, remoteTreeSha))
     const remoteDates = new Set<string>()
     for (const item of tree) {
       const d = item.type === 'blob' && item.sha ? parseEntryPath(item.path) : null
@@ -253,31 +254,31 @@ export async function pushOnly(
 
   if (dirtyEntries.length > 0 || pendingConflicts.length > 0 || tombstones.length > 0) {
     if (!remoteRefSha) {
-      throw new Error('缺少远端分支引用，无法提交（请重试）')
+      throw new Error(t('errors.noRef'))
     }
     const parentSha = remoteRefSha // 闭包内 TS 不保留收窄
     const items: TreeItem[] = []
     const pushedShas = new Map<string, string>()
 
     for (const e of dirtyEntries) {
-      const blob = await step('上传日记', () =>
+      const blob = await step('step.upload', () =>
         createBlob(token, owner, repo, serializeContent(e.body, { weather: e.weather, mood: e.mood }))
       )
       pushedShas.set(e.date, blob.sha)
       items.push({ path: entryPath(e.date), mode: '100644', type: 'blob', sha: blob.sha })
     }
     for (const c of pendingConflicts) {
-      const blob = await step('上传冲突备份', () => createBlob(token, owner, repo, c.body))
+      const blob = await step('step.uploadConflict', () => createBlob(token, owner, repo, c.body))
       items.push({ path: conflictPath(c.date), mode: '100644', type: 'blob', sha: blob.sha })
     }
     for (const d of tombstones) {
       items.push({ path: entryPath(d), mode: '100644', type: 'blob', sha: null })
     }
 
-    const tree = await step('构建提交树', () => createTree(token, owner, repo, remoteTreeSha || null, items))
+    const tree = await step('step.buildTree', () => createTree(token, owner, repo, remoteTreeSha || null, items))
     const commitMsg = `sync: ${dirtyEntries.length} entries${pendingConflicts.length > 0 ? `, ${pendingConflicts.length} conflicts` : ''}`
-    const commit = await step('创建提交', () => createCommit(token, owner, repo, commitMsg, tree.sha, [parentSha]))
-    await step('更新分支', () => updateBranchRef(token, owner, repo, branch, commit.sha))
+    const commit = await step('step.createCommit', () => createCommit(token, owner, repo, commitMsg, tree.sha, [parentSha]))
+    await step('step.updateBranch', () => updateBranchRef(token, owner, repo, branch, commit.sha))
 
     // 更新本地 blob SHA / 清除 dirty / 标记冲突已上传
     for (const [date, sha] of pushedShas) {

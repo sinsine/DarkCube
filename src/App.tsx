@@ -4,6 +4,7 @@ import type { DiaryEntry, GitHubSettings, SyncState, ViewId } from './core/types
 import { todayStr } from './core/date'
 import { pullOnly, pushOnly, syncNow, SyncStepError } from './core/sync/engine'
 import { friendlyGitHubError } from './core/github/api'
+import { t, useLang } from './core/i18n'
 import { LiquidBackground } from './ui/components/LiquidBackground'
 import { TopBar, BottomNav } from './ui/components/TopBar'
 import { LoginDialog } from './ui/components/LoginDialog'
@@ -19,6 +20,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function App() {
+  useLang() // 语言切换时全局重渲染
   const [view, setView] = useState<ViewId>('calendar')
   const [selectedDate, setSelectedDate] = useState(todayStr)
   const [entries, setEntries] = useState<DiaryEntry[]>([])
@@ -67,21 +69,21 @@ export default function App() {
   const doSync = useCallback(async () => {
     if (!settings?.token || !settings.userLogin) return
     setSyncing(true)
-    setLastSyncMsg('同步中…')
+    setLastSyncMsg(t('settings.syncDoing'))
     try {
       // 从数据库读取最新状态（墓碑可能刚被删除操作写入，React 状态未同步）
       const latest = await db.syncState.get(1)
       const result = await syncNow(settings, latest)
       setLastSyncMsg(
         result.conflicts > 0
-          ? `完成：拉取 ${result.pulled} · 推送 ${result.pushed} · 冲突 ${result.conflicts}（旧内容已备份为 .conflict.md）`
-          : `完成：拉取 ${result.pulled} · 推送 ${result.pushed}`
+          ? t('settings.syncDoneConflict', { a: result.pulled, b: result.pushed, c: result.conflicts })
+          : t('settings.syncDone', { a: result.pulled, b: result.pushed })
       )
     } catch (e) {
       setLastSyncMsg(
         e instanceof SyncStepError
-          ? `同步失败（${e.step}）：${e.message}`
-          : `同步失败：${friendlyGitHubError(e)}`
+          ? t('settings.syncFail', { step: t(e.step), msg: e.message })
+          : t('settings.syncFailPlain', { msg: friendlyGitHubError(e) })
       )
     } finally {
       setSyncing(false)
@@ -94,16 +96,16 @@ export default function App() {
   const doPush = useCallback(async () => {
     if (!settings?.token || !settings.userLogin) return
     setSyncing(true)
-    setLastSyncMsg('上传中…')
+    setLastSyncMsg(t('settings.pushDoing'))
     try {
       const latest = await db.syncState.get(1)
       const r = await pushOnly(settings, latest)
-      setLastSyncMsg(`上传完成：推送 ${r.pushed} 篇`)
+      setLastSyncMsg(t('settings.pushDone', { n: r.pushed }))
     } catch (e) {
       setLastSyncMsg(
         e instanceof SyncStepError
-          ? `上传失败（${e.step}）：${e.message}`
-          : `上传失败：${friendlyGitHubError(e)}`
+          ? t('settings.pushFail', { step: t(e.step), msg: e.message })
+          : t('settings.pushFailPlain', { msg: friendlyGitHubError(e) })
       )
     } finally {
       setSyncing(false)
@@ -116,16 +118,17 @@ export default function App() {
   const doPull = useCallback(async () => {
     if (!settings?.token || !settings.userLogin) return
     setSyncing(true)
-    setLastSyncMsg('下载中…')
+    setLastSyncMsg(t('settings.pullDoing'))
     try {
       const latest = await db.syncState.get(1)
       const r = await pullOnly(settings, latest)
-      setLastSyncMsg(`下载完成：拉取 ${r.pulled} 篇${r.conflicts ? ` · 冲突 ${r.conflicts}（旧内容已备份）` : ''}`)
+      const conflictSuffix = r.conflicts ? t('settings.pullDoneConflict', { n: r.conflicts }) : ''
+      setLastSyncMsg(t('settings.pullDone', { n: r.pulled }) + conflictSuffix)
     } catch (e) {
       setLastSyncMsg(
         e instanceof SyncStepError
-          ? `下载失败（${e.step}）：${e.message}`
-          : `下载失败：${friendlyGitHubError(e)}`
+          ? t('settings.pullFail', { step: t(e.step), msg: e.message })
+          : t('settings.pullFailPlain', { msg: friendlyGitHubError(e) })
       )
     } finally {
       setSyncing(false)
@@ -133,6 +136,16 @@ export default function App() {
       refreshEntries()
     }
   }, [settings, refreshSyncState, refreshEntries])
+
+  /** 编辑完成后自动同步（自动同步开启时；节流避免频繁触发） */
+  const lastAutoSync = useRef(0)
+  const handleAutoSyncAfterEdit = useCallback(() => {
+    if (!settings?.token || !settings.userLogin || !settings.autoSync) return
+    const now = Date.now()
+    if (now - lastAutoSync.current < 20000) return
+    lastAutoSync.current = now
+    void doSync()
+  }, [settings, doSync])
 
   /** 删除日记：本地删除 + 记墓碑 + 立即推送删除到云端 */
   const handleDeleteEntry = useCallback(
@@ -275,6 +288,8 @@ export default function App() {
               initialMode={editorInitialMode}
               onChangeDate={setSelectedDate}
               onEntrySaved={refreshEntries}
+              autoSyncEnabled={Boolean(settings?.autoSync) && loggedIn}
+              onAutoSync={handleAutoSyncAfterEdit}
             />
           )}
           {view === 'timeline' && (

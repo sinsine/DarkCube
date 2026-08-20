@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
-import { formatDateCN, formatDateDot, pad2 } from '../../core/date'
+import { formatDateDot, pad2 } from '../../core/date'
 import { countWords, deriveTitle, renderMarkdown, transformMarkdown, type MdOp } from '../../core/markdown'
 import { db } from '../../core/db'
 import { MOOD_OPTIONS, WEATHER_OPTIONS, metaBy } from '../../core/meta'
+import { formatDate, t } from '../../core/i18n'
 import { MarkdownToolbar } from '../components/MarkdownToolbar'
 
 interface EditorViewProps {
@@ -14,6 +15,9 @@ interface EditorViewProps {
   onChangeDate: (date: string) => void
   /** 保存完成后通知上层刷新条目列表 */
   onEntrySaved: () => void
+  /** 自动同步开启时，编辑保存后触发一次同步 */
+  autoSyncEnabled?: boolean
+  onAutoSync?: () => void
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved'
@@ -21,10 +25,19 @@ type Mode = 'edit' | 'preview'
 
 const SAVE_DELAY = 600
 
-export function EditorView({ date, entry, initialMode, onChangeDate, onEntrySaved }: EditorViewProps) {
+export function EditorView({
+  date,
+  entry,
+  initialMode,
+  onChangeDate,
+  onEntrySaved,
+  autoSyncEnabled,
+  onAutoSync
+}: EditorViewProps) {
   const [text, setText] = useState(entry?.body ?? '')
   const [mode, setMode] = useState<Mode>(initialMode ?? 'edit')
   const [status, setStatus] = useState<SaveStatus>(entry ? 'saved' : 'idle')
+  const [dateJumpOpen, setDateJumpOpen] = useState(false)
   // 竖屏默认折叠 Markdown 工具栏
   const [mdToolbarOpen, setMdToolbarOpen] = useState(
     () => !(typeof window !== 'undefined' && window.matchMedia('(max-width: 720px)').matches)
@@ -50,6 +63,7 @@ export function EditorView({ date, entry, initialMode, onChangeDate, onEntrySave
     setText(entry?.body ?? '')
     setStatus(entry ? 'saved' : 'idle')
     setMode(initialMode ?? 'edit')
+    setDateJumpOpen(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date])
 
@@ -115,6 +129,8 @@ export function EditorView({ date, entry, initialMode, onChangeDate, onEntrySave
       }
       setStatus('saved')
       onEntrySaved()
+      // 需求：自动同步开启时，完成编辑后自动同步一次
+      if (autoSyncEnabled && body.trim() !== '') onAutoSync?.()
     } catch {
       setStatus('saved')
     }
@@ -127,105 +143,129 @@ export function EditorView({ date, entry, initialMode, onChangeDate, onEntrySave
   }
 
   const words = countWords(text)
-  const statusLabel = status === 'saving' ? '保存中…' : status === 'saved' ? '已保存' : ''
+  const statusLabel = status === 'saving' ? t('editor.saving') : status === 'saved' ? t('editor.saved') : ''
+  const w = metaBy(WEATHER_OPTIONS, entry?.weather)
+  const m = metaBy(MOOD_OPTIONS, entry?.mood)
 
   return (
     <div className="view">
       <div className="glass-panel editor-wrap">
         <div className="editor__date">
-          <button className="icon-btn" onClick={() => shift(-1)} aria-label="前一天">
+          <button className="icon-btn" onClick={() => shift(-1)} aria-label={t('editor.prevDay')}>
             ‹
           </button>
-          <span className="editor__date-text">{formatDateCN(date)}</span>
+          <span className="editor__date-text">{formatDate(date)}</span>
           <span className="editor__date-short">{formatDateDot(date)}</span>
-          <button className="icon-btn" onClick={() => shift(1)} aria-label="后一天">
+          <button className="icon-btn" onClick={() => shift(1)} aria-label={t('editor.nextDay')}>
             ›
+          </button>
+          <button
+            className="icon-btn"
+            onClick={() => setDateJumpOpen((v) => !v)}
+            title={t('editor.jumpDate')}
+            aria-label={t('editor.jumpDate')}
+          >
+            📅
           </button>
           <span style={{ flex: 1 }} />
           {entry ? (
             <span className="chip editor__status-chip">
               <span className="chip__dot chip__dot--on" />
-              已有日记
+              {t('editor.hasEntry')}
             </span>
           ) : (
             <span className="chip editor__status-chip">
               <span className="chip__dot" />
-              新日记
+              {t('editor.newEntry')}
             </span>
           )}
         </div>
 
+        {dateJumpOpen && (
+          <div className="editor__jump-row">
+            <input
+              type="date"
+              className="input"
+              value={date}
+              onChange={(e) => {
+                if (e.target.value) onChangeDate(e.target.value)
+                setDateJumpOpen(false)
+              }}
+              aria-label={t('editor.jumpDate')}
+            />
+          </div>
+        )}
+
         {mode === 'edit' ? (
           <div className="editor__meta-row">
             <div className="meta-group">
-              <span className="meta-group__label">天气</span>
+              <span className="meta-group__label">{t('editor.weather')}</span>
               <div className="meta-group__scroll">
-                {WEATHER_OPTIONS.map((w) => (
+                {WEATHER_OPTIONS.map((o) => (
                   <button
-                    key={w.id}
-                    className={`meta-chip${entry?.weather === w.id ? ' meta-chip--active' : ''}`}
-                    onClick={() => void setMeta('weather', entry?.weather === w.id ? undefined : w.id)}
-                    title={w.label}
-                    aria-pressed={entry?.weather === w.id}
+                    key={o.id}
+                    className={`meta-chip${entry?.weather === o.id ? ' meta-chip--active' : ''}`}
+                    onClick={() => void setMeta('weather', entry?.weather === o.id ? undefined : o.id)}
+                    title={t(`weather.${o.id}`)}
+                    aria-pressed={entry?.weather === o.id}
                   >
-                    <span aria-hidden="true">{w.icon}</span>
-                    <span className="meta-chip__label">{w.label}</span>
+                    <span aria-hidden="true">{o.icon}</span>
+                    <span className="meta-chip__label">{t(`weather.${o.id}`)}</span>
                   </button>
                 ))}
               </div>
             </div>
             <div className="meta-group">
-              <span className="meta-group__label">心情</span>
+              <span className="meta-group__label">{t('editor.mood')}</span>
               <div className="meta-group__scroll">
-                {MOOD_OPTIONS.map((m) => (
+                {MOOD_OPTIONS.map((o) => (
                   <button
-                    key={m.id}
-                    className={`meta-chip${entry?.mood === m.id ? ' meta-chip--active' : ''}`}
-                    onClick={() => void setMeta('mood', entry?.mood === m.id ? undefined : m.id)}
-                    title={m.label}
-                    aria-pressed={entry?.mood === m.id}
+                    key={o.id}
+                    className={`meta-chip${entry?.mood === o.id ? ' meta-chip--active' : ''}`}
+                    onClick={() => void setMeta('mood', entry?.mood === o.id ? undefined : o.id)}
+                    title={t(`mood.${o.id}`)}
+                    aria-pressed={entry?.mood === o.id}
                   >
-                    <span aria-hidden="true">{m.icon}</span>
-                    <span className="meta-chip__label">{m.label}</span>
+                    <span aria-hidden="true">{o.icon}</span>
+                    <span className="meta-chip__label">{t(`mood.${o.id}`)}</span>
                   </button>
                 ))}
               </div>
             </div>
           </div>
-        ) : (entry?.weather || entry?.mood) ? (
+        ) : entry?.weather || entry?.mood ? (
           // 预览模式：只读展示已选中的天气/心情；未选择则整行隐藏
           <div className="editor__meta-readonly">
-            {metaBy(WEATHER_OPTIONS, entry?.weather) && (
+            {w && (
               <span className="meta-readonly-chip">
-                {metaBy(WEATHER_OPTIONS, entry?.weather)?.icon}{' '}
-                {metaBy(WEATHER_OPTIONS, entry?.weather)?.label}
+                {w.icon} {t(`weather.${w.id}`)}
               </span>
             )}
-            {metaBy(MOOD_OPTIONS, entry?.mood) && (
+            {m && (
               <span className="meta-readonly-chip">
-                {metaBy(MOOD_OPTIONS, entry?.mood)?.icon} {metaBy(MOOD_OPTIONS, entry?.mood)?.label}
+                {m.icon} {t(`mood.${m.id}`)}
               </span>
             )}
           </div>
         ) : null}
 
         <div className="editor__toolbar">
-          <div className="seg" role="tablist" aria-label="编辑模式">
+          <div className="seg" role="tablist" aria-label={t('editor.edit')}>
             <button
               className={`seg__item${mode === 'edit' ? ' seg__item--active' : ''}`}
               onClick={() => setMode('edit')}
             >
-              编辑
+              {t('editor.edit')}
             </button>
             <button
               className={`seg__item${mode === 'preview' ? ' seg__item--active' : ''}`}
               onClick={() => setMode('preview')}
             >
-              预览
+              {t('editor.preview')}
             </button>
           </div>
           <span style={{ flex: 1 }} />
-          {words > 0 && <span className="editor__meta">{words} 字</span>}
+          {words > 0 && <span className="editor__meta">{t('editor.words', { n: words })}</span>}
           {statusLabel && (
             <span className={`editor__status${status === 'saving' ? ' editor__status--busy' : ''}`}>
               {statusLabel}
@@ -240,7 +280,7 @@ export function EditorView({ date, entry, initialMode, onChangeDate, onEntrySave
               onClick={() => setMdToolbarOpen((v) => !v)}
               aria-expanded={mdToolbarOpen}
             >
-              {mdToolbarOpen ? '收起格式栏 ▴' : '展开格式栏 ▾'}
+              {mdToolbarOpen ? t('editor.collapseToolbar') : t('editor.expandToolbar')}
             </button>
             {mdToolbarOpen && <MarkdownToolbar onApply={applyMd} />}
           </div>
@@ -252,7 +292,7 @@ export function EditorView({ date, entry, initialMode, onChangeDate, onEntrySave
             className="editor__body"
             value={text}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={'在这里写下今天的思绪…\n\n支持 Markdown：\n# 标题\n**加粗** · *斜体* · - 列表 · > 引用'}
+            placeholder={t('editor.placeholder')}
             spellCheck={false}
           />
         ) : (
@@ -262,9 +302,7 @@ export function EditorView({ date, entry, initialMode, onChangeDate, onEntrySave
           />
         )}
 
-        {text.trim() === '' && (
-          <div className="note">内容将自动保存在本机（IndexedDB），登录 GitHub 后可同步到私有仓库。</div>
-        )}
+        {text.trim() === '' && <div className="note">{t('editor.note')}</div>}
       </div>
     </div>
   )

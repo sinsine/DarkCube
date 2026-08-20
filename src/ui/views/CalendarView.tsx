@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
-import { WEEKDAYS, buildMonthGrid, formatDateCN, monthTitle, todayStr } from '../../core/date'
+import { buildMonthGrid, todayStr } from '../../core/date'
+import { formatMonth, formatDate, getLang, t } from '../../core/i18n'
 
 interface CalendarViewProps {
   entries: DiaryEntry[]
@@ -8,12 +9,17 @@ interface CalendarViewProps {
   onPickDate: (date: string) => void
 }
 
+// 会话内记住上次浏览的月份（离开视图再回来时保持）
+let savedCursor: { year: number; month: number } | null = null
+
+function todayCursor(): { year: number; month: number } {
+  const t = todayStr().split('-').map(Number)
+  return { year: t[0], month: t[1] }
+}
+
 export function CalendarView({ entries, selectedDate, onPickDate }: CalendarViewProps) {
   const today = todayStr()
-  const [cursor, setCursor] = useState(() => {
-    const t = today.split('-').map(Number)
-    return { year: t[0], month: t[1] }
-  })
+  const [cursor, setCursor] = useState<{ year: number; month: number }>(() => savedCursor ?? todayCursor())
 
   // 滑动翻页手势 + 左右滑动动画
   const gridRef = useRef<HTMLDivElement | null>(null)
@@ -40,14 +46,17 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
     setSuppressAnim(false)
     setCursor((c) => {
       const d = new Date(c.year, c.month - 1 + delta, 1)
-      return { year: d.getFullYear(), month: d.getMonth() + 1 }
+      const next = { year: d.getFullYear(), month: d.getMonth() + 1 }
+      savedCursor = next
+      return next
     })
   }
 
   function backToToday() {
     setSuppressAnim(false)
-    const t = today.split('-').map(Number)
-    setCursor({ year: t[0], month: t[1] })
+    const next = todayCursor()
+    savedCursor = next
+    setCursor(next)
   }
 
   function onTouchStart(e: React.TouchEvent) {
@@ -104,28 +113,28 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
         onTouchEnd={onTouchEnd}
       >
         <div className="calendar__head">
-          <div className="calendar__title">{monthTitle(grid.year, grid.month)}</div>
+          <div className="calendar__title">{formatMonth(grid.year, grid.month)}</div>
           <div className="calendar__nav">
-            <button className="icon-btn" onClick={() => move(-12)} aria-label="上一年" title="上一年">
+            <button className="icon-btn" onClick={() => move(-12)} aria-label={t('calendar.prevYear')} title={t('calendar.prevYear')}>
               ‹‹
             </button>
-            <button className="icon-btn" onClick={() => move(-1)} aria-label="上个月">
+            <button className="icon-btn" onClick={() => move(-1)} aria-label={t('calendar.prevMonth')}>
               ‹
             </button>
-            <button className="icon-btn" onClick={backToToday} aria-label="回到今天" title="今天">
+            <button className="icon-btn" onClick={backToToday} aria-label={t('calendar.today')} title={t('calendar.today')}>
               今
             </button>
-            <button className="icon-btn" onClick={() => move(1)} aria-label="下个月">
+            <button className="icon-btn" onClick={() => move(1)} aria-label={t('calendar.nextMonth')}>
               ›
             </button>
-            <button className="icon-btn" onClick={() => move(12)} aria-label="下一年" title="下一年">
+            <button className="icon-btn" onClick={() => move(12)} aria-label={t('calendar.nextYear')} title={t('calendar.nextYear')}>
               ››
             </button>
           </div>
         </div>
 
         <div className="calendar__weekdays">
-          {WEEKDAYS.map((w) => (
+          {weekdayHeaders.map((w) => (
             <div key={w} className="calendar__weekday">
               {w}
             </div>
@@ -149,7 +158,7 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
                 key={date}
                 className={cls}
                 onClick={() => onPickDate(date)}
-                title={formatDateCN(date)}
+                title={formatDate(date)}
                 style={{ animationDelay: `${Math.min(i * 15, 320)}ms` }}
               >
                 <span>{Number(date.slice(8, 10))}</span>
@@ -162,3 +171,11 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
     </div>
   )
 }
+
+/** 星期表头（按语言） */
+const weekdayHeaders: string[] = (() => {
+  const lang = getLang()
+  if (lang === 'en') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  if (lang === 'ja') return ['月', '火', '水', '木', '金', '土', '日']
+  return ['一', '二', '三', '四', '五', '六', '日']
+})()

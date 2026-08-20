@@ -1,5 +1,6 @@
 import type { GitHubSettings, ViewId } from '../../core/types'
 import { version } from '../../../package.json'
+import { t } from '../../core/i18n'
 
 interface TopBarProps {
   view: ViewId
@@ -12,10 +13,10 @@ interface TopBarProps {
   onToggleTheme: () => void
 }
 
-const NAV_ITEMS: { id: ViewId; label: string }[] = [
-  { id: 'calendar', label: '日历' },
-  { id: 'timeline', label: '时间线' },
-  { id: 'settings', label: '设置' }
+const NAV_ITEMS: { id: ViewId; labelKey: string }[] = [
+  { id: 'calendar', labelKey: 'nav.calendar' },
+  { id: 'timeline', labelKey: 'nav.timeline' },
+  { id: 'settings', labelKey: 'nav.settings' }
 ]
 
 /** 顶栏：品牌 + 桌面导航 + 写日记 + 主题切换 + 登录状态 */
@@ -38,14 +39,14 @@ export function TopBar({
         <span className="brand__version">v{version}</span>
       </div>
 
-      <nav className="topbar__nav glass-panel--flat" aria-label="主导航">
+      <nav className="topbar__nav glass-panel--flat" aria-label={t('nav.settings')}>
         {NAV_ITEMS.map((item) => (
           <button
             key={item.id}
             className={`nav-item${view === item.id ? ' nav-item--active' : ''}`}
             onClick={() => onNavigate(item.id)}
           >
-            {item.label}
+            {t(item.labelKey)}
           </button>
         ))}
       </nav>
@@ -54,16 +55,16 @@ export function TopBar({
         <button
           className="icon-btn"
           onClick={onToggleTheme}
-          title={theme === 'dark' ? '切换日间模式' : '切换夜间模式'}
-          aria-label="切换主题"
+          title={theme === 'dark' ? t('topbar.theme.light') : t('topbar.theme.dark')}
+          aria-label={theme === 'dark' ? t('topbar.theme.light') : t('topbar.theme.dark')}
         >
           {theme === 'dark' ? '☀' : '☾'}
         </button>
         <button className="btn btn--primary topbar__write" onClick={onWrite}>
-          写日记
+          {t('nav.write')}
         </button>
         {loggedIn && settings ? (
-          <button className="chip" onClick={() => onNavigate('settings')} title="点击进入设置">
+          <button className="chip" onClick={() => onNavigate('settings')} title={t('nav.settings')}>
             {settings.userAvatar ? (
               <img className="chip__avatar" src={settings.userAvatar} alt="" referrerPolicy="no-referrer" />
             ) : (
@@ -76,7 +77,7 @@ export function TopBar({
         ) : (
           <button className="btn btn--sm" onClick={onOpenLogin}>
             <span className="chip__dot" />
-            登录 GitHub
+            {t('nav.login')}
           </button>
         )}
       </div>
@@ -90,17 +91,17 @@ interface BottomNavProps {
   onWrite: () => void
 }
 
-const MOBILE_ITEMS: { id: ViewId; label: string; glyph: string }[] = [
-  { id: 'calendar', label: '日历', glyph: '◫' },
-  { id: 'editor', label: '写日记', glyph: '✎' },
-  { id: 'timeline', label: '时间线', glyph: '≡' },
-  { id: 'settings', label: '设置', glyph: '⚙' }
+const MOBILE_ITEMS: { id: ViewId; labelKey: string; glyph: string }[] = [
+  { id: 'calendar', labelKey: 'nav.calendar', glyph: '◫' },
+  { id: 'editor', labelKey: 'nav.write', glyph: '✎' },
+  { id: 'timeline', labelKey: 'nav.timeline', glyph: '≡' },
+  { id: 'settings', labelKey: 'nav.settings', glyph: '⚙' }
 ]
 
 /** 底部导航（移动端） */
 export function BottomNav({ view, onNavigate, onWrite }: BottomNavProps) {
   return (
-    <nav className="bottomnav" aria-label="底部导航">
+    <nav className="bottomnav" aria-label={t('nav.settings')}>
       {MOBILE_ITEMS.map((item) => (
         <button
           key={item.id}
@@ -110,7 +111,7 @@ export function BottomNav({ view, onNavigate, onWrite }: BottomNavProps) {
           <span className="bottomnav__icon" aria-hidden="true">
             {item.glyph}
           </span>
-          <span className="bottomnav__label">{item.label}</span>
+          <span className="bottomnav__label">{t(item.labelKey)}</span>
         </button>
       ))}
     </nav>

@@ -319,6 +319,13 @@
   letter-spacing: 0.03em;
   font-variant-numeric: tabular-nums;
 }
+.editor__jump-row {
+  display: flex;
+  margin-top: 4px;
+}
+.editor__jump-row .input {
+  max-width: 220px;
+}
 .editor__body {
   min-height: 420px;
   resize: vertical;

@@ -3,6 +3,7 @@ import type { GitHubSettings, SyncState } from '../../core/types'
 import { todayStr } from '../../core/date'
 import { db } from '../../core/db'
 import { GITHUB_URL, RELEASES_URL, checkLatestRelease, isNewer, type ReleaseInfo } from '../../core/update'
+import { LANGS, getLang, setLang, t } from '../../core/i18n'
 import { version } from '../../../package.json'
 import { ChangelogDialog } from '../components/ChangelogDialog'
 
@@ -28,10 +29,11 @@ interface SettingsViewProps {
 }
 
 function formatSyncTime(ts?: number): string {
-  if (!ts) return '尚未同步'
+  if (!ts) return t('settings.notSynced')
   const d = new Date(ts)
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `最近同步：${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return t('settings.lastSync', { t: local })
 }
 
 async function handleExport() {
@@ -55,9 +57,7 @@ async function handleExport() {
 }
 
 async function handleClear() {
-  const ok = window.confirm(
-    '确定清空本机所有日记与配置？此操作不可恢复（已同步到 GitHub 的内容仍保留在仓库中）。'
-  )
+  const ok = window.confirm(t('settings.clearConfirm'))
   if (!ok) return
   await db.delete()
   window.location.reload()
@@ -104,7 +104,7 @@ export function SettingsView({
       const text = await file.text()
       const data = JSON.parse(text) as { entries?: unknown[]; conflicts?: unknown[] }
       if (!Array.isArray(data?.entries)) {
-        setImportMsg('文件格式不正确：缺少 entries 数组（请使用本应用导出的备份）')
+        setImportMsg(t('settings.importBad'))
         return
       }
       let n = 0
@@ -136,19 +136,21 @@ export function SettingsView({
           })
         }
       }
-      setImportMsg(`导入完成：${n} 篇日记（覆盖同名日期）`)
+      setImportMsg(t('settings.importDone', { n }))
       onEntriesChanged()
     } catch {
-      setImportMsg('导入失败：文件不是有效的 JSON 备份')
+      setImportMsg(t('settings.importFail'))
     }
   }
+
+  const currentLang = getLang()
 
   return (
     <div className="view">
       <div className="settings-wrap">
         {/* ---- GitHub 云存档 ---- */}
         <section className="glass-panel section">
-          <div className="section__title">GitHub 云存档</div>
+          <div className="section__title">{t('settings.githubSection')}</div>
 
           {loggedIn && settings ? (
             <div className="account-card glass-panel--flat">
@@ -175,19 +177,19 @@ export function SettingsView({
               </div>
               <div className="account-card__actions">
                 <button className="btn btn--sm" onClick={onOpenLogin}>
-                  重新登录
+                  {t('settings.reLogin')}
                 </button>
                 <button className="btn btn--sm btn--danger" onClick={onLogout}>
-                  退出登录
+                  {t('settings.logout')}
                 </button>
               </div>
             </div>
           ) : (
             <div className="note">
-              尚未登录 GitHub。登录后即可将日记同步到你的私有仓库作为云存档。
+              {t('settings.loggedOut')}
               <div style={{ marginTop: 10 }}>
                 <button className="btn btn--primary" onClick={onOpenLogin}>
-                  登录 GitHub
+                  {t('nav.login')}
                 </button>
               </div>
             </div>
@@ -196,12 +198,12 @@ export function SettingsView({
 
         {/* ---- 同步 ---- */}
         <section className="glass-panel section">
-          <div className="section__title">同步</div>
+          <div className="section__title">{t('settings.syncSection')}</div>
 
           <div className="row">
             <div className="row__main">
-              <div className="row__title">自动同步</div>
-              <div className="row__desc">打开应用或恢复联网时自动拉取与推送</div>
+              <div className="row__title">{t('settings.autoSync')}</div>
+              <div className="row__desc">{t('settings.autoSyncDesc')}</div>
             </div>
             <button
               className="switch"
@@ -209,13 +211,13 @@ export function SettingsView({
               aria-checked={Boolean(settings?.autoSync)}
               onClick={onToggleAutoSync}
               disabled={!loggedIn}
-              aria-label="自动同步"
+              aria-label={t('settings.autoSync')}
             />
           </div>
 
           <div className="row">
             <div className="row__main">
-              <div className="row__title">手动同步</div>
+              <div className="row__title">{t('settings.manualSync')}</div>
               <div className="row__desc">{formatSyncTime(syncState?.lastSyncAt)}</div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -223,17 +225,17 @@ export function SettingsView({
                 className="btn btn--sm"
                 onClick={onPull}
                 disabled={!loggedIn || syncing}
-                title="从云端下载到本地"
+                title={t('settings.pull')}
               >
-                {syncing ? '进行中…' : '↓ 下载'}
+                {syncing ? t('settings.busy') : t('settings.pull')}
               </button>
               <button
                 className="btn btn--sm btn--primary"
                 onClick={onPush}
                 disabled={!loggedIn || syncing}
-                title="从本地上传到云端"
+                title={t('settings.push')}
               >
-                {syncing ? '进行中…' : '↑ 上传'}
+                {syncing ? t('settings.busy') : t('settings.push')}
               </button>
             </div>
           </div>
@@ -243,23 +245,23 @@ export function SettingsView({
 
         {/* ---- 数据 ---- */}
         <section className="glass-panel section">
-          <div className="section__title">数据</div>
+          <div className="section__title">{t('settings.dataSection')}</div>
           <div className="row">
             <div className="row__main">
-              <div className="row__title">导出备份</div>
-              <div className="row__desc">将全部日记与冲突备份导出为 JSON 文件</div>
+              <div className="row__title">{t('settings.export')}</div>
+              <div className="row__desc">{t('settings.exportDesc')}</div>
             </div>
             <button className="btn btn--sm" onClick={() => void handleExport()}>
-              导出
+              {t('settings.exportBtn')}
             </button>
           </div>
           <div className="row">
             <div className="row__main">
-              <div className="row__title">导入备份</div>
-              <div className="row__desc">从 JSON 备份恢复日记（覆盖同名日期，下次同步自动上传）</div>
+              <div className="row__title">{t('settings.import')}</div>
+              <div className="row__desc">{t('settings.importDesc')}</div>
             </div>
             <button className="btn btn--sm" onClick={() => fileInputRef.current?.click()}>
-              导入
+              {t('settings.importBtn')}
             </button>
             <input
               ref={fileInputRef}
@@ -276,30 +278,48 @@ export function SettingsView({
           {importMsg && <div className="note">{importMsg}</div>}
           <div className="row">
             <div className="row__main">
-              <div className="row__title">清空本地数据</div>
-              <div className="row__desc">删除本机所有日记与配置（已同步内容仍在仓库中）</div>
+              <div className="row__title">{t('settings.clear')}</div>
+              <div className="row__desc">{t('settings.clearDesc')}</div>
             </div>
             <button className="btn btn--sm btn--danger" onClick={() => void handleClear()}>
-              清空
+              {t('settings.clearBtn')}
             </button>
           </div>
         </section>
 
         {/* ---- 关于 ---- */}
         <section className="glass-panel section">
-          <div className="section__title">外观与关于</div>
+          <div className="section__title">{t('settings.aboutSection')}</div>
 
           <div className="row">
             <div className="row__main">
-              <div className="row__title">日间模式</div>
-              <div className="row__desc">黑白反转的亮色界面</div>
+              <div className="row__title">{t('settings.langSection')}</div>
+              <div className="row__desc">{t('settings.lightModeDesc')}</div>
+            </div>
+          </div>
+          <div className="seg" role="group" aria-label={t('settings.langSection')} style={{ alignSelf: 'flex-start' }}>
+            {LANGS.map((l) => (
+              <button
+                key={l.id}
+                className={`seg__item${currentLang === l.id ? ' seg__item--active' : ''}`}
+                onClick={() => setLang(l.id)}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="row">
+            <div className="row__main">
+              <div className="row__title">{t('settings.lightMode')}</div>
+              <div className="row__desc">{t('settings.lightModeDesc')}</div>
             </div>
             <button
               className="switch"
               role="switch"
               aria-checked={theme === 'light'}
               onClick={onToggleTheme}
-              aria-label="日间模式"
+              aria-label={t('settings.lightMode')}
             />
           </div>
 
@@ -313,31 +333,31 @@ export function SettingsView({
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noreferrer"
-                title="打开项目 GitHub 主页"
+                title={GITHUB_URL}
               >
                 墨辰DarkCube v{version} ↗
               </a>
-              <div className="row__desc">本地优先 · GitHub 私有仓库云存档</div>
+              <div className="row__desc">{t('settings.aboutDesc')}</div>
             </div>
           </div>
           <div className="row">
             <div className="row__main">
-              <div className="row__title">检查更新</div>
+              <div className="row__title">{t('settings.checkUpdate')}</div>
               <div className="row__desc">
                 {release
                   ? isNewer(release.tag_name, version)
-                    ? `发现新版本 ${release.tag_name}，点击右侧前往下载`
-                    : `已是最新版本（${release.tag_name}）`
-                  : '前往 GitHub Releases 查看最新版本'}
+                    ? t('settings.newVersion', { v: release.tag_name })
+                    : t('settings.latest', { v: release.tag_name })
+                  : t('settings.latestRelease')}
               </div>
             </div>
             <a className="btn btn--sm" href={RELEASES_URL} target="_blank" rel="noreferrer">
-              最新 Releases ↗
+              {t('settings.releasesBtn')}
             </a>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
             <button className="btn btn--sm" onClick={() => setChangelogOpen(true)}>
-              📜 历史更新日志
+              {t('settings.changelog')}
             </button>
             <a
               className="link"
@@ -345,15 +365,15 @@ export function SettingsView({
               target="_blank"
               rel="noreferrer"
             >
-              作者 B 站主页 ↗
+              {t('settings.author')}
             </a>
             <button className="btn btn--sm" onClick={onShowDisclaimer}>
-              📄 免责声明
+              {t('settings.disclaimer')}
             </button>
           </div>
           {canInstall && (
             <button className="btn btn--primary btn--block" onClick={onInstall}>
-              安装应用到桌面 / 主屏幕
+              {t('settings.install')}
             </button>
           )}
         </section>

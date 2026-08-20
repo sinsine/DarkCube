@@ -1,5 +1,7 @@
 /** GitHub REST API 客户端（纯浏览器，无第三方依赖） */
 
+import { t } from '../i18n'
+
 const GH_API = 'https://api.github.com'
 const GH_VERSION = '2022-11-28'
 
@@ -99,7 +101,7 @@ export async function ensureRepo(token: string, owner: string, name: string): Pr
         return await createRepo(token, name)
       } catch (e2) {
         if (e2 instanceof GitHubError && e2.status === 422) {
-          throw new Error(`仓库「${name}」已存在但无法访问，或创建失败：请更换仓库名或检查 Token 权限`)
+          throw new Error(t('errors.repoExists', { name }))
         }
         throw e2
       }
@@ -108,28 +110,28 @@ export async function ensureRepo(token: string, owner: string, name: string): Pr
   }
 }
 
-/** 把 GitHubError 转成用户可读的中文提示 */
+/** 把 GitHubError 转成用户可读的提示（随语言） */
 export function friendlyGitHubError(e: unknown): string {
   if (e instanceof GitHubError) {
     switch (e.status) {
       case 400:
-        return '请求参数错误，请检查输入'
+        return t('errors.badRequest')
       case 401:
-        return 'Token 无效或已过期，请重新生成后输入'
+        return t('errors.tokenInvalid')
       case 403:
-        return '访问被拒绝：请检查 Token 是否勾选「Contents 读写」权限'
+        return t('errors.forbidden')
       case 404:
-        return '仓库不存在，或该 Token 没有访问此仓库的权限'
+        return t('errors.notFound')
       case 409:
-        return '请求冲突：仓库为空或状态异常，请稍后重试'
+        return t('errors.conflict409')
       case 422:
-        return '请求无效（422）：文件或仓库已存在，或仓库状态异常，请重试'
+        return t('errors.invalid422')
       default:
         return e.message
     }
   }
   if (e instanceof TypeError) {
-    return '网络连接失败，请检查网络后重试'
+    return t('errors.network')
   }
-  return e instanceof Error ? e.message : '发生未知错误'
+  return e instanceof Error ? e.message : t('errors.unknown')
 }
