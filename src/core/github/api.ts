@@ -95,7 +95,14 @@ export async function ensureRepo(token: string, owner: string, name: string): Pr
     return await getRepo(token, owner, name)
   } catch (e) {
     if (e instanceof GitHubError && e.status === 404) {
-      return createRepo(token, name)
+      try {
+        return await createRepo(token, name)
+      } catch (e2) {
+        if (e2 instanceof GitHubError && e2.status === 422) {
+          throw new Error(`仓库「${name}」已存在但无法访问，或创建失败：请更换仓库名或检查 Token 权限`)
+        }
+        throw e2
+      }
     }
     throw e
   }
@@ -116,7 +123,7 @@ export function friendlyGitHubError(e: unknown): string {
       case 409:
         return '请求冲突：仓库为空或状态异常，请稍后重试'
       case 422:
-        return '仓库名已存在或创建失败，请更换仓库名'
+        return '请求无效（422）：文件或仓库已存在，或仓库状态异常，请重试'
       default:
         return e.message
     }

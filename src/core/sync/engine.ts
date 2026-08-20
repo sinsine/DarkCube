@@ -64,18 +64,44 @@ export async function syncNow(
     const emptyRepo =
       e instanceof GitHubError && (e.status === 404 || (e.status === 409 && /empty/i.test(e.message)))
     if (!emptyRepo) throw e
-    // 空仓库：git database 接口全部不可用，必须用 PUT /contents 初始化
-    // （一次调用即完成「创建文件 + 首个提交 + 默认分支」）
+
+    // 配置的分支名可能与仓库实际默认分支不一致：先探测真实默认分支
     const repoInfo = await getRepo(token, owner, repo)
-    await putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰日记')
-    try {
-      const ref = await getBranchRef(token, owner, repo, branch)
-      remoteRefSha = ref.sha
-    } catch {
-      // 配置分支与实际默认分支不一致时，改用仓库真实默认分支
-      branch = repoInfo.default_branch
-      const ref = await getBranchRef(token, owner, repo, branch)
-      remoteRefSha = ref.sha
+    const actualBranch = repoInfo.default_branch
+    // 守卫后已确认存在；闭包内 TS 不保留收窄，用别名固定类型
+    const ghToken = token
+    const ghOwner = owner
+    const ghRepoName = repo
+
+    /** 探测默认分支是否存在；'missing' 表示确实没有分支（空仓库） */
+    async function resolveRef(): Promise<'ok' | 'missing' | 'error'> {
+      try {
+        const ref = await getBranchRef(ghToken, ghOwner, ghRepoName, actualBranch)
+        remoteRefSha = ref.sha
+        branch = actualBranch
+        return 'ok'
+      } catch (e2) {
+        const missing =
+          e2 instanceof GitHubError &&
+          (e2.status === 404 || (e2.status === 409 && /empty/i.test(e2.message)))
+        return missing ? 'missing' : 'error'
+      }
+    }
+
+    const probe = await resolveRef()
+    if (probe === 'error') throw e
+    if (probe === 'missing') {
+      // 确实为空仓库：git database 接口全部不可用，必须用 PUT /contents 初始化
+      // （一次调用即完成「创建文件 + 首个提交 + 默认分支」）
+      try {
+        await putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰日记')
+      } catch (e2) {
+        // 可能刚被其他设备初始化（README 已存在 → 422）：重新确认
+        if ((await resolveRef()) !== 'ok') throw e2
+      }
+      if ((await resolveRef()) !== 'ok') {
+        throw new Error('仓库初始化失败，请稍后重试')
+      }
     }
   }
 
