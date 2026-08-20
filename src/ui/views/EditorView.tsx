@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
-import { formatDateCN, pad2 } from '../../core/date'
+import { formatDateCN, formatDateDot, pad2 } from '../../core/date'
 import { countWords, deriveTitle, renderMarkdown, transformMarkdown, type MdOp } from '../../core/markdown'
 import { db } from '../../core/db'
 import { MOOD_OPTIONS, WEATHER_OPTIONS } from '../../core/meta'
@@ -130,17 +130,18 @@ export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorVi
             ‹
           </button>
           <span className="editor__date-text">{formatDateCN(date)}</span>
+          <span className="editor__date-short">{formatDateDot(date)}</span>
           <button className="icon-btn" onClick={() => shift(1)} aria-label="后一天">
             ›
           </button>
           <span style={{ flex: 1 }} />
           {entry ? (
-            <span className="chip">
+            <span className="chip editor__status-chip">
               <span className="chip__dot chip__dot--on" />
               已有日记
             </span>
           ) : (
-            <span className="chip">
+            <span className="chip editor__status-chip">
               <span className="chip__dot" />
               新日记
             </span>

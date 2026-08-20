@@ -33,7 +33,8 @@ export function TopBar({
     <header className="glass-panel topbar">
       <div className="brand">
         <span className="brand__logo">墨</span>
-        <span>墨辰DarkCube</span>
+        <span className="brand__name brand__name--full">墨辰DarkCube</span>
+        <span className="brand__name brand__name--short">墨辰</span>
         <span className="brand__version">v{version}</span>
       </div>
 
@@ -68,7 +69,7 @@ export function TopBar({
             ) : (
               <span className="chip__dot chip__dot--on" />
             )}
-            <span>
+            <span className="chip__text">
               {settings.userLogin} · {settings.repo}
             </span>
           </button>
@@ -107,7 +108,7 @@ export function BottomNav({ view, onNavigate, onWrite }: BottomNavProps) {
           onClick={() => (item.id === 'editor' ? onWrite() : onNavigate(item.id))}
         >
           <span aria-hidden="true">{item.glyph}</span>
-          <span>{item.label}</span>
+          <span className="bottomnav__label">{item.label}</span>
         </button>
       ))}
     </nav>

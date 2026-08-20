@@ -131,6 +131,9 @@
   font-weight: 700;
   box-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
 }
+.brand__name--short {
+  display: none;
+}
 .brand__version {
   font-size: 11px;
   color: var(--ink-3);
@@ -300,6 +303,13 @@
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 0.03em;
+}
+.editor__date-short {
+  display: none;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
 }
 .editor__body {
   min-height: 420px;
@@ -805,6 +815,67 @@
   .blob {
     filter: blur(60px);
     opacity: 0.4;
+  }
+  /* ---- 竖屏适配 ---- */
+
+  /* 顶栏避开手机状态栏（APK 通知栏不重叠） */
+  .app-shell {
+    padding-top: calc(var(--sp-3) + env(safe-area-inset-top));
+  }
+
+  /* 品牌：只显示「墨辰」，隐藏图标与版本号 */
+  .brand__logo,
+  .brand__name--full,
+  .brand__version {
+    display: none;
+  }
+  .brand__name--short {
+    display: inline;
+  }
+
+  /* 登录后仅显示头像 */
+  .chip {
+    padding: 4px;
+  }
+  .chip__text {
+    display: none;
+  }
+
+  /* 底部导航仅图标 */
+  .bottomnav__label {
+    display: none;
+  }
+  .bottomnav__item {
+    gap: 0;
+  }
+
+  /* 编辑器日期简写 YYYY.MM.DD，隐藏状态胶囊 */
+  .editor__date-text {
+    display: none;
+  }
+  .editor__date-short {
+    display: inline;
+  }
+  .editor__status-chip {
+    display: none;
+  }
+
+  /* 天气 / 心情：各占一行并缩进 */
+  .editor__meta-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .editor__meta-row .meta-group {
+    padding-left: 4px;
+  }
+
+  /* 日历导航紧凑（5 个按钮） */
+  .calendar__nav {
+    gap: 3px;
+  }
+  .calendar__nav .icon-btn {
+    width: 30px;
+    height: 30px;
   }
   /* 时间线移动端：日期与内容上下排列，隐藏轴线 */
   .timeline-item {

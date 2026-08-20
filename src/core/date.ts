@@ -21,6 +21,11 @@ export function weekdayCN(dateStr: string): string {
   return `周${'日一二三四五六'[w]}`
 }
 
+/** YYYY-MM-DD → 「2025.01.15」（竖屏简写） */
+export function formatDateDot(dateStr: string): string {
+  return dateStr.replace(/-/g, '.')
+}
+
 /** 月历标题 */
 export function monthTitle(year: number, month: number): string {
   return `${year} 年 ${month} 月`

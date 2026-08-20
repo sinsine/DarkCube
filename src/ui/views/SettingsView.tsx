@@ -4,6 +4,7 @@ import { todayStr } from '../../core/date'
 import { db } from '../../core/db'
 import { RELEASES_URL, checkLatestRelease, isNewer, type ReleaseInfo } from '../../core/update'
 import { version } from '../../../package.json'
+import { DisclaimerDialog } from '../components/DisclaimerDialog'
 
 interface SettingsViewProps {
   settings: GitHubSettings | null
@@ -73,6 +74,7 @@ export function SettingsView({
   onToggleTheme
 }: SettingsViewProps) {
   const [release, setRelease] = useState<ReleaseInfo | null>(null)
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
 
   // 进入设置页时检查一次最新版本
   useEffect(() => {
@@ -233,15 +235,19 @@ export function SettingsView({
               最新 Releases ↗
             </a>
           </div>
-          <a
-            className="link"
-            href="https://space.bilibili.com/518517303"
-            target="_blank"
-            rel="noreferrer"
-            style={{ alignSelf: 'flex-start' }}
-          >
-            作者 B 站主页（墨辰）↗
-          </a>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+            <a
+              className="link"
+              href="https://space.bilibili.com/518517303"
+              target="_blank"
+              rel="noreferrer"
+            >
+              作者 B 站主页 ↗
+            </a>
+            <button className="btn btn--sm" onClick={() => setDisclaimerOpen(true)}>
+              📄 免责声明
+            </button>
+          </div>
           {canInstall && (
             <button className="btn btn--primary btn--block" onClick={onInstall}>
               安装应用到桌面 / 主屏幕
@@ -249,6 +255,8 @@ export function SettingsView({
           )}
         </section>
       </div>
+
+      <DisclaimerDialog open={disclaimerOpen} onClose={() => setDisclaimerOpen(false)} />
     </div>
   )
 }
