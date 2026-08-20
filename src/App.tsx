@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { db, loadSettings, saveSettings } from './core/db'
 import type { DiaryEntry, GitHubSettings, SyncState, ViewId } from './core/types'
 import { todayStr } from './core/date'
-import { syncNow, SyncStepError } from './core/sync/engine'
+import { pullOnly, pushOnly, syncNow, SyncStepError } from './core/sync/engine'
 import { friendlyGitHubError } from './core/github/api'
 import { LiquidBackground } from './ui/components/LiquidBackground'
 import { TopBar, BottomNav } from './ui/components/TopBar'
@@ -77,6 +77,65 @@ export default function App() {
       refreshEntries() // 拉取的新内容立即刷新到界面，无需重启
     }
   }, [settings, refreshSyncState, refreshEntries])
+
+  /** 仅上传：本地 → 云端 */
+  const doPush = useCallback(async () => {
+    if (!settings?.token || !settings.userLogin) return
+    setSyncing(true)
+    setLastSyncMsg('上传中…')
+    try {
+      const r = await pushOnly(settings, syncStateRef.current)
+      setLastSyncMsg(`上传完成：推送 ${r.pushed} 篇`)
+    } catch (e) {
+      setLastSyncMsg(
+        e instanceof SyncStepError
+          ? `上传失败（${e.step}）：${e.message}`
+          : `上传失败：${friendlyGitHubError(e)}`
+      )
+    } finally {
+      setSyncing(false)
+      refreshSyncState()
+      refreshEntries()
+    }
+  }, [settings, refreshSyncState, refreshEntries])
+
+  /** 仅下载：云端 → 本地 */
+  const doPull = useCallback(async () => {
+    if (!settings?.token || !settings.userLogin) return
+    setSyncing(true)
+    setLastSyncMsg('下载中…')
+    try {
+      const r = await pullOnly(settings, syncStateRef.current)
+      setLastSyncMsg(`下载完成：拉取 ${r.pulled} 篇${r.conflicts ? ` · 冲突 ${r.conflicts}（旧内容已备份）` : ''}`)
+    } catch (e) {
+      setLastSyncMsg(
+        e instanceof SyncStepError
+          ? `下载失败（${e.step}）：${e.message}`
+          : `下载失败：${friendlyGitHubError(e)}`
+      )
+    } finally {
+      setSyncing(false)
+      refreshSyncState()
+      refreshEntries()
+    }
+  }, [settings, refreshSyncState, refreshEntries])
+
+  /** 删除日记：本地删除 + 记墓碑 + 立即推送删除到云端 */
+  const handleDeleteEntry = useCallback(
+    async (date: string) => {
+      const entry = await db.entries.get(date)
+      if (!entry) return
+      if (entry.blobSha) {
+        const st = await db.syncState.get(1)
+        const deleted = [...(st?.deleted ?? []).filter((d) => d !== date), date]
+        await db.syncState.put({ ...(st ?? { id: 1 }), deleted })
+      }
+      await db.entries.delete(date)
+      refreshEntries()
+      void doPush()
+    },
+    [refreshEntries, doPush]
+  )
 
   // 主题：日间 / 夜间
   useEffect(() => {
@@ -209,6 +268,7 @@ export default function App() {
               entries={entries}
               conflictCount={conflictCount}
               onOpen={(d) => openEditor(d, 'preview')}
+              onDelete={(d) => void handleDeleteEntry(d)}
             />
           )}
           {view === 'settings' && (
@@ -220,7 +280,8 @@ export default function App() {
               syncState={syncState}
               syncing={syncing}
               lastSyncMsg={lastSyncMsg}
-              onSync={() => void doSync()}
+              onPush={() => void doPush()}
+              onPull={() => void doPull()}
               onToggleAutoSync={() => void handleToggleAutoSync()}
               canInstall={installEvt !== null}
               onInstall={() => void handleInstall()}

@@ -20,12 +20,16 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
   const touchX = useRef<number | null>(null)
   const touchY = useRef<number | null>(null)
   const animTimer = useRef<number | undefined>(undefined)
+  const suppressTimer = useRef<number | undefined>(undefined)
   const [dragX, setDragX] = useState(0)
   const [dragging, setDragging] = useState(false)
+  // 滑动翻页后不再播放渐显动画（只保留滑动过渡）
+  const [suppressAnim, setSuppressAnim] = useState(false)
 
   useEffect(() => {
     return () => {
       if (animTimer.current !== undefined) clearTimeout(animTimer.current)
+      if (suppressTimer.current !== undefined) clearTimeout(suppressTimer.current)
     }
   }, [])
 
@@ -75,6 +79,10 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
       setDragX(dir * -width)
       animTimer.current = window.setTimeout(() => {
         move(dir)
+        // 滑动翻页后：新月份只做滑动过渡，不播放渐显动画
+        setSuppressAnim(true)
+        if (suppressTimer.current !== undefined) clearTimeout(suppressTimer.current)
+        suppressTimer.current = window.setTimeout(() => setSuppressAnim(false), 500)
         setDragging(true) // 无过渡，先放到反方向
         setDragX(dir * width)
         requestAnimationFrame(() => {
@@ -126,7 +134,7 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
 
         <div
           ref={gridRef}
-          className={`calendar__grid${dragging ? ' calendar__grid--dragging' : ''}`}
+          className={`calendar__grid${dragging ? ' calendar__grid--dragging' : ''}${suppressAnim ? ' calendar__grid--no-anim' : ''}`}
           style={{ transform: `translateX(${dragX}px)` }}
         >
           {grid.cells.map((date, i) => {

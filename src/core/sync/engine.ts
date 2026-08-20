@@ -1,4 +1,4 @@
-/** 同步引擎：拉取远端 → 比对 → 推送本地，冲突时远端为权威并另存 .conflict.md */
+/** 同步引擎：拉取 / 推送分离，可单独执行；冲突时远端为权威并另存 .conflict.md */
 
 import { db } from '../db'
 import type { GitHubSettings, SyncResult, SyncState } from '../types'
@@ -67,17 +67,15 @@ async function step<T>(label: string, fn: () => Promise<T>): Promise<T> {
   }
 }
 
-/** 执行一次完整同步。成功返回结果对象，失败抛出错误（由调用方转成用户提示） */
-export async function syncNow(
-  settings: GitHubSettings,
-  prev: SyncState | undefined
-): Promise<SyncResult> {
+/** 校验配置并解析远端 ref；空仓库自动初始化（写 README + 首个提交 + 默认分支） */
+async function resolveBranch(
+  settings: GitHubSettings
+): Promise<{ branch: string; remoteRefSha: string | null }> {
   const { owner, repo, token, defaultBranch } = settings
   if (!owner || !repo || !token) throw new Error('请先登录 GitHub')
   let branch = defaultBranch || 'main'
-
-  // ---- 1. 远端 ref（空仓库用 Contents API 初始化） ----
   let remoteRefSha: string | null = null
+
   try {
     const ref = await step('读取分支', () => getBranchRef(token, owner, repo, branch))
     remoteRefSha = ref.sha
@@ -127,12 +125,23 @@ export async function syncNow(
     }
   }
 
+  return { branch, remoteRefSha }
+}
+
+/** 仅下载：从云端拉取到本地（不推送本地改动） */
+export async function pullOnly(
+  settings: GitHubSettings,
+  prev: SyncState | undefined
+): Promise<SyncResult> {
+  const { owner, repo, token } = settings
+  if (!owner || !repo || !token) throw new Error('请先登录 GitHub')
+  const { branch, remoteRefSha } = await resolveBranch(settings)
+
   let pulled = 0
-  let pushed = 0
   let conflicts = 0
   let remoteTreeSha = prev?.remoteTreeSha ?? ''
 
-  // ---- 2. 拉取（远端 ref 有变化时） ----
+  // ---- 拉取（远端 ref 有变化时） ----
   const remoteEntries = new Map<string, string>() // date → blob sha
   const needPull = prev?.remoteRefSha !== remoteRefSha
   if (needPull && remoteRefSha) {
@@ -168,7 +177,7 @@ export async function syncNow(
         const content = await step('下载日记', () => getRawFile(token, owner, repo, entryPath(date), branch))
         const parsed = parseContent(content)
         if (local.dirty) {
-          // 两端都改过 → 远端为权威，本地旧内容进冲突备份（稍后上传 .conflict.md）
+          // 两端都改过 → 远端为权威，本地旧内容进冲突备份（稍后随上传推送 .conflict.md）
           await db.conflicts.put({
             date,
             title: local.title,
@@ -189,23 +198,64 @@ export async function syncNow(
           updatedAt: Date.now()
         })
         pulled++
-      } else {
-        // 两端内容一致（blobSha 相同），无需处理
       }
     }
   }
 
-  // ---- 3. 推送（本地改动 / 冲突备份 / 墓碑） ----
+  // 记录同步状态（保留待删除墓碑，删除尚未推送）
+  await db.syncState.put({
+    id: 1,
+    lastSyncAt: Date.now(),
+    remoteRefSha: remoteRefSha ?? '',
+    remoteTreeSha,
+    deleted: prev?.deleted ?? []
+  })
+
+  return { ok: true, pulled, pushed: 0, conflicts }
+}
+
+/** 仅上传：将本地改动 / 冲突备份 / 墓碑推送到云端 */
+export async function pushOnly(
+  settings: GitHubSettings,
+  prev: SyncState | undefined
+): Promise<SyncResult> {
+  const { owner, repo, token } = settings
+  if (!owner || !repo || !token) throw new Error('请先登录 GitHub')
+  const resolved = await resolveBranch(settings)
+  const branch = resolved.branch
+  let remoteRefSha: string | null = resolved.remoteRefSha
+
+  let pushed = 0
+  let remoteTreeSha = prev?.remoteTreeSha ?? ''
+
+  // 确定 base tree：远端有变化或墓碑存在时，取当前提交的树
+  if (remoteRefSha && (prev?.remoteRefSha !== remoteRefSha || !remoteTreeSha || (prev?.deleted?.length ?? 0) > 0)) {
+    const refSha = remoteRefSha
+    const commit = await step('读取提交', () => getCommit(token, owner, repo, refSha))
+    remoteTreeSha = commit.tree.sha
+  }
+
+  // 墓碑只推远端确实存在的日记文件（避免删除不存在的路径报错）
+  let tombstones = prev?.deleted ?? []
+  if (tombstones.length > 0 && remoteRefSha && remoteTreeSha) {
+    const tree = await step('读取文件列表', () => getTreeRecursive(token, owner, repo, remoteTreeSha))
+    const remoteDates = new Set<string>()
+    for (const item of tree) {
+      const d = item.type === 'blob' && item.sha ? parseEntryPath(item.path) : null
+      if (d) remoteDates.add(d)
+    }
+    tombstones = tombstones.filter((d) => remoteDates.has(d))
+  }
+
+  // ---- 推送（本地改动 / 冲突备份 / 墓碑） ----
   const dirtyEntries = await db.entries.filter((e) => e.dirty || !e.blobSha).toArray()
   const pendingConflicts = await db.conflicts.filter((c) => !c.synced).toArray()
-  const tombstones = needPull
-    ? (prev?.deleted ?? []).filter((d) => remoteEntries.has(d))
-    : (prev?.deleted ?? [])
 
   if (dirtyEntries.length > 0 || pendingConflicts.length > 0 || tombstones.length > 0) {
     if (!remoteRefSha) {
-      throw new Error('缺少远端分支引用，无法提交（请重试同步）')
+      throw new Error('缺少远端分支引用，无法提交（请重试）')
     }
+    const parentSha = remoteRefSha // 闭包内 TS 不保留收窄
     const items: TreeItem[] = []
     const pushedShas = new Map<string, string>()
 
@@ -226,7 +276,7 @@ export async function syncNow(
 
     const tree = await step('构建提交树', () => createTree(token, owner, repo, remoteTreeSha || null, items))
     const commitMsg = `sync: ${dirtyEntries.length} entries${pendingConflicts.length > 0 ? `, ${pendingConflicts.length} conflicts` : ''}`
-    const commit = await step('创建提交', () => createCommit(token, owner, repo, commitMsg, tree.sha, [remoteRefSha!]))
+    const commit = await step('创建提交', () => createCommit(token, owner, repo, commitMsg, tree.sha, [parentSha]))
     await step('更新分支', () => updateBranchRef(token, owner, repo, branch, commit.sha))
 
     // 更新本地 blob SHA / 清除 dirty / 标记冲突已上传
@@ -241,7 +291,7 @@ export async function syncNow(
     pushed = dirtyEntries.length + pendingConflicts.length
   }
 
-  // ---- 4. 记录同步状态 ----
+  // 记录同步状态（墓碑已推送，清空）
   await db.syncState.put({
     id: 1,
     lastSyncAt: Date.now(),
@@ -250,5 +300,16 @@ export async function syncNow(
     deleted: []
   })
 
-  return { ok: true, pulled, pushed, conflicts }
+  return { ok: true, pulled: 0, pushed, conflicts: 0 }
+}
+
+/** 完整同步：先下载再上传（自动同步使用） */
+export async function syncNow(
+  settings: GitHubSettings,
+  prev: SyncState | undefined
+): Promise<SyncResult> {
+  const pulled = await pullOnly(settings, prev)
+  const after = await db.syncState.get(1)
+  const pushed = await pushOnly(settings, after)
+  return { ok: true, pulled: pulled.pulled, pushed: pushed.pushed, conflicts: pulled.conflicts }
 }

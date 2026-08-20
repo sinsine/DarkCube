@@ -14,7 +14,8 @@ interface SettingsViewProps {
   syncState: SyncState | undefined
   syncing: boolean
   lastSyncMsg: string
-  onSync: () => void
+  onPush: () => void
+  onPull: () => void
   onToggleAutoSync: () => void
   canInstall: boolean
   onInstall: () => void
@@ -68,7 +69,8 @@ export function SettingsView({
   syncState,
   syncing,
   lastSyncMsg,
-  onSync,
+  onPush,
+  onPull,
   onToggleAutoSync,
   canInstall,
   onInstall,
@@ -210,12 +212,27 @@ export function SettingsView({
 
           <div className="row">
             <div className="row__main">
-              <div className="row__title">立即同步</div>
+              <div className="row__title">手动同步</div>
               <div className="row__desc">{formatSyncTime(syncState?.lastSyncAt)}</div>
             </div>
-            <button className="btn btn--sm" onClick={onSync} disabled={!loggedIn || syncing}>
-              {syncing ? '同步中…' : '立即同步'}
-            </button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="btn btn--sm"
+                onClick={onPull}
+                disabled={!loggedIn || syncing}
+                title="从云端下载到本地"
+              >
+                {syncing ? '进行中…' : '↓ 下载'}
+              </button>
+              <button
+                className="btn btn--sm btn--primary"
+                onClick={onPush}
+                disabled={!loggedIn || syncing}
+                title="从本地上传到云端"
+              >
+                {syncing ? '进行中…' : '↑ 上传'}
+              </button>
+            </div>
           </div>
 
           {lastSyncMsg && <div className="note">{lastSyncMsg}</div>}
