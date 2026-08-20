@@ -43,6 +43,10 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      # Windows 提交会丢失 gradlew 可执行位，构建前恢复
+      - name: Fix gradlew permissions
+        run: chmod +x android/gradlew
+
       - name: Build APK (debug)
         working-directory: android
         run: ./gradlew assembleDebug
