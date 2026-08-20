@@ -190,7 +190,7 @@ export function EditorView({
         </div>
 
         {dateJumpOpen && (
-          <div className="editor__jump-row">
+          <div className="editor__jump-row collapse-in">
             <input
               type="date"
               className="input"
@@ -295,7 +295,11 @@ export function EditorView({
             >
               {mdToolbarOpen ? t('editor.collapseToolbar') : t('editor.expandToolbar')}
             </button>
-            {mdToolbarOpen && <MarkdownToolbar onApply={applyMd} />}
+            {mdToolbarOpen && (
+              <div className="collapse-in">
+                <MarkdownToolbar onApply={applyMd} />
+              </div>
+            )}
           </div>
         )}
 

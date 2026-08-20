@@ -199,11 +199,14 @@
   -webkit-backdrop-filter: blur(12px);
   font-size: 13px;
   color: var(--ink-1);
-  transition: background var(--dur-fast), border-color var(--dur-fast);
+  transition: background var(--dur-fast), border-color var(--dur-fast), transform 0.12s var(--ease);
 }
 .chip:hover {
   background: var(--glass-bg-hover);
   border-color: var(--line-strong);
+}
+.chip:active {
+  transform: scale(0.96);
 }
 .chip__avatar {
   width: 22px;

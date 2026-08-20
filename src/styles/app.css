@@ -153,11 +153,14 @@
   border-radius: var(--radius-pill);
   font-size: 13.5px;
   color: var(--ink-2);
-  transition: color var(--dur-fast), background var(--dur-fast);
+  transition: color var(--dur-fast), background var(--dur-fast), transform 0.12s var(--ease);
 }
 .nav-item:hover {
   color: var(--ink-0);
   background: var(--glass-bg);
+}
+.nav-item:active {
+  transform: scale(0.96);
 }
 .nav-item--active {
   color: var(--ink-0);
@@ -209,12 +212,15 @@
   background: var(--glass-bg);
   color: var(--ink-1);
   font-size: 15px;
-  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast), transform 0.12s var(--ease);
 }
 .icon-btn:hover {
   background: var(--glass-bg-hover);
   border-color: var(--line-strong);
   color: var(--ink-0);
+}
+.icon-btn:active {
+  transform: scale(0.96);
 }
 .calendar__weekdays {
   display: grid;
@@ -251,12 +257,15 @@
   padding: 12px 16px;
   border-radius: var(--radius-m);
   animation: rise-in 0.35s var(--ease) backwards;
-  transition: background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast);
+  transition: background var(--dur-fast), border-color var(--dur-fast), transform 0.12s var(--ease);
 }
 .on-this-day:hover {
   background: var(--glass-bg-hover);
   border-color: var(--line-strong);
   transform: translateY(-1px);
+}
+.on-this-day:active {
+  transform: scale(0.97);
 }
 .on-this-day__head {
   display: flex;
@@ -299,12 +308,15 @@
   font-size: 14px;
   color: var(--ink-1);
   animation: rise-in 0.3s var(--ease) backwards;
-  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast), transform 0.12s var(--ease);
 }
 .day-cell:hover {
   background: var(--glass-bg-hover);
   border-color: var(--line);
   color: var(--ink-0);
+}
+.day-cell:active {
+  transform: scale(0.96);
 }
 .day-cell--blank {
   visibility: hidden;
@@ -498,11 +510,14 @@
   color: var(--ink-1);
   font-size: 13px;
   flex-shrink: 0;
-  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast), transform 0.12s var(--ease);
 }
 .meta-chip:hover {
   border-color: var(--line-strong);
   color: var(--ink-0);
+}
+.meta-chip:active {
+  transform: scale(0.96);
 }
 .meta-chip--active {
   background: var(--ink-0);
@@ -563,10 +578,13 @@
   border-radius: var(--radius-pill);
   font-size: 13px;
   color: var(--ink-2);
-  transition: color var(--dur-fast), background var(--dur-fast);
+  transition: color var(--dur-fast), background var(--dur-fast), transform 0.12s var(--ease);
 }
 .seg__item:hover {
   color: var(--ink-0);
+}
+.seg__item:active {
+  transform: scale(0.96);
 }
 .seg__item--active {
   background: var(--glass-bg-active);
@@ -750,7 +768,10 @@
   font-size: 14px;
   font-weight: 600;
   border-radius: 14px; /* 四周圆角 */
-  transition: right var(--dur) var(--ease);
+  transition: right var(--dur) var(--ease), transform 0.12s var(--ease);
+}
+.swipe-delete:active {
+  transform: scale(0.96);
 }
 .swipe-delete--open {
   right: 8px;
@@ -832,6 +853,14 @@
   color: var(--ink-2);
   letter-spacing: 0.1em;
   font-weight: 600;
+}
+/* 关于栏目下方的小字座右铭 */
+.about-motto {
+  font-size: 12px;
+  color: var(--ink-3);
+  letter-spacing: 0.12em;
+  margin-top: -10px;
+  animation: fade-in 0.4s var(--ease);
 }
 .row {
   display: flex;
@@ -957,7 +986,10 @@
     border-radius: 12px;
     font-size: 11px;
     color: var(--ink-2);
-    transition: color var(--dur-fast), background var(--dur-fast);
+    transition: color var(--dur-fast), background var(--dur-fast), transform 0.12s var(--ease);
+  }
+  .bottomnav__item:active {
+    transform: scale(0.96);
   }
   .bottomnav__item--active {
     color: var(--ink-0);
@@ -1148,4 +1180,85 @@
     background: var(--ink-0);
     box-shadow: 0 0 0 3px var(--bg-0), 0 0 0 4px var(--line);
   }
+}
+
+/* ============================================================
+   中国新年彩蛋皮肤（data-cny）：红金传统配色
+   仅在「彩蛋皮肤」开关开启且系统日期处于农历除夕～正月初七时生效
+   ============================================================ */
+:root[data-cny] {
+  --bg-glow-1: #2b0d0b;
+  --bg-glow-2: #251505;
+  --blob-1: #57140e;
+  --blob-2: #4a2f08;
+  --blob-3: #6b2416;
+  --line: rgba(255, 206, 130, 0.14);
+  --line-strong: rgba(255, 196, 92, 0.4);
+  --focus-ring: rgba(240, 180, 70, 0.65);
+  --scroll-thumb: rgba(255, 200, 120, 0.18);
+  --scroll-thumb-hover: rgba(255, 200, 120, 0.34);
+  --cny-red: #c02f1d;
+  --cny-gold: #e6b422;
+}
+:root[data-cny][data-theme='light'] {
+  --bg-glow-1: #f7e3dc;
+  --bg-glow-2: #f6eed6;
+  --blob-1: #efc6bb;
+  --blob-2: #ead9a8;
+  --blob-3: #f4d8c4;
+  --line: rgba(192, 47, 29, 0.16);
+  --line-strong: rgba(192, 47, 29, 0.38);
+  --focus-ring: rgba(192, 47, 29, 0.55);
+  --scroll-thumb: rgba(192, 47, 29, 0.2);
+  --scroll-thumb-hover: rgba(192, 47, 29, 0.4);
+}
+:root[data-cny] .btn--primary,
+:root[data-cny] .btn--primary:hover,
+:root[data-cny] .brand__logo,
+:root[data-cny] .day-cell--selected,
+:root[data-cny] .day-cell--selected:hover,
+:root[data-cny] .meta-chip--active,
+:root[data-cny] .meta-chip--active:hover,
+:root[data-cny] .switch[aria-checked="true"] {
+  background: var(--cny-red);
+  color: #fff7e6;
+  border-color: transparent;
+}
+:root[data-cny] .switch[aria-checked="true"]::after {
+  background: #fff7e6;
+}
+:root[data-cny] .chip__dot--on {
+  background: var(--cny-gold);
+  box-shadow: 0 0 0 3px rgba(230, 180, 34, 0.28);
+}
+:root[data-cny] .day-cell--today {
+  border-color: var(--cny-gold);
+}
+:root[data-cny] .day-cell--selected .day-dot {
+  background: #fff7e6;
+}
+:root[data-cny] .brand__logo {
+  box-shadow: 0 0 18px rgba(192, 47, 29, 0.55);
+}
+:root[data-cny] .day-cell--selected {
+  box-shadow: 0 0 22px rgba(192, 47, 29, 0.5);
+}
+
+/* 顶部彩蛋小字（与离线横幅一致，随内容流排列在顶栏上方） */
+.cny-banner {
+  align-self: center;
+  padding: 6px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  color: var(--cny-gold);
+  border: 1px solid rgba(230, 180, 34, 0.5);
+  background: var(--banner-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-soft);
+  animation: slide-up 0.35s var(--ease);
+}
+:root[data-cny] .cny-banner {
+  color: var(--cny-gold);
 }

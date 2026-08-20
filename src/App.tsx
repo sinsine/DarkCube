@@ -5,6 +5,7 @@ import { todayStr } from './core/date'
 import { pullOnly, pushOnly, syncNow, SyncStepError } from './core/sync/engine'
 import { friendlyGitHubError } from './core/github/api'
 import { checkLatestRelease, isNewer, RELEASES_URL, type ReleaseInfo } from './core/update'
+import { isCnyPeriod } from './core/lunar'
 import { t, useLang } from './core/i18n'
 import { version } from '../package.json'
 import { LiquidBackground } from './ui/components/LiquidBackground'
@@ -39,6 +40,10 @@ export default function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>(() =>
     localStorage.getItem('darkcube-theme') === 'dark' ? 'dark' : 'light'
   )
+  // 彩蛋皮肤开关（本地持久化）
+  const [easterEgg, setEasterEgg] = useState(() => localStorage.getItem('darkcube-easter-egg') === '1')
+  // 中国新年彩蛋皮肤是否激活：开关开启 且 系统日期处于农历除夕～正月初七
+  const [cnyActive, setCnyActive] = useState(false)
 
   // 启动：检查更新（新版本优先于免责声明；首次启动且有更新时，免责声明在更新弹窗关闭后出现）
   const updatePendingDisclaimer = useRef(false)
@@ -216,6 +221,28 @@ export default function App() {
     setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
   }, [])
 
+  // 彩蛋皮肤开关：持久化到本地
+  useEffect(() => {
+    localStorage.setItem('darkcube-easter-egg', easterEgg ? '1' : '0')
+  }, [easterEgg])
+
+  // 中国新年彩蛋皮肤：开关开启且日期处于农历除夕～正月初七时激活
+  useEffect(() => {
+    const apply = () => {
+      const active = easterEgg && isCnyPeriod()
+      setCnyActive(active)
+      if (active) document.documentElement.dataset.cny = '1'
+      else delete document.documentElement.dataset.cny
+    }
+    apply()
+    // 跨天时自动刷新（每小时检查一次）
+    const id = window.setInterval(apply, 60 * 60 * 1000)
+    return () => {
+      clearInterval(id)
+      delete document.documentElement.dataset.cny
+    }
+  }, [easterEgg])
+
   // 网络状态
   useEffect(() => {
     const onOnline = () => setOnline(true)
@@ -305,6 +332,7 @@ export default function App() {
     <div className="app">
       <LiquidBackground />
       <div className="app-shell">
+        {cnyActive && <div className="cny-banner">{t('skin.cny')}</div>}
         {!online && (
           <div className="offline-banner">离线中 · 日记已保存在本机，联网后自动同步</div>
         )}
@@ -321,7 +349,12 @@ export default function App() {
 
         <main className="app-main">
           {view === 'calendar' && (
-            <CalendarView entries={entries} selectedDate={selectedDate} onPickDate={openEditor} />
+            <CalendarView
+              entries={entries}
+              selectedDate={selectedDate}
+              onPickDate={openEditor}
+              onOpenPreview={(d) => openEditor(d, 'preview')}
+            />
           )}
           {view === 'editor' && (
             <EditorView
@@ -356,6 +389,8 @@ export default function App() {
               onInstall={() => void handleInstall()}
               theme={theme}
               onToggleTheme={toggleTheme}
+              easterEgg={easterEgg}
+              onToggleEasterEgg={() => setEasterEgg((v) => !v)}
               onEntriesChanged={refreshEntries}
               onShowDisclaimer={() => setDisclaimerOpen(true)}
             />

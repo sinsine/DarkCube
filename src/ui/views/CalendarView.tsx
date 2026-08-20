@@ -8,6 +8,8 @@ interface CalendarViewProps {
   entries: DiaryEntry[]
   selectedDate: string
   onPickDate: (date: string) => void
+  /** 打开某篇日记（预览模式，例如「那年今天」） */
+  onOpenPreview?: (date: string) => void
 }
 
 // 会话内记住上次浏览的月份（离开视图再回来时保持）
@@ -18,7 +20,7 @@ function todayCursor(): { year: number; month: number } {
   return { year: t[0], month: t[1] }
 }
 
-export function CalendarView({ entries, selectedDate, onPickDate }: CalendarViewProps) {
+export function CalendarView({ entries, selectedDate, onPickDate, onOpenPreview }: CalendarViewProps) {
   const today = todayStr()
   const [cursor, setCursor] = useState<{ year: number; month: number }>(() => savedCursor ?? todayCursor())
 
@@ -184,7 +186,7 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
         {onThisDay && (
           <button
             className="on-this-day glass-panel--flat"
-            onClick={() => onPickDate(onThisDay.pick.date)}
+            onClick={() => (onOpenPreview ? onOpenPreview(onThisDay.pick.date) : onPickDate(onThisDay.pick.date))}
             title={formatDate(onThisDay.pick.date)}
           >
             <div className="on-this-day__head">

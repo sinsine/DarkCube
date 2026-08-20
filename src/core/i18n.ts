@@ -198,6 +198,17 @@ const dict: Record<string, Strings> = {
   'settings.author': { 'zh-CN': '作者 B 站主页 ↗', 'zh-TW': '作者 B 站主頁 ↗', en: "Author's Bilibili ↗", ja: '作者の Bilibili ホーム ↗' },
   'settings.disclaimer': { 'zh-CN': '📄 免责声明', 'zh-TW': '📄 免責聲明', en: '📄 Disclaimer', ja: '📄 免責事項' },
   'settings.install': { 'zh-CN': '安装应用到桌面 / 主屏幕', 'zh-TW': '安裝應用程式到桌面 / 主畫面', en: 'Install app to desktop / home screen', ja: 'デスクトップ／ホーム画面にインストール' },
+  'settings.easterEgg': { 'zh-CN': '彩蛋皮肤', 'zh-TW': '彩蛋皮膚', en: 'Easter egg skin', ja: 'イースターエッグスキン' },
+  'settings.easterEggDesc': {
+    'zh-CN': '在特定日期能触发主题配色',
+    'zh-TW': '在特定日期能觸發主題配色',
+    en: 'Unlocks a special theme on certain dates',
+    ja: '特定の日付でテーマ配色が発動します'
+  },
+  'about.motto': { 'zh-CN': '— 人定胜天 —', 'zh-TW': '— 人定勝天 —', en: '— Man Can Conquer Nature —', ja: '— 人間は天に勝つ —' },
+
+  // ---- 彩蛋皮肤 ----
+  'skin.cny': { 'zh-CN': '🧧 中国新年彩蛋皮肤', 'zh-TW': '🧧 中國新年彩蛋皮膚', en: '🧧 Chinese New Year skin', ja: '🧧 中国旧正月スキン' },
 
   // ---- 登录 ----
   'login.title': { 'zh-CN': '登录 GitHub', 'zh-TW': '登入 GitHub', en: 'Login GitHub', ja: 'GitHub ログイン' },

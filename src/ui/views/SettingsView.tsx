@@ -22,6 +22,9 @@ interface SettingsViewProps {
   onInstall: () => void
   theme: 'dark' | 'light'
   onToggleTheme: () => void
+  /** 彩蛋皮肤开关（特定日期触发主题配色） */
+  easterEgg: boolean
+  onToggleEasterEgg: () => void
   /** 导入等数据变更后通知上层刷新条目 */
   onEntriesChanged: () => void
   /** 打开免责声明（由 App 统一管理，用于首次使用弹窗） */
@@ -78,6 +81,8 @@ export function SettingsView({
   onInstall,
   theme,
   onToggleTheme,
+  easterEgg,
+  onToggleEasterEgg,
   onEntriesChanged,
   onShowDisclaimer
 }: SettingsViewProps) {
@@ -347,7 +352,7 @@ export function SettingsView({
           </div>
 
           {langOpen && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="collapse-in" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {getAllLangs().map((l) => (
                   <div key={l.id} className="row" style={{ gap: 8 }}>
@@ -405,6 +410,7 @@ export function SettingsView({
         {/* ---- 关于 ---- */}
         <section className="glass-panel section">
           <div className="section__title">{t('settings.aboutSection')}</div>
+          <div className="about-motto">{t('about.motto')}</div>
 
           <div className="row">
             <div className="row__main">
@@ -417,6 +423,21 @@ export function SettingsView({
               aria-checked={theme === 'light'}
               onClick={onToggleTheme}
               aria-label={t('settings.lightMode')}
+            />
+          </div>
+
+          {/* 彩蛋皮肤开关：在特定日期能触发主题配色 */}
+          <div className="row">
+            <div className="row__main">
+              <div className="row__title">{t('settings.easterEgg')}</div>
+              <div className="row__desc">{t('settings.easterEggDesc')}</div>
+            </div>
+            <button
+              className="switch"
+              role="switch"
+              aria-checked={easterEgg}
+              onClick={onToggleEasterEgg}
+              aria-label={t('settings.easterEgg')}
             />
           </div>
 

@@ -7,4 +7,20 @@
     <path
         android:fillColor="#F5F5F5"
         android:pathData="M54,54m-30,0a30,30 0 1,1 60,0a30,30 0 1,1 -60,0" />
+    <!-- 白圈内的黑色钢笔（✎） -->
+    <path
+        android:strokeColor="#0A0A0A"
+        android:strokeWidth="3.9"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M42,66 L67.2,40.8" />
+    <path
+        android:strokeColor="#0A0A0A"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M71.9,45.5 L62.5,36.1" />
+    <path
+        android:fillColor="#0A0A0A"
+        android:pathData="M33.6,74.4 L45.2,69.2 L38.8,62.8 Z" />
 </vector>

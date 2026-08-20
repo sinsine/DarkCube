@@ -11,6 +11,45 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.5',
+    tag: 'v1.3.5',
+    date: '2026-08',
+    notes: {
+      'zh-CN': [
+        '应用图标白圈内新增黑色钢笔图案',
+        '安卓应用名改为「墨辰」（英文系统显示 DarkCube）',
+        '新增「彩蛋皮肤」开关：在特定日期触发主题配色',
+        '中国新年彩蛋皮肤：农历除夕至正月初七切换红金传统配色，顶部显示彩蛋小字',
+        '「那年今天」点击后以预览模式打开日记',
+        '动效优化：日历/设置等按钮按压反馈、语言与格式栏折叠入场动画、日期跳转输入框入场动画、时间线删除退场动画'
+      ],
+      'zh-TW': [
+        '應用程式圖示白圈內新增黑色鋼筆圖案',
+        '安卓應用名稱改為「墨辰」（英文系統顯示 DarkCube）',
+        '新增「彩蛋皮膚」開關：在特定日期觸發主題配色',
+        '中國新年彩蛋皮膚：農曆除夕至正月初七切換紅金傳統配色，頂部顯示彩蛋小字',
+        '「那年今天」點擊後以預覽模式開啟日記',
+        '動效優化：日曆/設定等按鈕按壓回饋、語言與格式列摺疊入場動畫、日期跳轉輸入框入場動畫、時間線刪除退場動畫'
+      ],
+      en: [
+        'Black pen glyph added inside the app icon\u2019s white circle',
+        'Android app name changed to "墨辰" ("DarkCube" on English systems)',
+        'New "Easter egg skin" toggle: triggers a special theme on certain dates',
+        'Chinese New Year skin: switches to a red-and-gold palette from Lunar New Year\u2019s Eve to the 7th day, with a small badge at the top',
+        '"On this day" now opens the entry in preview mode',
+        'Motion polish: press feedback on calendar/settings controls, expand-in animations for language & toolbar collapse, date-jump field entry, and a timeline delete exit animation'
+      ],
+      ja: [
+        'アプリアイコンの白い円に黒いペンの絵を追加',
+        'Android アプリ名を「墨辰」に変更（英語環境では DarkCube）',
+        '「イースターエッグスキン」スイッチを追加：特定の日付でテーマ配色が発動',
+        '中国旧正月スキン：旧暦大晦日から1月7日まで紅・金の伝統配色に切り替え、上部にバッジ表示',
+        '「この日の過去」をクリックするとプレビューモードで開く',
+        'モーション改善：カレンダー・設定などの押下フィードバック、言語・ツールバーの展開アニメーション、日付ジャンプ欄の登場、タイムライン削除時の退場アニメーション'
+      ]
+    }
+  },
+  {
     version: '1.3.4',
     tag: 'v1.3.4',
     date: '2026-08',

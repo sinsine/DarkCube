@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
 import { firstSentence } from '../../core/markdown'
 import { metaBy, MOOD_OPTIONS, WEATHER_OPTIONS } from '../../core/meta'
@@ -59,6 +59,9 @@ function TimelineItem({
   onDelete
 }: TimelineItemProps) {
   const [dx, setDx] = useState(0)
+  // 删除确认后先播放退出动画（200ms）再真正移除
+  const [exiting, setExiting] = useState(false)
+  const exitTimer = useRef<number | undefined>(undefined)
   const startX = useRef<number | null>(null)
   const startY = useRef<number | null>(null)
 
@@ -114,14 +117,22 @@ function TimelineItem({
     }
   }
 
+  // 组件卸载时清理退出定时器（防止删除后仍触发回调）
+  useEffect(() => {
+    return () => {
+      if (exitTimer.current !== undefined) clearTimeout(exitTimer.current)
+    }
+  }, [])
+
   function handleDelete() {
     if (window.confirm(t('timeline.confirmDelete'))) {
-      onDelete()
+      setExiting(true)
+      exitTimer.current = window.setTimeout(() => onDelete(), 200)
     }
   }
 
   return (
-    <div className="timeline-item-swipe">
+    <div className={`timeline-item-swipe${exiting ? ' timeline-item-swipe--exiting' : ''}`}>
       <button
         className={`swipe-delete${swiped ? ' swipe-delete--open' : ''}`}
         onClick={handleDelete}

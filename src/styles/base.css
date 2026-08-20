@@ -111,6 +111,25 @@ textarea {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* 折叠面板展开入场：轻微下移淡入 */
+@keyframes collapse-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.collapse-in {
+  animation: collapse-in 0.18s var(--ease);
+}
+
+/* 条目删除退场：右移淡出（200ms） */
+@keyframes exit-out {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to { opacity: 0; transform: translateX(24px) scale(0.97); }
+}
+.timeline-item-swipe--exiting {
+  animation: exit-out 0.2s var(--ease) forwards;
+  pointer-events: none;
+}
+
 /* 注：安卓竖屏下曾为主题切换添加颜色过渡导致闪烁，故竖屏不触发；
    仅横屏（≥721px）保留平滑过渡效果。 */
 @media (min-width: 721px) {
