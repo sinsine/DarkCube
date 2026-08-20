@@ -1245,22 +1245,3 @@
 :root[data-cny] .day-cell--selected {
   box-shadow: 0 0 22px rgba(192, 47, 29, 0.5);
 }
-
-/* 顶部彩蛋小字（与离线横幅一致，随内容流排列在顶栏上方） */
-.cny-banner {
-  align-self: center;
-  padding: 6px 18px;
-  border-radius: var(--radius-pill);
-  font-size: 12.5px;
-  letter-spacing: 0.06em;
-  color: var(--cny-gold);
-  border: 1px solid rgba(230, 180, 34, 0.5);
-  background: var(--banner-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: var(--shadow-soft);
-  animation: slide-up 0.35s var(--ease);
-}
-:root[data-cny] .cny-banner {
-  color: var(--cny-gold);
-}

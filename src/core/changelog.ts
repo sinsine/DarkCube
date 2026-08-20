@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.7',
+    tag: 'v1.3.7',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['移除中国新年彩蛋皮肤顶部的小字', '设置「外观与关于」拆分为「外观」（上方）与「关于」（下方）两个栏目', '英文/日文副标题与座右铭文案优化'],
+      'zh-TW': ['移除中國新年彩蛋皮膚頂部的小字', '設定「外觀與關於」拆分為「外觀」（上方）與「關於」（下方）兩個欄目', '英文/日文副標題與座右銘文案最佳化'],
+      en: ['Removed the small Chinese New Year skin badge at the top', 'Split "Appearance & About" into two sections: "Appearance" (top) and "About" (below)', 'Refined English/Japanese subtitle and motto wording'],
+      ja: ['中国旧正月スキンの上部バッジ表示を削除', '「外観と情報」を「外観」（上）と「情報」（下）の2つの欄に分割', '英語・日本語のサブタイトルとモットーの文言を改善']
+    }
+  },
+  {
     version: '1.3.6',
     tag: 'v1.3.6',
     date: '2026-08',

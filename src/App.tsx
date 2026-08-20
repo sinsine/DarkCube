@@ -42,8 +42,6 @@ export default function App() {
   )
   // 彩蛋皮肤开关（本地持久化）
   const [easterEgg, setEasterEgg] = useState(() => localStorage.getItem('darkcube-easter-egg') === '1')
-  // 中国新年彩蛋皮肤是否激活：开关开启 且 系统日期处于农历除夕～正月初七
-  const [cnyActive, setCnyActive] = useState(false)
 
   // 启动：检查更新（新版本优先于免责声明；首次启动且有更新时，免责声明在更新弹窗关闭后出现）
   const updatePendingDisclaimer = useRef(false)
@@ -230,7 +228,6 @@ export default function App() {
   useEffect(() => {
     const apply = () => {
       const active = easterEgg && isCnyPeriod()
-      setCnyActive(active)
       if (active) document.documentElement.dataset.cny = '1'
       else delete document.documentElement.dataset.cny
     }
@@ -332,7 +329,6 @@ export default function App() {
     <div className="app">
       <LiquidBackground />
       <div className="app-shell">
-        {cnyActive && <div className="cny-banner">{t('skin.cny')}</div>}
         {!online && (
           <div className="offline-banner">离线中 · 日记已保存在本机，联网后自动同步</div>
         )}

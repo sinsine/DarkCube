@@ -407,9 +407,9 @@ export function SettingsView({
           )}
         </section>
 
-        {/* ---- 关于 ---- */}
+        {/* ---- 外观 ---- */}
         <section className="glass-panel section">
-          <div className="section__title">{t('settings.aboutSection')}</div>
+          <div className="section__title">{t('settings.appearanceSection')}</div>
 
           <div className="row">
             <div className="row__main">
@@ -439,6 +439,11 @@ export function SettingsView({
               aria-label={t('settings.easterEgg')}
             />
           </div>
+        </section>
+
+        {/* ---- 关于 ---- */}
+        <section className="glass-panel section">
+          <div className="section__title">{t('settings.aboutSection')}</div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span className="brand__logo" style={{ width: 34, height: 34 }}>
