@@ -69,6 +69,12 @@ function TimelineItem({
   function onPointerDown(ev: React.PointerEvent) {
     startX.current = ev.clientX
     startY.current = ev.clientY
+    // 捕获指针：拖动过程中光标移出卡片也不中断（鼠标左滑可完整拉出删除按钮）
+    try {
+      ev.currentTarget.setPointerCapture(ev.pointerId)
+    } catch {
+      /* 某些环境不支持，忽略 */
+    }
   }
 
   function onPointerMove(ev: React.PointerEvent) {
@@ -93,6 +99,11 @@ function TimelineItem({
     setDx(0)
     if (d < -40) onSwipeOpen()
     else if (d > 40) onSwipeClose()
+    try {
+      ev.currentTarget.releasePointerCapture(ev.pointerId)
+    } catch {
+      /* ignore */
+    }
   }
 
   function handleClick() {

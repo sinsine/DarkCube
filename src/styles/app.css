@@ -241,6 +241,51 @@
 .calendar__grid--no-anim .day-cell {
   animation: none;
 }
+
+/* 那年今天 */
+.on-this-day {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: var(--radius-m);
+  animation: rise-in 0.35s var(--ease) backwards;
+  transition: background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast);
+}
+.on-this-day:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+.on-this-day__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.on-this-day__badge {
+  font-size: 12px;
+  color: var(--ink-1);
+  letter-spacing: 0.04em;
+}
+.on-this-day__arrow {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.on-this-day__title {
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.on-this-day__excerpt {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .day-cell {
   position: relative;
   aspect-ratio: 1;

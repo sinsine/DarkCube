@@ -4,11 +4,14 @@ import type { DiaryEntry, GitHubSettings, SyncState, ViewId } from './core/types
 import { todayStr } from './core/date'
 import { pullOnly, pushOnly, syncNow, SyncStepError } from './core/sync/engine'
 import { friendlyGitHubError } from './core/github/api'
+import { checkLatestRelease, isNewer, RELEASES_URL, type ReleaseInfo } from './core/update'
 import { t, useLang } from './core/i18n'
+import { version } from '../package.json'
 import { LiquidBackground } from './ui/components/LiquidBackground'
 import { TopBar, BottomNav } from './ui/components/TopBar'
 import { LoginDialog } from './ui/components/LoginDialog'
 import { DisclaimerDialog } from './ui/components/DisclaimerDialog'
+import { UpdateDialog } from './ui/components/UpdateDialog'
 import { CalendarView } from './ui/views/CalendarView'
 import { EditorView } from './ui/views/EditorView'
 import { TimelineView } from './ui/views/TimelineView'
@@ -37,13 +40,62 @@ export default function App() {
     localStorage.getItem('darkcube-theme') === 'dark' ? 'dark' : 'light'
   )
 
-  // 首次使用弹出免责声明（仅一次）
+  // 启动：检查更新（新版本优先于免责声明；首次启动且有更新时，免责声明在更新弹窗关闭后出现）
+  const updatePendingDisclaimer = useRef(false)
+  const [updateInfo, setUpdateInfo] = useState<ReleaseInfo | null>(null)
+  const [updateOpen, setUpdateOpen] = useState(false)
+
   useEffect(() => {
-    if (!localStorage.getItem('darkcube-disclaimer-seen')) {
+    const DISCLAIMER_KEY = 'darkcube-disclaimer-seen'
+    const DISMISS_KEY = 'darkcube-update-dismissed'
+    const firstLaunch = !localStorage.getItem(DISCLAIMER_KEY)
+    let alive = true
+    void checkLatestRelease().then((r) => {
+      if (!alive) return
+      if (r && isNewer(r.tag_name, version)) {
+        const dismissed = localStorage.getItem(DISMISS_KEY)
+        if (dismissed === r.tag_name) {
+          // 该版本已选择「不再提醒」
+          if (firstLaunch) {
+            localStorage.setItem(DISCLAIMER_KEY, '1')
+            setDisclaimerOpen(true)
+          }
+          return
+        }
+        setUpdateInfo(r)
+        setUpdateOpen(true)
+        updatePendingDisclaimer.current = firstLaunch
+        return
+      }
+      if (firstLaunch) {
+        localStorage.setItem(DISCLAIMER_KEY, '1')
+        setDisclaimerOpen(true)
+      }
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  /** 更新弹窗关闭后的收尾：若首次启动，接着弹免责声明 */
+  const closeUpdate = useCallback(() => {
+    setUpdateOpen(false)
+    if (updatePendingDisclaimer.current) {
+      updatePendingDisclaimer.current = false
       localStorage.setItem('darkcube-disclaimer-seen', '1')
       setDisclaimerOpen(true)
     }
   }, [])
+
+  const handleUpdateGo = useCallback(() => {
+    window.open(RELEASES_URL, '_blank', 'noopener')
+    closeUpdate()
+  }, [closeUpdate])
+
+  const handleUpdateDismiss = useCallback(() => {
+    if (updateInfo) localStorage.setItem('darkcube-update-dismissed', updateInfo.tag_name)
+    closeUpdate()
+  }, [updateInfo, closeUpdate])
 
   const syncStateRef = useRef<SyncState | undefined>(undefined)
   syncStateRef.current = syncState
@@ -320,6 +372,13 @@ export default function App() {
         onSaved={handleSaved}
       />
       <DisclaimerDialog open={disclaimerOpen} onClose={() => setDisclaimerOpen(false)} />
+      <UpdateDialog
+        open={updateOpen}
+        version={updateInfo?.tag_name ?? ''}
+        onGo={handleUpdateGo}
+        onLater={closeUpdate}
+        onDismiss={handleUpdateDismiss}
+      />
     </div>
   )
 }

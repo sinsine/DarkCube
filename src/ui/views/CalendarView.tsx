@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
 import { buildMonthGrid, todayStr } from '../../core/date'
+import { firstSentence } from '../../core/markdown'
 import { formatMonth, formatDate, getLang, t } from '../../core/i18n'
 
 interface CalendarViewProps {
@@ -40,6 +41,18 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
 
   const grid = useMemo(() => buildMonthGrid(cursor.year, cursor.month), [cursor])
   const hasEntry = useMemo(() => new Set(entries.map((e) => e.date)), [entries])
+
+  /** 那年今天：往年同月同日的一篇日记（多篇时随机挑一年） */
+  const onThisDay = useMemo(() => {
+    const todayYear = Number(today.slice(0, 4))
+    const md = today.slice(5) // MM-DD
+    const past = entries.filter(
+      (e) => e.date.slice(5) === md && Number(e.date.slice(0, 4)) < todayYear
+    )
+    if (past.length === 0) return null
+    const pick = past[Math.floor(Math.random() * past.length)]
+    return { pick, yearsAgo: todayYear - Number(pick.date.slice(0, 4)) }
+  }, [entries, today])
 
   /** 切换月份：按钮导航恢复渐显动画；滑动翻页会在之后覆盖为抑制 */
   function move(delta: number) {
@@ -167,6 +180,31 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
             )
           })}
         </div>
+
+        {onThisDay && (
+          <button
+            className="on-this-day glass-panel--flat"
+            onClick={() => onPickDate(onThisDay.pick.date)}
+            title={formatDate(onThisDay.pick.date)}
+          >
+            <div className="on-this-day__head">
+              <span className="on-this-day__badge">
+                {t('calendar.onThisDay')} · {t('calendar.yearsAgo', { n: onThisDay.yearsAgo })}
+              </span>
+              <span className="on-this-day__arrow">→</span>
+            </div>
+            <div className="on-this-day__title">
+              {onThisDay.pick.body
+                ? firstSentence(onThisDay.pick.body) || t('timeline.untitled')
+                : onThisDay.pick.title || t('timeline.untitled')}
+            </div>
+            {onThisDay.pick.body && (
+              <div className="on-this-day__excerpt">
+                {onThisDay.pick.body.replace(/[#>*_`~\-[\]]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 70)}
+              </div>
+            )}
+          </button>
+        )}
       </div>
     </div>
   )

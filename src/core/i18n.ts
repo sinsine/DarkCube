@@ -31,6 +31,8 @@ const dict: Record<string, Strings> = {
   'calendar.nextMonth': { 'zh-CN': '下个月', 'zh-TW': '下個月', en: 'Next month', ja: '翌月' },
   'calendar.nextYear': { 'zh-CN': '下一年', 'zh-TW': '下一年', en: 'Next year', ja: '翌年' },
   'calendar.today': { 'zh-CN': '今天', 'zh-TW': '今天', en: 'Today', ja: '今日' },
+  'calendar.onThisDay': { 'zh-CN': '那年今天', 'zh-TW': '那年今天', en: 'On this day', ja: 'この日の過去' },
+  'calendar.yearsAgo': { 'zh-CN': '{n} 年前', 'zh-TW': '{n} 年前', en: '{n} years ago', ja: '{n}年前' },
 
   // ---- 编辑器 ----
   'editor.prevDay': { 'zh-CN': '前一天', 'zh-TW': '前一天', en: 'Previous day', ja: '前日' },
@@ -270,7 +272,20 @@ const dict: Record<string, Strings> = {
   'settings.langRemove': { 'zh-CN': '移除', 'zh-TW': '移除', en: 'Remove', ja: '削除' },
 
   // ---- 编辑器导出 ----
-  'editor.exportMd': { 'zh-CN': '导出 .md', 'zh-TW': '匯出 .md', en: 'Export .md', ja: '.md を書き出し' }
+  'editor.exportMd': { 'zh-CN': '导出 .md', 'zh-TW': '匯出 .md', en: 'Export .md', ja: '.md を書き出し' },
+
+  // ---- 更新弹窗 ----
+  'update.title': { 'zh-CN': '发现新版本', 'zh-TW': '發現新版本', en: 'New version available', ja: '新しいバージョンがあります' },
+  'update.subtitle': { 'zh-CN': 'v{version} 已发布', 'zh-TW': 'v{version} 已發布', en: 'v{version} released', ja: 'v{version} がリリースされました' },
+  'update.desc': {
+    'zh-CN': '检测到新版本 {v}，是否前往 GitHub Releases 下载更新？',
+    'zh-TW': '偵測到新版本 {v}，是否前往 GitHub Releases 下載更新？',
+    en: 'A new version {v} is available. Go to GitHub Releases to download it?',
+    ja: '新しいバージョン {v} があります。GitHub Releases からダウンロードしますか？'
+  },
+  'update.go': { 'zh-CN': '前往 Releases', 'zh-TW': '前往 Releases', en: 'Go to Releases', ja: 'リリースへ' },
+  'update.later': { 'zh-CN': '稍后再说', 'zh-TW': '稍後再說', en: 'Later', ja: '後で' },
+  'update.dismiss': { 'zh-CN': '不再提醒（此版本）', 'zh-TW': '不再提醒（此版本）', en: "Don't remind again (this version)", ja: '再表示しない（このバージョン）' }
 }
 
 /** 内置语言列表 */

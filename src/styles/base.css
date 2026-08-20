@@ -111,17 +111,8 @@ textarea {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* 主题切换时的平滑过渡（仅作用于无自身过渡的表面） */
-body,
-.glass-panel,
-.glass-panel--flat,
-.bottomnav,
-.offline-banner,
-.liquid-bg {
-  transition: background-color var(--dur-slow) var(--ease),
-    border-color var(--dur-slow) var(--ease),
-    color var(--dur-slow) var(--ease);
-}
+/* 注：曾为主题切换添加 background-color 过渡，在安卓 WebView 上导致闪烁，
+   已移除；主题现为即时切换（body/玻璃面板/液态背景均无颜色过渡）。 */
 
 @media (prefers-reduced-motion: reduce) {
   *,

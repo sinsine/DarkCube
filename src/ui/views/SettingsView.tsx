@@ -348,23 +348,20 @@ export function SettingsView({
 
           {langOpen && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div
-                className="seg"
-                role="group"
-                aria-label={t('settings.langSection')}
-                style={{ alignSelf: 'flex-start', flexWrap: 'wrap' }}
-              >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {getAllLangs().map((l) => (
-                  <span key={l.id} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <div key={l.id} className="row" style={{ gap: 8 }}>
                     <button
-                      className={`seg__item${currentLang === l.id ? ' seg__item--active' : ''}`}
+                      className={`btn btn--sm${currentLang === l.id ? ' btn--primary' : ''}`}
                       onClick={() => setLang(l.id)}
+                      style={{ flex: 1, justifyContent: 'flex-start' }}
                     >
                       {l.label}
+                      {currentLang === l.id ? ' ✓' : ''}
                     </button>
                     {l.custom && (
                       <button
-                        className="lang-remove"
+                        className="btn btn--sm btn--danger"
                         title={t('settings.langRemove')}
                         aria-label={t('settings.langRemove')}
                         onClick={() => {
@@ -375,7 +372,7 @@ export function SettingsView({
                         ✕
                       </button>
                     )}
-                  </span>
+                  </div>
                 ))}
               </div>
 
