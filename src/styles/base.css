@@ -9,6 +9,19 @@
   padding: 0;
 }
 
+/* 安卓 WebView 点击蓝框优化 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+button,
+a {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 html,
 body,
 #root {

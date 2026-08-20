@@ -845,8 +845,22 @@
   .bottomnav__label {
     display: none;
   }
+  /* 竖屏底部导航加大：更高的栏、更大的图标 */
+  .bottomnav {
+    padding: 12px var(--sp-3) calc(12px + env(safe-area-inset-bottom));
+  }
   .bottomnav__item {
     gap: 0;
+    padding: 12px 0;
+    border-radius: 14px;
+  }
+  .bottomnav__icon {
+    font-size: 24px;
+    line-height: 1;
+  }
+  /* 日历：允许竖向滚动但横向手势留给翻页 */
+  .calendar-wrap {
+    touch-action: pan-y;
   }
 
   /* 编辑器日期简写 YYYY.MM.DD，隐藏状态胶囊 */

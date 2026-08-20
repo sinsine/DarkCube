@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { DiaryEntry } from '../../core/types'
 import { WEEKDAYS, buildMonthGrid, formatDateCN, monthTitle, todayStr } from '../../core/date'
 
@@ -15,6 +15,10 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
     return { year: t[0], month: t[1] }
   })
 
+  // 滑动翻页手势
+  const touchX = useRef<number | null>(null)
+  const touchY = useRef<number | null>(null)
+
   const grid = useMemo(() => buildMonthGrid(cursor.year, cursor.month), [cursor])
   const hasEntry = useMemo(() => new Set(entries.map((e) => e.date)), [entries])
 
@@ -30,9 +34,30 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
     setCursor({ year: t[0], month: t[1] })
   }
 
+  function onTouchStart(e: React.TouchEvent) {
+    touchX.current = e.touches[0].clientX
+    touchY.current = e.touches[0].clientY
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchX.current === null || touchY.current === null) return
+    const dx = e.changedTouches[0].clientX - touchX.current
+    const dy = e.changedTouches[0].clientY - touchY.current
+    touchX.current = null
+    touchY.current = null
+    // 水平滑动且横向占优才翻页：左滑下月、右滑上月
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+      move(dx < 0 ? 1 : -1)
+    }
+  }
+
   return (
     <div className="view">
-      <div className="glass-panel calendar-wrap">
+      <div
+        className="glass-panel calendar-wrap"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="calendar__head">
           <div className="calendar__title">{monthTitle(grid.year, grid.month)}</div>
           <div className="calendar__nav">

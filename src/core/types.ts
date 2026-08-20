@@ -12,9 +12,9 @@ export interface DiaryEntry {
   blobSha?: string
   /** 本地有未推送改动 */
   dirty?: boolean
-  /** 天气（本地元数据，不同步） */
+  /** 天气（随正文同步：以 front matter 嵌入仓库文件） */
   weather?: string
-  /** 心情（本地元数据，不同步） */
+  /** 心情（随正文同步：以 front matter 嵌入仓库文件） */
   mood?: string
 }
 

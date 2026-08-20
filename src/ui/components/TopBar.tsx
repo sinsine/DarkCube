@@ -107,7 +107,9 @@ export function BottomNav({ view, onNavigate, onWrite }: BottomNavProps) {
           className={`bottomnav__item${view === item.id ? ' bottomnav__item--active' : ''}`}
           onClick={() => (item.id === 'editor' ? onWrite() : onNavigate(item.id))}
         >
-          <span aria-hidden="true">{item.glyph}</span>
+          <span className="bottomnav__icon" aria-hidden="true">
+            {item.glyph}
+          </span>
           <span className="bottomnav__label">{item.label}</span>
         </button>
       ))}

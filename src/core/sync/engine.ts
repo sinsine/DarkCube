@@ -4,6 +4,7 @@ import { db } from '../db'
 import type { GitHubSettings, SyncResult, SyncState } from '../types'
 import { deriveTitle } from '../markdown'
 import { friendlyGitHubError, GitHubError, getRepo } from '../github/api'
+import { parseContent, serializeContent } from './frontmatter'
 import {
   createBlob,
   createCommit,
@@ -151,10 +152,13 @@ export async function syncNow(
       const local = await db.entries.get(date)
       if (!local) {
         const content = await step('下载日记', () => getRawFile(token, owner, repo, entryPath(date), branch))
+        const parsed = parseContent(content)
         await db.entries.put({
           date,
-          title: deriveTitle(content),
-          body: content,
+          title: deriveTitle(parsed.body),
+          body: parsed.body,
+          weather: parsed.weather,
+          mood: parsed.mood,
           updatedAt: Date.now(),
           blobSha: remoteSha,
           dirty: false
@@ -162,12 +166,13 @@ export async function syncNow(
         pulled++
       } else if (local.blobSha !== remoteSha) {
         const content = await step('下载日记', () => getRawFile(token, owner, repo, entryPath(date), branch))
+        const parsed = parseContent(content)
         if (local.dirty) {
           // 两端都改过 → 远端为权威，本地旧内容进冲突备份（稍后上传 .conflict.md）
           await db.conflicts.put({
             date,
             title: local.title,
-            body: local.body,
+            body: serializeContent(local.body, { weather: local.weather, mood: local.mood }),
             updatedAt: local.updatedAt,
             synced: false
           })
@@ -175,8 +180,10 @@ export async function syncNow(
         }
         await db.entries.put({
           ...local,
-          title: deriveTitle(content),
-          body: content,
+          title: deriveTitle(parsed.body),
+          body: parsed.body,
+          weather: parsed.weather,
+          mood: parsed.mood,
           blobSha: remoteSha,
           dirty: false,
           updatedAt: Date.now()
@@ -203,7 +210,9 @@ export async function syncNow(
     const pushedShas = new Map<string, string>()
 
     for (const e of dirtyEntries) {
-      const blob = await step('上传日记', () => createBlob(token, owner, repo, e.body))
+      const blob = await step('上传日记', () =>
+        createBlob(token, owner, repo, serializeContent(e.body, { weather: e.weather, mood: e.mood }))
+      )
       pushedShas.set(e.date, blob.sha)
       items.push({ path: entryPath(e.date), mode: '100644', type: 'blob', sha: blob.sha })
     }

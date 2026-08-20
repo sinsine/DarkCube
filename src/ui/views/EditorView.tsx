@@ -68,7 +68,7 @@ export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorVi
     })
   }
 
-  /** 设置天气 / 心情（本地元数据，不参与正文同步） */
+  /** 设置天气 / 心情（随正文同步：序列化为 front matter 上传） */
   async function setMeta(field: 'weather' | 'mood', value: string | undefined) {
     const base: DiaryEntry = entry ?? {
       date,
@@ -76,7 +76,7 @@ export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorVi
       body: text,
       updatedAt: Date.now()
     }
-    const next: DiaryEntry = { ...base, updatedAt: Date.now() }
+    const next: DiaryEntry = { ...base, updatedAt: Date.now(), dirty: true }
     if (field === 'weather') next.weather = value
     else next.mood = value
     await db.entries.put(next)
