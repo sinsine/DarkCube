@@ -120,6 +120,13 @@
   font-weight: 700;
   box-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
 }
+.brand__version {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  user-select: none;
+}
 .topbar__nav {
   display: flex;
   gap: 2px;

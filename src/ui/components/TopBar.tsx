@@ -1,4 +1,5 @@
 import type { GitHubSettings, ViewId } from '../../core/types'
+import { version } from '../../../package.json'
 
 interface TopBarProps {
   view: ViewId
@@ -33,6 +34,7 @@ export function TopBar({
       <div className="brand">
         <span className="brand__logo">墨</span>
         <span>墨辰日记</span>
+        <span className="brand__version">v{version}</span>
       </div>
 
       <nav className="topbar__nav glass-panel--flat" aria-label="主导航">
