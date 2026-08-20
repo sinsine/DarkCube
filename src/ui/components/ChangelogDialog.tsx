@@ -1,6 +1,6 @@
 import { CHANGELOG } from '../../core/changelog'
 import { releaseUrl } from '../../core/update'
-import { getLang, t } from '../../core/i18n'
+import { getLang, t, type Lang } from '../../core/i18n'
 
 interface ChangelogDialogProps {
   open: boolean
@@ -55,7 +55,7 @@ export function ChangelogDialog({ open, onClose }: ChangelogDialogProps) {
                 </a>
               </div>
               <ul className="changelog-entry__notes">
-                {entry.notes[lang]?.map((n, i) => (
+                {(entry.notes[lang as Lang] ?? entry.notes['en'] ?? []).map((n, i) => (
                   <li key={i}>{n}</li>
                 ))}
               </ul>

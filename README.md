@@ -141,6 +141,39 @@ npm run dist:win   # 打包 Windows 桌面应用（Electron），输出安装包
 └── vite.config.ts
 ```
 
+## 🌐 多语言与自定义翻译
+
+内置 **简体中文 / 繁體中文 / English / 日本語** 四种语言。首次打开自动检测系统语言，也可在 **设置 → 语言** 随时切换。
+
+### 第三方开发者：制作自定义翻译
+
+1. 复制以下 JSON 模板，按语言改写 `dict` 中的文案：
+
+```json
+{
+  "code": "fr",
+  "label": "Français",
+  "usesSpaces": true,
+  "dict": {
+    "nav.calendar": "Calendrier",
+    "nav.timeline": "Chronologie",
+    "nav.settings": "Paramètres",
+    "nav.write": "Écrire",
+    "nav.login": "Se connecter GitHub",
+    "editor.weather": "Météo",
+    "editor.mood": "Humeur",
+    "settings.aboutSection": "Apparence et À propos"
+  }
+}
+```
+
+- `code`：语言代码（如 `fr`、`pt-BR`），小写字母 2~3 位，可选 `-大写` 后缀
+- `label`：在语言列表中显示的名称
+- `usesSpaces`：该语言书面语是否用空格分词（英语类 `true`，中日文类 `false`）
+- `dict`：`"界面词条键": "译文"` 的映射。键可从源码 [src/core/i18n.ts](src/core/i18n.ts) 的字典中查看；**未提供的键自动回退内置语言**
+
+2. 将文件保存为 `darkcube-<code>.json`，在应用内 **设置 → 语言 → 展开语言选项 → 导入语言** 选择该文件，立即切换生效（同一 `code` 重复导入会覆盖）。
+
 ## 🗺 路线图
 
 - [x] 图形化 Markdown 辅助工具栏

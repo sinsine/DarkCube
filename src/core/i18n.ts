@@ -252,16 +252,105 @@ const dict: Record<string, Strings> = {
   'step.uploadConflict': { 'zh-CN': '上传冲突备份', 'zh-TW': '上傳衝突備份', en: 'upload conflict backup', ja: '競合バックアップの送信' },
   'step.buildTree': { 'zh-CN': '构建提交树', 'zh-TW': '建立提交樹', en: 'build commit tree', ja: 'コミットツリーの構築' },
   'step.createCommit': { 'zh-CN': '创建提交', 'zh-TW': '建立提交', en: 'create commit', ja: 'コミット作成' },
-  'step.updateBranch': { 'zh-CN': '更新分支', 'zh-TW': '更新分支', en: 'update branch', ja: 'ブランチ更新' }
+  'step.updateBranch': { 'zh-CN': '更新分支', 'zh-TW': '更新分支', en: 'update branch', ja: 'ブランチ更新' },
+
+  // ---- 语言设置（v1.3.2） ----
+  'settings.langExpand': { 'zh-CN': '展开语言选项', 'zh-TW': '展開語言選項', en: 'Expand language options', ja: '言語オプションを展開' },
+  'settings.langCollapse': { 'zh-CN': '收起语言选项', 'zh-TW': '收起語言選項', en: 'Collapse language options', ja: '言語オプションを折りたたむ' },
+  'settings.langImport': { 'zh-CN': '导入语言', 'zh-TW': '匯入語言', en: 'Import language', ja: '言語を読み込み' },
+  'settings.langImportDesc': {
+    'zh-CN': '导入第三方开发者制作的翻译文件（JSON），立即切换并使用',
+    'zh-TW': '匯入第三方開發者製作的翻譯檔案（JSON），立即切換並使用',
+    en: 'Import a translation file (JSON) made by third-party developers and switch to it immediately',
+    ja: '第三者が作成した翻訳ファイル（JSON）を読み込み、すぐに切り替えて使用します'
+  },
+  'settings.langImportDone': { 'zh-CN': '已导入语言「{label}」并切换', 'zh-TW': '已匯入語言「{label}」並切換', en: 'Imported language "{label}" and switched', ja: '言語「{label}」を読み込み、切り替えました' },
+  'settings.langImportBad': { 'zh-CN': '文件格式不正确：需要 code / label / dict 字段', 'zh-TW': '檔案格式不正確：需要 code / label / dict 欄位', en: 'Invalid file format: needs code / label / dict fields', ja: 'ファイル形式が不正です：code / label / dict が必要です' },
+  'settings.langImportFail': { 'zh-CN': '导入失败：无法解析该文件', 'zh-TW': '匯入失敗：無法解析該檔案', en: 'Import failed: cannot parse the file', ja: '読み込み失敗：ファイルを解析できません' },
+  'settings.langRemove': { 'zh-CN': '移除', 'zh-TW': '移除', en: 'Remove', ja: '削除' },
+
+  // ---- 编辑器导出 ----
+  'editor.exportMd': { 'zh-CN': '导出 .md', 'zh-TW': '匯出 .md', en: 'Export .md', ja: '.md を書き出し' }
 }
 
-let currentLang: Lang = 'zh-CN'
+/** 内置语言列表 */
+export interface CustomLang {
+  code: string
+  label: string
+  usesSpaces: boolean
+  dict: Record<string, string>
+}
 
-function loadLang(): Lang {
+const CUSTOM_KEY = 'darkcube-custom-langs'
+
+function isValidCustomLang(x: unknown): x is CustomLang {
+  if (typeof x !== 'object' || x === null) return false
+  const o = x as Record<string, unknown>
+  return (
+    typeof o.code === 'string' &&
+    /^[a-z]{2,3}(-[A-Z]{2})?$/.test(o.code) &&
+    typeof o.label === 'string' &&
+    typeof o.usesSpaces === 'boolean' &&
+    typeof o.dict === 'object' &&
+    o.dict !== null
+  )
+}
+
+function loadCustomLangs(): CustomLang[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_KEY)
+    if (!raw) return []
+    const arr: unknown = JSON.parse(raw)
+    if (!Array.isArray(arr)) return []
+    return arr.filter(isValidCustomLang)
+  } catch {
+    return []
+  }
+}
+
+function saveCustomLangs(): void {
+  try {
+    localStorage.setItem(CUSTOM_KEY, JSON.stringify(customLangs))
+  } catch {
+    /* ignore */
+  }
+}
+
+let customLangs: CustomLang[] = loadCustomLangs()
+
+export function getCustomLangs(): CustomLang[] {
+  return customLangs
+}
+
+/** 添加自定义语言（同 code 覆盖），成功返回 true */
+export function addCustomLang(lang: CustomLang): boolean {
+  if (!isValidCustomLang(lang)) return false
+  customLangs = [...customLangs.filter((l) => l.code !== lang.code), lang]
+  saveCustomLangs()
+  return true
+}
+
+export function removeCustomLang(code: string): void {
+  customLangs = customLangs.filter((l) => l.code !== code)
+  saveCustomLangs()
+}
+
+/** 全部可用语言：内置 4 + 自定义 */
+export function getAllLangs(): { id: string; label: string; custom: boolean }[] {
+  return [
+    ...LANGS.map((l) => ({ id: l.id, label: l.label, custom: false })),
+    ...customLangs.map((l) => ({ id: l.code, label: l.label, custom: true }))
+  ]
+}
+
+let currentLang: string = 'zh-CN'
+
+function loadLang(): string {
   try {
     const saved = localStorage.getItem(KEY)
-    if (saved && (saved === 'zh-CN' || saved === 'zh-TW' || saved === 'en' || saved === 'ja')) {
-      return saved
+    if (saved) {
+      const known = LANGS.some((l) => l.id === saved) || customLangs.some((l) => l.code === saved)
+      if (known) return saved
     }
   } catch {
     /* ignore */
@@ -288,11 +377,11 @@ export function detectSystemLang(): Lang {
   return 'en'
 }
 
-export function getLang(): Lang {
+export function getLang(): string {
   return currentLang
 }
 
-export function setLang(lang: Lang): void {
+export function setLang(lang: string): void {
   currentLang = lang
   try {
     localStorage.setItem(KEY, lang)
@@ -307,7 +396,7 @@ export function setLang(lang: Lang): void {
 }
 
 /** React 钩子：语言变化时触发重渲染（供 App 层调用） */
-export function useLang(): Lang {
+export function useLang(): string {
   const [, setTick] = useState(0)
   useEffect(() => {
     const onChange = () => setTick((t) => t + 1)
@@ -317,10 +406,16 @@ export function useLang(): Lang {
   return currentLang
 }
 
-/** 翻译：t('nav.calendar') 或 t('editor.words', { n: 12 }) */
+/** 翻译：t('nav.calendar') 或 t('editor.words', { n: 12 })；自定义语言优先 */
 export function t(key: string, vars?: Record<string, string | number>): string {
-  const entry = dict[key]
-  let text = entry ? entry[currentLang] : key
+  let text = ''
+  const custom = customLangs.find((l) => l.code === currentLang)
+  if (custom && custom.dict[key] != null) {
+    text = custom.dict[key]
+  } else {
+    const entry = dict[key]
+    text = entry ? entry[currentLang as Lang] ?? entry['en'] : key
+  }
   if (vars) {
     for (const [k, v] of Object.entries(vars)) {
       text = text.replaceAll(`{${k}}`, String(v))
@@ -329,8 +424,10 @@ export function t(key: string, vars?: Record<string, string | number>): string {
   return text
 }
 
-/** 该语言书面语是否使用空格分词（英语 true，中日文 false） */
-export function langUsesSpaces(lang: Lang): boolean {
+/** 该语言书面语是否使用空格分词（英语 true，中日文 false，自定义语言按配置） */
+export function langUsesSpaces(lang: string): boolean {
+  const custom = customLangs.find((l) => l.code === lang)
+  if (custom) return custom.usesSpaces
   return lang === 'en'
 }
 

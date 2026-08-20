@@ -11,6 +11,28 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.2',
+    tag: 'v1.3.2',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['语言设置独立为单独栏目（数据与关于之间）并可折叠', '新增导入第三方翻译文件功能', '预览模式可导出 .md 文件', '修复更新日志未随版本更新', '移除编辑后立即自动同步'],
+      'zh-TW': ['語言設定獨立為單獨欄目（資料與關於之間）並可摺疊', '新增匯入第三方翻譯檔案功能', '預覽模式可匯出 .md 檔案', '修復更新日誌未隨版本更新', '移除編輯後立即自動同步'],
+      en: ['Language settings moved to a standalone collapsible section', 'Import third-party translation files', 'Export .md in preview mode', 'Fixed changelog not updated', 'Removed auto-sync right after editing'],
+      ja: ['言語設定を独立した折りたたみ欄に（データと情報の間）', '第三者製翻訳ファイルの読み込みに対応', 'プレビューで .md を書き出し', '更新履歴が更新されない問題を修正', '編集直後の自動同期を削除']
+    }
+  },
+  {
+    version: '1.3.1',
+    tag: 'v1.3.1',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['四语言支持（简/繁/英/日）与系统语言检测', '时间线上下滑动不再误触删除', '编辑后自动同步', '日历保持离开时的月份', '首句判断语言感知', '日期跳转'],
+      'zh-TW': ['四語言支援（簡/繁/英/日）與系統語言偵測', '時間線上下滑動不再誤觸刪除', '編輯後自動同步', '日曆保持離開時的月份', '首句判斷語言感知', '日期跳轉'],
+      en: ['4-language support (SC/TC/EN/JA) with system detection', 'Vertical scroll no longer triggers delete', 'Auto-sync after editing', 'Calendar keeps its month', 'Language-aware first sentence', 'Jump to date'],
+      ja: ['4言語対応（簡/繁/英/日）とシステム言語検出', '縦スクロールで削除が誤発動しないよう修正', '編集後の自動同期', 'カレンダーの月を保持', '最初の一文の言語対応', '日付へ移動']
+    }
+  },
+  {
     version: '1.3.0',
     tag: 'v1.3.0',
     date: '2026-08',

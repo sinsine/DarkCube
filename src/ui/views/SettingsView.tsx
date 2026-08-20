@@ -3,7 +3,7 @@ import type { GitHubSettings, SyncState } from '../../core/types'
 import { todayStr } from '../../core/date'
 import { db } from '../../core/db'
 import { GITHUB_URL, RELEASES_URL, checkLatestRelease, isNewer, type ReleaseInfo } from '../../core/update'
-import { LANGS, getLang, setLang, t } from '../../core/i18n'
+import { addCustomLang, getAllLangs, getLang, removeCustomLang, setLang, t, type CustomLang } from '../../core/i18n'
 import { version } from '../../../package.json'
 import { ChangelogDialog } from '../components/ChangelogDialog'
 
@@ -84,7 +84,47 @@ export function SettingsView({
   const [release, setRelease] = useState<ReleaseInfo | null>(null)
   const [changelogOpen, setChangelogOpen] = useState(false)
   const [importMsg, setImportMsg] = useState('')
+  const [langOpen, setLangOpen] = useState(false)
+  const [langMsg, setLangMsg] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const langFileInputRef = useRef<HTMLInputElement | null>(null)
+
+  /** 导入第三方语言文件 */
+  async function handleImportLang(file: File) {
+    setLangMsg('')
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text) as {
+        code?: unknown
+        label?: unknown
+        usesSpaces?: unknown
+        dict?: unknown
+      }
+      if (
+        typeof data?.code !== 'string' ||
+        typeof data.label !== 'string' ||
+        typeof data.dict !== 'object' ||
+        data.dict === null
+      ) {
+        setLangMsg(t('settings.langImportBad'))
+        return
+      }
+      const custom: CustomLang = {
+        code: data.code,
+        label: data.label,
+        usesSpaces: Boolean(data.usesSpaces),
+        dict: data.dict as Record<string, string>
+      }
+      if (!addCustomLang(custom)) {
+        setLangMsg(t('settings.langImportBad'))
+        return
+      }
+      setLang(custom.code)
+      setLangMsg(t('settings.langImportDone', { label: custom.label }))
+    } catch {
+      setLangMsg(t('settings.langImportFail'))
+    }
+  }
 
   // 进入设置页时检查一次最新版本
   useEffect(() => {
@@ -144,6 +184,7 @@ export function SettingsView({
   }
 
   const currentLang = getLang()
+  const currentLangLabel = getAllLangs().find((l) => l.id === currentLang)?.label ?? currentLang
 
   return (
     <div className="view">
@@ -287,27 +328,86 @@ export function SettingsView({
           </div>
         </section>
 
-        {/* ---- 关于 ---- */}
+        {/* ---- 语言 ---- */}
         <section className="glass-panel section">
-          <div className="section__title">{t('settings.aboutSection')}</div>
+          <div className="section__title">{t('settings.langSection')}</div>
 
           <div className="row">
             <div className="row__main">
-              <div className="row__title">{t('settings.langSection')}</div>
-              <div className="row__desc">{t('settings.lightModeDesc')}</div>
+              <div className="row__title">{currentLangLabel}</div>
+              <div className="row__desc">{t('settings.langImportDesc')}</div>
             </div>
+            <button
+              className="btn btn--sm"
+              onClick={() => setLangOpen((v) => !v)}
+              aria-expanded={langOpen}
+            >
+              {langOpen ? t('settings.langCollapse') : t('settings.langExpand')}
+            </button>
           </div>
-          <div className="seg" role="group" aria-label={t('settings.langSection')} style={{ alignSelf: 'flex-start' }}>
-            {LANGS.map((l) => (
-              <button
-                key={l.id}
-                className={`seg__item${currentLang === l.id ? ' seg__item--active' : ''}`}
-                onClick={() => setLang(l.id)}
+
+          {langOpen && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div
+                className="seg"
+                role="group"
+                aria-label={t('settings.langSection')}
+                style={{ alignSelf: 'flex-start', flexWrap: 'wrap' }}
               >
-                {l.label}
-              </button>
-            ))}
-          </div>
+                {getAllLangs().map((l) => (
+                  <span key={l.id} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    <button
+                      className={`seg__item${currentLang === l.id ? ' seg__item--active' : ''}`}
+                      onClick={() => setLang(l.id)}
+                    >
+                      {l.label}
+                    </button>
+                    {l.custom && (
+                      <button
+                        className="lang-remove"
+                        title={t('settings.langRemove')}
+                        aria-label={t('settings.langRemove')}
+                        onClick={() => {
+                          removeCustomLang(l.id)
+                          if (currentLang === l.id) setLang('zh-CN')
+                        }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+
+              <div className="row">
+                <div className="row__main">
+                  <div className="row__title">{t('settings.langImport')}</div>
+                  <div className="row__desc">{t('settings.langImportDesc')}</div>
+                </div>
+                <button className="btn btn--sm" onClick={() => langFileInputRef.current?.click()}>
+                  {t('settings.langImport')}
+                </button>
+                <input
+                  ref={langFileInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) void handleImportLang(f)
+                    e.target.value = ''
+                  }}
+                />
+              </div>
+
+              {langMsg && <div className="note">{langMsg}</div>}
+            </div>
+          )}
+        </section>
+
+        {/* ---- 关于 ---- */}
+        <section className="glass-panel section">
+          <div className="section__title">{t('settings.aboutSection')}</div>
 
           <div className="row">
             <div className="row__main">

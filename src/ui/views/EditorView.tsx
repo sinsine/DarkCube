@@ -3,6 +3,7 @@ import type { DiaryEntry } from '../../core/types'
 import { formatDateDot, pad2 } from '../../core/date'
 import { countWords, deriveTitle, renderMarkdown, transformMarkdown, type MdOp } from '../../core/markdown'
 import { db } from '../../core/db'
+import { serializeContent } from '../../core/sync/frontmatter'
 import { MOOD_OPTIONS, WEATHER_OPTIONS, metaBy } from '../../core/meta'
 import { formatDate, t } from '../../core/i18n'
 import { MarkdownToolbar } from '../components/MarkdownToolbar'
@@ -15,9 +16,6 @@ interface EditorViewProps {
   onChangeDate: (date: string) => void
   /** 保存完成后通知上层刷新条目列表 */
   onEntrySaved: () => void
-  /** 自动同步开启时，编辑保存后触发一次同步 */
-  autoSyncEnabled?: boolean
-  onAutoSync?: () => void
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved'
@@ -30,9 +28,7 @@ export function EditorView({
   entry,
   initialMode,
   onChangeDate,
-  onEntrySaved,
-  autoSyncEnabled,
-  onAutoSync
+  onEntrySaved
 }: EditorViewProps) {
   const [text, setText] = useState(entry?.body ?? '')
   const [mode, setMode] = useState<Mode>(initialMode ?? 'edit')
@@ -129,11 +125,23 @@ export function EditorView({
       }
       setStatus('saved')
       onEntrySaved()
-      // 需求：自动同步开启时，完成编辑后自动同步一次
-      if (autoSyncEnabled && body.trim() !== '') onAutoSync?.()
     } catch {
       setStatus('saved')
     }
+  }
+
+  /** 预览模式：导出当前日记为 .md 文件（含 front matter，与仓库格式一致） */
+  function exportMd() {
+    const content = serializeContent(text, { weather: entry?.weather, mood: entry?.mood })
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${date}.md`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
   }
 
   function shift(delta: number) {
@@ -265,6 +273,11 @@ export function EditorView({
             </button>
           </div>
           <span style={{ flex: 1 }} />
+          {mode === 'preview' && text.trim() !== '' && (
+            <button className="btn btn--sm" onClick={exportMd} title={t('editor.exportMd')}>
+              {t('editor.exportMd')}
+            </button>
+          )}
           {words > 0 && <span className="editor__meta">{t('editor.words', { n: words })}</span>}
           {statusLabel && (
             <span className={`editor__status${status === 'saving' ? ' editor__status--busy' : ''}`}>

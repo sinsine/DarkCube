@@ -137,16 +137,6 @@ export default function App() {
     }
   }, [settings, refreshSyncState, refreshEntries])
 
-  /** 编辑完成后自动同步（自动同步开启时；节流避免频繁触发） */
-  const lastAutoSync = useRef(0)
-  const handleAutoSyncAfterEdit = useCallback(() => {
-    if (!settings?.token || !settings.userLogin || !settings.autoSync) return
-    const now = Date.now()
-    if (now - lastAutoSync.current < 20000) return
-    lastAutoSync.current = now
-    void doSync()
-  }, [settings, doSync])
-
   /** 删除日记：本地删除 + 记墓碑 + 立即推送删除到云端 */
   const handleDeleteEntry = useCallback(
     async (date: string) => {
@@ -288,8 +278,6 @@ export default function App() {
               initialMode={editorInitialMode}
               onChangeDate={setSelectedDate}
               onEntrySaved={refreshEntries}
-              autoSyncEnabled={Boolean(settings?.autoSync) && loggedIn}
-              onAutoSync={handleAutoSyncAfterEdit}
             />
           )}
           {view === 'timeline' && (
