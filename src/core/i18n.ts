@@ -185,10 +185,15 @@ const dict: Record<string, Strings> = {
     ja: '端末のすべての日記と設定を消去しますか？この操作は元に戻せません（GitHub に同期済みの内容はリポジトリに残ります）。'
   },
   'settings.aboutSection': { 'zh-CN': '外观与关于', 'zh-TW': '外觀與關於', en: 'Appearance & About', ja: '外観と情報' },
-  'settings.lightMode': { 'zh-CN': '日间模式', 'zh-TW': '日間模式', en: 'Light mode', ja: 'ライトモード' },
-  'settings.lightModeDesc': { 'zh-CN': '黑白反转的亮色界面', 'zh-TW': '黑白反轉的亮色介面', en: 'Inverted monochrome light interface', ja: '白黒反転のライトな画面' },
+  'settings.darkMode': { 'zh-CN': '夜间模式', 'zh-TW': '夜間模式', en: 'Dark mode', ja: 'ダークモード' },
+  'settings.darkModeDesc': {
+    'zh-CN': '黑白玻璃质感的暗色界面',
+    'zh-TW': '黑白玻璃質感的暗色介面',
+    en: 'Monochrome glass dark interface',
+    ja: '白黒ガラスのダークな画面'
+  },
   'settings.langSection': { 'zh-CN': '语言', 'zh-TW': '語言', en: 'Language', ja: '言語' },
-  'settings.aboutDesc': { 'zh-CN': '本地优先 · GitHub 私有仓库云存档', 'zh-TW': '本地優先 · GitHub 私有倉庫雲端存檔', en: 'Local-first · GitHub private repo backup', ja: 'ローカル優先 · GitHub プライベートリポジトリ保存' },
+  'settings.aboutDesc': { 'zh-CN': '求求给个star吧——', 'zh-TW': '求求給個star吧——', en: 'Pretty please give a star ——', ja: 'スターをください——' },
   'settings.checkUpdate': { 'zh-CN': '检查更新', 'zh-TW': '檢查更新', en: 'Check for updates', ja: '更新を確認' },
   'settings.newVersion': { 'zh-CN': '发现新版本 {v}，点击右侧前往下载', 'zh-TW': '發現新版本 {v}，點擊右側前往下載', en: 'New version {v} available, click to download', ja: '新しいバージョン {v} があります。右側からダウンロードできます' },
   'settings.latest': { 'zh-CN': '已是最新版本（{v}）', 'zh-TW': '已是最新版本（{v}）', en: 'You are up to date ({v})', ja: '最新版です（{v}）' },

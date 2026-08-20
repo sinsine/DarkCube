@@ -410,19 +410,18 @@ export function SettingsView({
         {/* ---- 关于 ---- */}
         <section className="glass-panel section">
           <div className="section__title">{t('settings.aboutSection')}</div>
-          <div className="about-motto">{t('about.motto')}</div>
 
           <div className="row">
             <div className="row__main">
-              <div className="row__title">{t('settings.lightMode')}</div>
-              <div className="row__desc">{t('settings.lightModeDesc')}</div>
+              <div className="row__title">{t('settings.darkMode')}</div>
+              <div className="row__desc">{t('settings.darkModeDesc')}</div>
             </div>
             <button
               className="switch"
               role="switch"
-              aria-checked={theme === 'light'}
+              aria-checked={theme === 'dark'}
               onClick={onToggleTheme}
-              aria-label={t('settings.lightMode')}
+              aria-label={t('settings.darkMode')}
             />
           </div>
 
@@ -495,6 +494,9 @@ export function SettingsView({
             </button>
           )}
         </section>
+
+        {/* 设置区最底部的座右铭 */}
+        <div className="about-motto">{t('about.motto')}</div>
       </div>
 
       <ChangelogDialog open={changelogOpen} onClose={() => setChangelogOpen(false)} />

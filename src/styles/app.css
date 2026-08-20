@@ -337,8 +337,9 @@
   box-shadow: 0 0 22px rgba(255, 255, 255, 0.28);
 }
 .day-cell--selected:hover {
-  background: #ffffff;
+  background: var(--ink-0);
   color: var(--bg-0);
+  filter: brightness(1.08);
 }
 .day-dot {
   width: 4px;
@@ -854,12 +855,13 @@
   letter-spacing: 0.1em;
   font-weight: 600;
 }
-/* 关于栏目下方的小字座右铭 */
+/* 设置区最底部的座右铭 */
 .about-motto {
   font-size: 12px;
   color: var(--ink-3);
   letter-spacing: 0.12em;
-  margin-top: -10px;
+  text-align: center;
+  padding: var(--sp-2) 0 var(--sp-4);
   animation: fade-in 0.4s var(--ease);
 }
 .row {

@@ -61,7 +61,9 @@
   font-weight: 600;
 }
 .btn--primary:hover {
-  background: #ffffff;
+  background: var(--ink-0);
+  color: var(--bg-0);
+  filter: brightness(1.08);
   border-color: transparent;
 }
 

@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.6',
+    tag: 'v1.3.6',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['修复切换语言后所选语言按钮颜色发虚的问题（悬停/触屏残留时不再变浅）', '外观与关于：日间模式改为「夜间模式」，开关反转（夜间模式开启时开关变白）', '关于页副标题改为「求求给个star吧——」'],
+      'zh-TW': ['修復切換語言後所選語言按鈕顏色發虛的問題（懸停/觸屏殘留時不再變淺）', '外觀與關於：日間模式改為「夜間模式」，開關反轉（夜間模式開啟時開關變白）', '關於頁副標題改為「求求給個star吧——」'],
+      en: ['Fixed selected language button looking faded after switching language (no longer washes out on hover/touch residue)', 'Appearance & About: "Light mode" changed to "Dark mode" with the switch inverted (turns white when dark mode is on)', 'About subtitle changed to "Pretty please give a star ——"'],
+      ja: ['言語切替後、選択した言語ボタンの色が薄くなる問題を修正（ホバー/タッチ残像で薄くならない）', '外観と情報：「ライトモード」を「ダークモード」に変更し、スイッチを反転（ダークモードONで白くなる）', '情報ページのサブタイトルを「スターをください——」に変更']
+    }
+  },
+  {
     version: '1.3.5',
     tag: 'v1.3.5',
     date: '2026-08',
