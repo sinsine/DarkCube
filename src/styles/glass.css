@@ -235,20 +235,6 @@
   opacity: 0.75;
 }
 
-/* ---------- 设备码展示（网页登录） ---------- */
-.device-code {
-  text-align: center;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  padding: 14px 10px;
-  border: 1px dashed var(--line-strong);
-  border-radius: 12px;
-  background: var(--field-bg);
-  user-select: all;
-}
-
 /* ---------- 开关 ---------- */
 .switch {
   position: relative;

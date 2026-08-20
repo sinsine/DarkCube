@@ -42,12 +42,6 @@ export interface GitHubSettings {
   defaultBranch?: string
   /** 自动同步开关 */
   autoSync: boolean
-  /** OAuth App Client ID（网页辅助登录） */
-  clientId?: string
-  /** OAuth App Client Secret（可选，GitHub 部分应用要求） */
-  clientSecret?: string
-  /** 自建中转服务地址（绕过 CORS 的 Device Flow 转发） */
-  relayUrl?: string
 }
 
 /** 同步状态（单例 id=1） */

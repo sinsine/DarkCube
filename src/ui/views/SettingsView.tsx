@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { GitHubSettings, SyncState } from '../../core/types'
 import { todayStr } from '../../core/date'
 import { db } from '../../core/db'
@@ -17,7 +16,6 @@ interface SettingsViewProps {
   onInstall: () => void
   theme: 'dark' | 'light'
   onToggleTheme: () => void
-  onSaveSettings: (patch: Partial<GitHubSettings>) => void
 }
 
 function formatSyncTime(ts?: number): string {
@@ -69,20 +67,8 @@ export function SettingsView({
   canInstall,
   onInstall,
   theme,
-  onToggleTheme,
-  onSaveSettings
+  onToggleTheme
 }: SettingsViewProps) {
-  const [clientId, setClientId] = useState(settings?.clientId ?? '')
-  const [clientSecret, setClientSecret] = useState(settings?.clientSecret ?? '')
-  const [relayUrl, setRelayUrl] = useState(settings?.relayUrl ?? '')
-
-  function saveOAuth() {
-    onSaveSettings({
-      clientId: clientId.trim() || undefined,
-      clientSecret: clientSecret.trim() || undefined,
-      relayUrl: relayUrl.trim() || undefined
-    })
-  }
 
   return (
     <div className="view">
@@ -133,78 +119,6 @@ export function SettingsView({
               </div>
             </div>
           )}
-        </section>
-
-        {/* ---- 网页登录（OAuth） ---- */}
-        <section className="glass-panel section">
-          <div className="section__title">网页登录（OAuth）</div>
-          <div className="row__desc">
-            用于「登录 GitHub → 网页登录」免输 Token：创建 OAuth App 并部署自建中转后，填写以下配置。
-          </div>
-
-          <div className="field">
-            <label className="field__label" htmlFor="st-cid">
-              OAuth App Client ID
-            </label>
-            <input
-              id="st-cid"
-              className="input"
-              placeholder="Iv1.xxxxxxxx"
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </div>
-
-          <div className="field">
-            <label className="field__label" htmlFor="st-secret">
-              Client Secret（可选）
-            </label>
-            <input
-              id="st-secret"
-              className="input"
-              type="password"
-              placeholder="仅在 GitHub 要求时填写"
-              value={clientSecret}
-              onChange={(e) => setClientSecret(e.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </div>
-
-          <div className="field">
-            <label className="field__label" htmlFor="st-relay">
-              中转地址（Cloudflare Worker）
-            </label>
-            <input
-              id="st-relay"
-              className="input"
-              placeholder="https://xxx.workers.dev"
-              value={relayUrl}
-              onChange={(e) => setRelayUrl(e.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <a
-              className="link"
-              href="https://github.com/settings/applications/new"
-              target="_blank"
-              rel="noreferrer"
-            >
-              创建 OAuth App（勾选 Device flow）↗
-            </a>
-            <a className="link" href="https://dash.cloudflare.com" target="_blank" rel="noreferrer">
-              部署中转 Worker（复制仓库 server/device-flow-worker.js）↗
-            </a>
-          </div>
-
-          <button className="btn btn--sm" onClick={saveOAuth} style={{ alignSelf: 'flex-start' }}>
-            保存 OAuth 配置
-          </button>
         </section>
 
         {/* ---- 同步 ---- */}
@@ -285,7 +199,7 @@ export function SettingsView({
               墨
             </span>
             <div>
-              <div className="row__title">墨辰日记 v1.1.0</div>
+              <div className="row__title">墨辰日记 v1.1.1</div>
               <div className="row__desc">本地优先 · GitHub 私有仓库云存档 · 黑白液态玻璃</div>
             </div>
           </div>

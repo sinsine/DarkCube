@@ -158,16 +158,6 @@ export default function App() {
     setSettings(next)
   }, [settings])
 
-  const handleSaveSettings = useCallback(
-    async (patch: Partial<GitHubSettings>) => {
-      if (!settings) return
-      const next: GitHubSettings = { ...settings, ...patch }
-      await saveSettings(next)
-      setSettings(next)
-    },
-    [settings]
-  )
-
   const openEditor = useCallback((date: string) => {
     setSelectedDate(date)
     setView('editor')
@@ -223,7 +213,6 @@ export default function App() {
               onInstall={() => void handleInstall()}
               theme={theme}
               onToggleTheme={toggleTheme}
-              onSaveSettings={handleSaveSettings}
             />
           )}
         </main>
