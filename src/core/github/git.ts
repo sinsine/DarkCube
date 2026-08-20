@@ -95,6 +95,31 @@ export async function createBlob(
   return (await res.json()) as { sha: string }
 }
 
+/**
+ * PUT /contents：在空仓库创建首个文件（一次完成「文件 + 首个提交 + 分支」）。
+ * GitHub 官方文档明确：空仓库需先用本接口初始化，git database 接口才可用。
+ */
+export async function putContent(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string,
+  content: string,
+  message: string
+): Promise<void> {
+  const bytes = new TextEncoder().encode(content)
+  let bin = ''
+  for (const b of bytes) bin += String.fromCharCode(b)
+  await ghApiFetch(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`,
+    token,
+    {
+      method: 'PUT',
+      body: JSON.stringify({ message, content: btoa(bin) })
+    }
+  )
+}
+
 export async function createTree(
   token: string,
   owner: string,
@@ -132,23 +157,6 @@ export async function createCommit(
     }
   )
   return (await res.json()) as { sha: string }
-}
-
-export async function createRef(
-  token: string,
-  owner: string,
-  repo: string,
-  branch: string,
-  sha: string
-): Promise<void> {
-  await ghApiFetch(
-    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/refs`,
-    token,
-    {
-      method: 'POST',
-      body: JSON.stringify({ ref: `refs/heads/${branch}`, sha })
-    }
-  )
 }
 
 export async function updateBranchRef(

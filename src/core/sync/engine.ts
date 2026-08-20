@@ -7,12 +7,12 @@ import { GitHubError, getRepo } from '../github/api'
 import {
   createBlob,
   createCommit,
-  createRef,
   createTree,
   getBranchRef,
   getCommit,
   getRawFile,
   getTreeRecursive,
+  putContent,
   updateBranchRef,
   type TreeItem
 } from '../github/git'
@@ -52,11 +52,10 @@ export async function syncNow(
 ): Promise<SyncResult> {
   const { owner, repo, token, defaultBranch } = settings
   if (!owner || !repo || !token) throw new Error('请先登录 GitHub')
-  const branch = defaultBranch || 'main'
+  let branch = defaultBranch || 'main'
 
-  // ---- 1. 远端 ref ----
+  // ---- 1. 远端 ref（空仓库用 Contents API 初始化） ----
   let remoteRefSha: string | null = null
-  let needInitRef = false
   try {
     const ref = await getBranchRef(token, owner, repo, branch)
     remoteRefSha = ref.sha
@@ -64,12 +63,19 @@ export async function syncNow(
     // 404：分支不存在；409 + "empty"：仓库还没有任何提交（GitHub 对空仓库返回 409 Conflict）
     const emptyRepo =
       e instanceof GitHubError && (e.status === 404 || (e.status === 409 && /empty/i.test(e.message)))
-    if (emptyRepo) {
-      // 确认仓库存在后走首次初始化（写 README + 首个 commit + 建分支）
-      await getRepo(token, owner, repo)
-      needInitRef = true
-    } else {
-      throw e
+    if (!emptyRepo) throw e
+    // 空仓库：git database 接口全部不可用，必须用 PUT /contents 初始化
+    // （一次调用即完成「创建文件 + 首个提交 + 默认分支」）
+    const repoInfo = await getRepo(token, owner, repo)
+    await putContent(token, owner, repo, 'README.md', README_CONTENT, 'init: 墨辰日记')
+    try {
+      const ref = await getBranchRef(token, owner, repo, branch)
+      remoteRefSha = ref.sha
+    } catch {
+      // 配置分支与实际默认分支不一致时，改用仓库真实默认分支
+      branch = repoInfo.default_branch
+      const ref = await getBranchRef(token, owner, repo, branch)
+      remoteRefSha = ref.sha
     }
   }
 
@@ -80,7 +86,7 @@ export async function syncNow(
 
   // ---- 2. 拉取（远端 ref 有变化时） ----
   const remoteEntries = new Map<string, string>() // date → blob sha
-  const needPull = !needInitRef && prev?.remoteRefSha !== remoteRefSha
+  const needPull = prev?.remoteRefSha !== remoteRefSha
   if (needPull && remoteRefSha) {
     const commit = await getCommit(token, owner, repo, remoteRefSha)
     remoteTreeSha = commit.tree.sha
@@ -132,27 +138,17 @@ export async function syncNow(
     }
   }
 
-  // ---- 3. 推送（本地改动 / 冲突备份 / 墓碑 / 首次初始化） ----
+  // ---- 3. 推送（本地改动 / 冲突备份 / 墓碑） ----
   const dirtyEntries = await db.entries.filter((e) => e.dirty || !e.blobSha).toArray()
   const pendingConflicts = await db.conflicts.filter((c) => !c.synced).toArray()
   const tombstones = needPull
     ? (prev?.deleted ?? []).filter((d) => remoteEntries.has(d))
     : (prev?.deleted ?? [])
 
-  if (
-    needInitRef ||
-    dirtyEntries.length > 0 ||
-    pendingConflicts.length > 0 ||
-    tombstones.length > 0
-  ) {
+  if (dirtyEntries.length > 0 || pendingConflicts.length > 0 || tombstones.length > 0) {
     const items: TreeItem[] = []
     const pushedShas = new Map<string, string>()
 
-    if (needInitRef) {
-      // 空仓库首次初始化：先写入 README，保证分支上有内容
-      const readme = await createBlob(token, owner, repo, README_CONTENT)
-      items.push({ path: 'README.md', mode: '100644', type: 'blob', sha: readme.sha })
-    }
     for (const e of dirtyEntries) {
       const blob = await createBlob(token, owner, repo, e.body)
       pushedShas.set(e.date, blob.sha)
@@ -168,12 +164,8 @@ export async function syncNow(
 
     const tree = await createTree(token, owner, repo, remoteTreeSha || null, items)
     const commitMsg = `sync: ${dirtyEntries.length} entries${pendingConflicts.length > 0 ? `, ${pendingConflicts.length} conflicts` : ''}`
-    const commit = await createCommit(token, owner, repo, commitMsg, tree.sha, needInitRef ? [] : [remoteRefSha!])
-    if (needInitRef) {
-      await createRef(token, owner, repo, branch, commit.sha)
-    } else {
-      await updateBranchRef(token, owner, repo, branch, commit.sha)
-    }
+    const commit = await createCommit(token, owner, repo, commitMsg, tree.sha, [remoteRefSha!])
+    await updateBranchRef(token, owner, repo, branch, commit.sha)
 
     // 更新本地 blob SHA / 清除 dirty / 标记冲突已上传
     for (const [date, sha] of pushedShas) {

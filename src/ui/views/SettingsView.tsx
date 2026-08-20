@@ -199,7 +199,7 @@ export function SettingsView({
               墨
             </span>
             <div>
-              <div className="row__title">墨辰日记 v1.1.2</div>
+              <div className="row__title">墨辰日记 v1.1.3</div>
               <div className="row__desc">本地优先 · GitHub 私有仓库云存档 · 黑白液态玻璃</div>
             </div>
           </div>
