@@ -135,7 +135,7 @@ export function CalendarView({ entries, selectedDate, onPickDate }: CalendarView
               ‹
             </button>
             <button className="icon-btn" onClick={backToToday} aria-label={t('calendar.today')} title={t('calendar.today')}>
-              今
+              {t('calendar.todayBtn')}
             </button>
             <button className="icon-btn" onClick={() => move(1)} aria-label={t('calendar.nextMonth')}>
               ›

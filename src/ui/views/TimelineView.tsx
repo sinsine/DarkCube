@@ -217,7 +217,7 @@ export function TimelineView({ entries, conflictCount, onOpen, onDelete }: Timel
         {groups.map((g) => (
           <section key={g.year} className="timeline-year">
             <div className="timeline-year__head">
-              <span className="timeline-year__title">{g.year} 年</span>
+              <span className="timeline-year__title">{t('timeline.yearLabel', { y: g.year })}</span>
               <span className="timeline-year__count">{t('timeline.count', { n: g.items.length })}</span>
             </div>
 

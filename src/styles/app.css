@@ -1022,6 +1022,11 @@
     width: 0;
   }
 
+  /* 竖屏：浏览日记时隐藏「导出 .md」按钮 */
+  .editor__export-btn {
+    display: none;
+  }
+
   /* 登录后仅显示头像 */
   .chip {
     padding: 4px;

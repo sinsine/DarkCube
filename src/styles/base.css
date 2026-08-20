@@ -111,8 +111,20 @@ textarea {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* 注：曾为主题切换添加 background-color 过渡，在安卓 WebView 上导致闪烁，
-   已移除；主题现为即时切换（body/玻璃面板/液态背景均无颜色过渡）。 */
+/* 注：安卓竖屏下曾为主题切换添加颜色过渡导致闪烁，故竖屏不触发；
+   仅横屏（≥721px）保留平滑过渡效果。 */
+@media (min-width: 721px) {
+  body,
+  .glass-panel,
+  .glass-panel--flat,
+  .bottomnav,
+  .offline-banner,
+  .liquid-bg {
+    transition: background-color var(--dur-slow) var(--ease),
+      border-color var(--dur-slow) var(--ease),
+      color var(--dur-slow) var(--ease);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

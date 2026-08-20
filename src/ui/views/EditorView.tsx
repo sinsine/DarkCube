@@ -274,7 +274,7 @@ export function EditorView({
           </div>
           <span style={{ flex: 1 }} />
           {mode === 'preview' && text.trim() !== '' && (
-            <button className="btn btn--sm" onClick={exportMd} title={t('editor.exportMd')}>
+            <button className="btn btn--sm editor__export-btn" onClick={exportMd} title={t('editor.exportMd')}>
               {t('editor.exportMd')}
             </button>
           )}

@@ -432,7 +432,7 @@ export function SettingsView({
                 rel="noreferrer"
                 title={GITHUB_URL}
               >
-                墨辰DarkCube v{version} ↗
+                {getLang() === 'en' ? 'DarkCube' : '墨辰DarkCube'} v{version} ↗
               </a>
               <div className="row__desc">{t('settings.aboutDesc')}</div>
             </div>

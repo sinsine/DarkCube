@@ -31,8 +31,10 @@ const dict: Record<string, Strings> = {
   'calendar.nextMonth': { 'zh-CN': '下个月', 'zh-TW': '下個月', en: 'Next month', ja: '翌月' },
   'calendar.nextYear': { 'zh-CN': '下一年', 'zh-TW': '下一年', en: 'Next year', ja: '翌年' },
   'calendar.today': { 'zh-CN': '今天', 'zh-TW': '今天', en: 'Today', ja: '今日' },
+  'calendar.todayBtn': { 'zh-CN': '今', 'zh-TW': '今', en: 'T', ja: '今' },
   'calendar.onThisDay': { 'zh-CN': '那年今天', 'zh-TW': '那年今天', en: 'On this day', ja: 'この日の過去' },
   'calendar.yearsAgo': { 'zh-CN': '{n} 年前', 'zh-TW': '{n} 年前', en: '{n} years ago', ja: '{n}年前' },
+  'timeline.yearLabel': { 'zh-CN': '{y} 年', 'zh-TW': '{y} 年', en: '{y}', ja: '{y}年' },
 
   // ---- 编辑器 ----
   'editor.prevDay': { 'zh-CN': '前一天', 'zh-TW': '前一天', en: 'Previous day', ja: '前日' },
@@ -193,7 +195,7 @@ const dict: Record<string, Strings> = {
   'settings.latestRelease': { 'zh-CN': '前往 GitHub Releases 查看最新版本', 'zh-TW': '前往 GitHub Releases 查看最新版本', en: 'Visit GitHub Releases for the latest version', ja: 'GitHub Releases で最新版を確認' },
   'settings.releasesBtn': { 'zh-CN': '最新 Releases ↗', 'zh-TW': '最新 Releases ↗', en: 'Latest Releases ↗', ja: '最新リリース ↗' },
   'settings.changelog': { 'zh-CN': '📜 历史更新日志', 'zh-TW': '📜 歷史更新日誌', en: '📜 Changelog', ja: '📜 更新履歴' },
-  'settings.author': { 'zh-CN': '作者 B 站主页 ↗', 'zh-TW': '作者 B 站主頁 ↗', en: "Author's Bilibili ↗", ja: '作者のB站ホーム ↗' },
+  'settings.author': { 'zh-CN': '作者 B 站主页 ↗', 'zh-TW': '作者 B 站主頁 ↗', en: "Author's Bilibili ↗", ja: '作者の Bilibili ホーム ↗' },
   'settings.disclaimer': { 'zh-CN': '📄 免责声明', 'zh-TW': '📄 免責聲明', en: '📄 Disclaimer', ja: '📄 免責事項' },
   'settings.install': { 'zh-CN': '安装应用到桌面 / 主屏幕', 'zh-TW': '安裝應用程式到桌面 / 主畫面', en: 'Install app to desktop / home screen', ja: 'デスクトップ／ホーム画面にインストール' },
 

@@ -1,6 +1,6 @@
 import type { GitHubSettings, ViewId } from '../../core/types'
 import { version } from '../../../package.json'
-import { t } from '../../core/i18n'
+import { getLang, t } from '../../core/i18n'
 
 interface TopBarProps {
   view: ViewId
@@ -30,12 +30,16 @@ export function TopBar({
   theme,
   onToggleTheme
 }: TopBarProps) {
+  const isEn = getLang() === 'en'
+  const brandFull = isEn ? 'DarkCube' : '墨辰DarkCube'
+  const brandShort = isEn ? 'DarkCube' : '墨辰'
+
   return (
     <header className="glass-panel topbar">
       <div className="brand">
         <span className="brand__logo">墨</span>
-        <span className="brand__name brand__name--full">墨辰DarkCube</span>
-        <span className="brand__name brand__name--short">墨辰</span>
+        <span className="brand__name brand__name--full">{brandFull}</span>
+        <span className="brand__name brand__name--short">{brandShort}</span>
         <span className="brand__version">v{version}</span>
       </div>
 

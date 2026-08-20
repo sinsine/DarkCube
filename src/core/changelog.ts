@@ -11,6 +11,28 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.4',
+    tag: 'v1.3.4',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['竖屏浏览日记时隐藏「导出 .md」按钮', '横屏保留日夜主题过渡（竖屏不触发）', '新增 AGENTS.md 开发约定（新版本必须更新日志）', '补全 v1.3.3 更新日志', '英语模式下标题改为 DarkCube', '修复英语模式残留汉字（日历「今」、时间线「年」等）', '日语模式 B 站改为 Bilibili', '更新日志日期颜色与正文一致'],
+      'zh-TW': ['直式瀏覽日記時隱藏「匯出 .md」按鈕', '橫式保留日夜主題過渡（直式不觸發）', '新增 AGENTS.md 開發約定（新版本必須更新日誌）', '補全 v1.3.3 更新日誌', '英語模式下標題改為 DarkCube', '修復英語模式殘留漢字（日曆「今」、時間線「年」等）', '日語模式 B 站改為 Bilibili', '更新日誌日期顏色與內文一致'],
+      en: ['Hide "Export .md" button in portrait preview', 'Landscape-only theme transition (not in portrait)', 'Added AGENTS.md dev rules (changelog required for every release)', 'Backfilled v1.3.3 changelog', 'Brand shows "DarkCube" in English mode', 'Fixed remaining Chinese strings in English (calendar "T", year labels)', 'Bilibili in Japanese mode', 'Changelog date color matches body text'],
+      ja: ['縦画面のプレビューで「.md 書き出し」ボタンを非表示', '横画面のみテーマ遷移（縦画面では発動しない）', 'AGENTS.md を追加（新バージョンは必ず更新履歴を更新）', 'v1.3.3 の更新履歴を補完', '英語モードではタイトルを DarkCube に', '英語モードの残存漢字（カレンダー「今」、年表示など）を修正', '日本語モードで B站 を Bilibili に', '更新履歴の日付色を本文と統一']
+    }
+  },
+  {
+    version: '1.3.3',
+    tag: 'v1.3.3',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['README 中英双语化', '修复安卓日夜主题切换闪烁', '鼠标左滑可完整拉出删除按钮', '日历新增「那年今天」版块', '启动检查更新弹窗（前往/稍后/不再提醒）', '语言选项每种独占一行'],
+      'zh-TW': ['README 中英雙語化', '修復安卓日夜主題切換閃爍', '滑鼠左滑可完整拉出刪除按鈕', '日曆新增「那年今天」版塊', '啟動檢查更新彈窗（前往/稍後/不再提醒）', '語言選項每種獨佔一行'],
+      en: ['Bilingual README', 'Fixed Android theme-switch flicker', 'Mouse drag fully reveals delete button', 'Added "On This Day" below the calendar', 'Startup update dialog (Go/Later/Dismiss)', 'One language per line'],
+      ja: ['README を中英バイリンガル化', 'Android のテーマ切替のちらつきを修正', 'マウスドラッグで削除ボタンを完全表示', 'カレンダー下に「この日の過去」を追加', '起動時の更新ダイアログ（リリースへ/後で/再表示しない）', '言語オプションを1行1言語に']
+    }
+  },
+  {
     version: '1.3.2',
     tag: 'v1.3.2',
     date: '2026-08',
