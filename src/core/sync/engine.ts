@@ -61,8 +61,11 @@ export async function syncNow(
     const ref = await getBranchRef(token, owner, repo, branch)
     remoteRefSha = ref.sha
   } catch (e) {
-    if (e instanceof GitHubError && e.status === 404) {
-      // 仓库还没有任何提交（新建的空仓库）→ 确认仓库存在后走首次初始化
+    // 404：分支不存在；409 + "empty"：仓库还没有任何提交（GitHub 对空仓库返回 409 Conflict）
+    const emptyRepo =
+      e instanceof GitHubError && (e.status === 404 || (e.status === 409 && /empty/i.test(e.message)))
+    if (emptyRepo) {
+      // 确认仓库存在后走首次初始化（写 README + 首个 commit + 建分支）
       await getRepo(token, owner, repo)
       needInitRef = true
     } else {

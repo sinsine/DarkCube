@@ -113,6 +113,8 @@ export function friendlyGitHubError(e: unknown): string {
         return '访问被拒绝：请检查 Token 是否勾选「Contents 读写」权限'
       case 404:
         return '仓库不存在，或该 Token 没有访问此仓库的权限'
+      case 409:
+        return '请求冲突：仓库为空或状态异常，请稍后重试'
       case 422:
         return '仓库名已存在或创建失败，请更换仓库名'
       default:
