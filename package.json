@@ -1,7 +1,7 @@
 {
   "name": "darkcube-diary",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "description": "墨辰DarkCube — 黑白玻璃风格的本地优先日记，GitHub 私有仓库云存档",
   "main": "electron/main.cjs",
@@ -13,6 +13,7 @@
     "dist:win": "npm run build && electron-builder --win"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.0",
     "dexie": "^4.0.11",
     "dompurify": "^3.4.14",
     "marked": "^15.0.7",
@@ -20,6 +21,8 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
