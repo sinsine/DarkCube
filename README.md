@@ -44,6 +44,7 @@ npm run dev        # http://localhost:5173
 ```bash
 npm run build      # 输出到 dist/（含 service worker 与 manifest）
 npm run preview    # 本地预览生产构建
+npm run dist:win   # 打包 Windows 桌面应用（Electron），输出安装包与便携版到配置目录
 ```
 
 ## ☁️ GitHub 配置
