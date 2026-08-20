@@ -30,7 +30,7 @@ export default function App() {
   const [online, setOnline] = useState(navigator.onLine)
   const [installEvt, setInstallEvt] = useState<BeforeInstallPromptEvent | null>(null)
   const [theme, setTheme] = useState<'dark' | 'light'>(() =>
-    localStorage.getItem('darkcube-theme') === 'light' ? 'light' : 'dark'
+    localStorage.getItem('darkcube-theme') === 'dark' ? 'dark' : 'light'
   )
 
   const syncStateRef = useRef<SyncState | undefined>(undefined)

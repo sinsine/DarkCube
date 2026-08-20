@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { GitHubSettings } from '../../core/types'
 import { ensureRepo, friendlyGitHubError, getCurrentUser } from '../../core/github/api'
+import { TutorialDialog } from './TutorialDialog'
 
 interface LoginDialogProps {
   open: boolean
@@ -23,6 +24,7 @@ export function LoginDialog({ open, onClose, initial, onSaved }: LoginDialogProp
   const [repoName, setRepoName] = useState(DEFAULT_REPO)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
+  const [tutorialOpen, setTutorialOpen] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -65,14 +67,15 @@ export function LoginDialog({ open, onClose, initial, onSaved }: LoginDialogProp
   }
 
   return (
-    <div className="dialog-mask" onClick={onClose} role="presentation">
-      <div
-        className="dialog glass-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-label="登录 GitHub"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <>
+      <div className="dialog-mask" onClick={onClose} role="presentation">
+        <div
+          className="dialog glass-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label="登录 GitHub"
+          onClick={(e) => e.stopPropagation()}
+        >
         <div className="dialog__head">
           <div>
             <div className="dialog__title">登录 GitHub</div>
@@ -152,7 +155,19 @@ export function LoginDialog({ open, onClose, initial, onSaved }: LoginDialogProp
         <div className="note" style={{ marginTop: 14 }}>
           提示：Token 仅保存在本机浏览器。仓库不存在时会自动创建为私有仓库。
         </div>
+
+        <button
+          type="button"
+          className="btn btn--sm"
+          onClick={() => setTutorialOpen(true)}
+          style={{ alignSelf: 'center', marginTop: 10 }}
+        >
+          📖 不会操作 GitHub？查看新手登录教程
+        </button>
       </div>
-    </div>
+      </div>
+
+      <TutorialDialog open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
+    </>
   )
 }

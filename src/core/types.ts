@@ -12,6 +12,10 @@ export interface DiaryEntry {
   blobSha?: string
   /** 本地有未推送改动 */
   dirty?: boolean
+  /** 天气（本地元数据，不同步） */
+  weather?: string
+  /** 心情（本地元数据，不同步） */
+  mood?: string
 }
 
 /** 冲突备份：同步时本地被远端覆盖的旧内容，另存为仓库 .conflict.md */

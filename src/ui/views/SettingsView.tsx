@@ -199,10 +199,19 @@ export function SettingsView({
               墨
             </span>
             <div>
-              <div className="row__title">墨辰日记 v1.1.6</div>
+              <div className="row__title">墨辰日记 v1.2.0</div>
               <div className="row__desc">本地优先 · GitHub 私有仓库云存档 · 黑白液态玻璃</div>
             </div>
           </div>
+          <a
+            className="link"
+            href="https://space.bilibili.com/518517303"
+            target="_blank"
+            rel="noreferrer"
+            style={{ alignSelf: 'flex-start' }}
+          >
+            作者 B 站主页（墨辰）↗
+          </a>
           {canInstall && (
             <button className="btn btn--primary btn--block" onClick={onInstall}>
               安装应用到桌面 / 主屏幕

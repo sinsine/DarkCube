@@ -235,6 +235,26 @@
   opacity: 0.75;
 }
 
+/* ---------- 教程弹窗 ---------- */
+.tutorial-dialog {
+  width: min(680px, 100%);
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+}
+.tutorial-body {
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-top: 4px;
+  font-size: 15px;
+}
+.tutorial-body h2 {
+  font-size: 1.25em;
+}
+.tutorial-body blockquote {
+  font-size: 0.95em;
+}
+
 /* ---------- 开关 ---------- */
 .switch {
   position: relative;

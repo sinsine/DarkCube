@@ -3,6 +3,7 @@ import type { DiaryEntry } from '../../core/types'
 import { formatDateCN, pad2 } from '../../core/date'
 import { countWords, deriveTitle, renderMarkdown, transformMarkdown, type MdOp } from '../../core/markdown'
 import { db } from '../../core/db'
+import { MOOD_OPTIONS, WEATHER_OPTIONS } from '../../core/meta'
 import { MarkdownToolbar } from '../components/MarkdownToolbar'
 
 interface EditorViewProps {
@@ -67,6 +68,21 @@ export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorVi
     })
   }
 
+  /** 设置天气 / 心情（本地元数据，不参与正文同步） */
+  async function setMeta(field: 'weather' | 'mood', value: string | undefined) {
+    const base: DiaryEntry = entry ?? {
+      date,
+      title: deriveTitle(text),
+      body: text,
+      updatedAt: Date.now()
+    }
+    const next: DiaryEntry = { ...base, updatedAt: Date.now() }
+    if (field === 'weather') next.weather = value
+    else next.mood = value
+    await db.entries.put(next)
+    onEntrySaved()
+  }
+
   async function doSave(saveDate: string, body: string) {
     timer.current = undefined
     try {
@@ -129,6 +145,39 @@ export function EditorView({ date, entry, onChangeDate, onEntrySaved }: EditorVi
               新日记
             </span>
           )}
+        </div>
+
+        <div className="editor__meta-row">
+          <div className="meta-group">
+            <span className="meta-group__label">天气</span>
+            {WEATHER_OPTIONS.map((w) => (
+              <button
+                key={w.id}
+                className={`meta-chip${entry?.weather === w.id ? ' meta-chip--active' : ''}`}
+                onClick={() => void setMeta('weather', entry?.weather === w.id ? undefined : w.id)}
+                title={w.label}
+                aria-pressed={entry?.weather === w.id}
+              >
+                <span aria-hidden="true">{w.icon}</span>
+                <span className="meta-chip__label">{w.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="meta-group">
+            <span className="meta-group__label">心情</span>
+            {MOOD_OPTIONS.map((m) => (
+              <button
+                key={m.id}
+                className={`meta-chip${entry?.mood === m.id ? ' meta-chip--active' : ''}`}
+                onClick={() => void setMeta('mood', entry?.mood === m.id ? undefined : m.id)}
+                title={m.label}
+                aria-pressed={entry?.mood === m.id}
+              >
+                <span aria-hidden="true">{m.icon}</span>
+                <span className="meta-chip__label">{m.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="editor__toolbar">

@@ -7,16 +7,18 @@
 ## ✨ 功能
 
 - **写日记**：一天一篇，Markdown 语法，实时预览，字数统计，自动保存（防抖 600ms）
+- **天气 / 心情记录**：编辑界面上方一键选择当天天气与心情，时间线中展示（仅存本机，不同步）
 - **图形化 Markdown 辅助**：编辑器上方工具栏一键插入 标题 / 加粗 / 斜体 / 删除线 / 引用 / 列表 / 待办 / 代码 / 链接 / 分割线（作用于当前选区）
-- **GitHub 登录**：手动 Token 登录（可一键打开 GitHub 生成 Token 页面）
+- **GitHub 登录**：手动 Token 登录（可一键打开 GitHub 生成 Token 页面）；登录弹窗内置**新手教程**（[docs/login-tutorial.md](docs/login-tutorial.md)）
 - **自动创建仓库**：登录后自动创建私有仓库（默认 `darkcube-diary`，已存在则复用），无需手动建仓
-- **日间 / 夜间模式**：黑白玻璃界面一键反转
+- **日间 / 夜间模式**：黑白玻璃界面一键反转（**默认日间模式**）
 - **日历视图**：月历上墨点标记有日记的日子，今日高亮
 - **时间线**：倒序浏览全部日记
 - **GitHub 云存档**：日记以 Markdown 明文同步到你自己的**私有仓库**（`diary/entries/YYYY/MM/YYYY-MM-DD.md`），GitHub 网页上可直接阅读
 - **双端互通**：PWA 应用，电脑（Chrome/Edge）与安卓（Chrome）均可安装使用，两端共享同一份数据
 - **离线可用**：本地优先（IndexedDB），断网照常写日记，联网后自动同步
 - **黑白液态玻璃**：纯黑白灰配色，动态灰阶光斑 + 毛玻璃拟态界面
+- **作者主页**：设置 → 关于 → [作者 B 站主页](https://space.bilibili.com/518517303)
 - **数据安全**：同步冲突时远端为权威，本地旧内容自动备份为 `.conflict.md`，绝不丢数据；支持一键导出 JSON 备份
 
 ## 🖥 技术栈
@@ -115,6 +117,7 @@ npm run preview    # 本地预览生产构建
 
 ```
 ├── .github/workflows/deploy.yml   # GitHub Pages 自动部署
+├── docs/login-tutorial.md         # 面向小白的 GitHub 登录教程（登录弹窗内置）
 ├── public/icons/                  # PWA 图标（脚本生成）
 ├── scripts/gen-icons.mjs          # 纯 Node 图标生成器
 ├── src/

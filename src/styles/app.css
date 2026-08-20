@@ -345,6 +345,62 @@
   transform: scale(0.94);
 }
 
+/* ---------- 天气 / 心情选择 ---------- */
+.editor__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+.meta-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.meta-group__label {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  letter-spacing: 0.05em;
+  margin-right: 2px;
+}
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--field-bg);
+  color: var(--ink-1);
+  font-size: 13px;
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+.meta-chip:hover {
+  border-color: var(--line-strong);
+  color: var(--ink-0);
+}
+.meta-chip--active {
+  background: var(--ink-0);
+  color: var(--bg-0);
+  border-color: transparent;
+  font-weight: 600;
+}
+.meta-chip--active:hover {
+  color: var(--bg-0);
+}
+.meta-chip__label {
+  font-size: 12.5px;
+}
+
+/* 时间线元数据（天气/心情） */
+.timeline-item__meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  margin-top: 3px;
+}
+
 /* 编辑器工具栏 */
 .editor__toolbar {
   display: flex;
