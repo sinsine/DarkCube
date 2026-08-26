@@ -46,6 +46,8 @@ export interface GitHubSettings {
   defaultBranch?: string
   /** 自动同步开关 */
   autoSync: boolean
+  /** 云端混淆存储：上传前对日记内容 Base64url 编码（可逆，非加密） */
+  obfuscate?: boolean
 }
 
 /** 同步状态（单例 id=1） */

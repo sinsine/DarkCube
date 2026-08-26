@@ -5,6 +5,7 @@ import type { GitHubSettings, SyncResult, SyncState } from '../types'
 import { deriveTitle } from '../markdown'
 import { friendlyGitHubError, GitHubError, getRepo } from '../github/api'
 import { parseContent, serializeContent } from './frontmatter'
+import { deobfuscate, obfuscate } from './obfuscate'
 import { t } from '../i18n'
 import {
   createBlob,
@@ -26,6 +27,8 @@ const README_CONTENT = `# 墨辰DarkCube
 
 - \`diary/entries/YYYY/MM/YYYY-MM-DD.md\`：每日一篇 Markdown 日记
 - \`diary/entries/**/*.conflict.md\`：同步冲突时自动保留的本地旧内容
+
+> 说明：开启「云端混淆存储」后，日记文件以 \`.enc\` 后缀保存，内容为 Base64url 编码（可逆，非加密）。
 `
 
 /** 日记文件路径：diary/entries/YYYY/MM/YYYY-MM-DD.md */
@@ -34,13 +37,26 @@ export function entryPath(date: string): string {
   return `diary/entries/${y}/${m}/${date}.md`
 }
 
+/** 混淆存储时的日记路径：.enc 后缀 */
+export function entryPathEnc(date: string): string {
+  const [y, m] = date.split('-')
+  return `diary/entries/${y}/${m}/${date}.enc`
+}
+
 /** 冲突备份文件路径 */
 export function conflictPath(date: string): string {
   const [y, m] = date.split('-')
   return `diary/entries/${y}/${m}/${date}.conflict.md`
 }
 
-const FILE_RE = /^diary\/entries\/\d{4}\/\d{2}\/(\d{4}-\d{2}-\d{2})\.md$/
+/** 混淆存储时的冲突备份路径 */
+export function conflictPathEnc(date: string): string {
+  const [y, m] = date.split('-')
+  return `diary/entries/${y}/${m}/${date}.conflict.enc`
+}
+
+// 兼容两种格式：旧明文 .md 与新混淆 .enc
+const FILE_RE = /^diary\/entries\/\d{4}\/\d{2}\/(\d{4}-\d{2}-\d{2})(?:\.md|\.enc)$/
 
 function parseEntryPath(path: string): string | null {
   const m = path.match(FILE_RE)
@@ -143,7 +159,7 @@ export async function pullOnly(
   let remoteTreeSha = prev?.remoteTreeSha ?? ''
 
   // ---- 拉取（远端 ref 有变化时） ----
-  const remoteEntries = new Map<string, string>() // date → blob sha
+  const remoteEntries = new Map<string, { sha: string; path: string }>() // date → { blob sha, 远端实际路径 }
   const needPull = prev?.remoteRefSha !== remoteRefSha
   if (needPull && remoteRefSha) {
     const refSha = remoteRefSha // 闭包内 TS 不保留收窄
@@ -155,14 +171,14 @@ export async function pullOnly(
     for (const item of tree) {
       if (item.type !== 'blob' || !item.sha) continue
       const date = parseEntryPath(item.path)
-      if (date && !deletedDates.has(date)) remoteEntries.set(date, item.sha)
+      if (date && !deletedDates.has(date)) remoteEntries.set(date, { sha: item.sha, path: item.path })
     }
 
-    for (const [date, remoteSha] of remoteEntries) {
+    for (const [date, remote] of remoteEntries) {
       const local = await db.entries.get(date)
       if (!local) {
-        const content = await step('step.download', () => getRawFile(token, owner, repo, entryPath(date), branch))
-        const parsed = parseContent(content)
+        const raw = await step('step.download', () => getRawFile(token, owner, repo, remote.path, branch))
+        const parsed = parseContent(deobfuscate(raw))
         await db.entries.put({
           date,
           title: deriveTitle(parsed.body),
@@ -170,15 +186,15 @@ export async function pullOnly(
           weather: parsed.weather,
           mood: parsed.mood,
           updatedAt: Date.now(),
-          blobSha: remoteSha,
+          blobSha: remote.sha,
           dirty: false
         })
         pulled++
-      } else if (local.blobSha !== remoteSha) {
-        const content = await step('step.download', () => getRawFile(token, owner, repo, entryPath(date), branch))
-        const parsed = parseContent(content)
+      } else if (local.blobSha !== remote.sha) {
+        const raw = await step('step.download', () => getRawFile(token, owner, repo, remote.path, branch))
+        const parsed = parseContent(deobfuscate(raw))
         if (local.dirty) {
-          // 两端都改过 → 远端为权威，本地旧内容进冲突备份（稍后随上传推送 .conflict.md）
+          // 两端都改过 → 远端为权威，本地旧内容进冲突备份（稍后随上传推送）
           await db.conflicts.put({
             date,
             title: local.title,
@@ -194,7 +210,7 @@ export async function pullOnly(
           body: parsed.body,
           weather: parsed.weather,
           mood: parsed.mood,
-          blobSha: remoteSha,
+          blobSha: remote.sha,
           dirty: false,
           updatedAt: Date.now()
         })
@@ -236,22 +252,33 @@ export async function pushOnly(
     remoteTreeSha = commit.tree.sha
   }
 
-  // 墓碑只推远端确实存在的日记文件（避免删除不存在的路径报错）
+  // 是否启用混淆存储（云端内容 Base64url 编码，非加密）
+  const useObf = Boolean(settings.obfuscate)
+
+  // 墓碑只推远端确实存在的日记文件（避免删除不存在的路径报错）；
+  // 混淆模式下还需要收集各日期在远端的全部路径（删除遗留的旧 .md）
   let tombstones = prev?.deleted ?? []
-  if (tombstones.length > 0 && remoteRefSha && remoteTreeSha) {
+  const dirtyEntries = await db.entries.filter((e) => e.dirty || !e.blobSha).toArray()
+  const pendingConflicts = await db.conflicts.filter((c) => !c.synced).toArray()
+  const remotePathsByDate = new Map<string, string[]>() // date → 远端存在的全部路径（含 .md / .enc）
+
+  if (
+    remoteRefSha &&
+    remoteTreeSha &&
+    (tombstones.length > 0 || (useObf && dirtyEntries.length > 0))
+  ) {
     const tree = await step('step.readTree', () => getTreeRecursive(token, owner, repo, remoteTreeSha))
-    const remoteDates = new Set<string>()
     for (const item of tree) {
       const d = item.type === 'blob' && item.sha ? parseEntryPath(item.path) : null
-      if (d) remoteDates.add(d)
+      if (!d) continue
+      const arr = remotePathsByDate.get(d) ?? []
+      arr.push(item.path)
+      remotePathsByDate.set(d, arr)
     }
-    tombstones = tombstones.filter((d) => remoteDates.has(d))
+    tombstones = tombstones.filter((d) => remotePathsByDate.has(d))
   }
 
   // ---- 推送（本地改动 / 冲突备份 / 墓碑） ----
-  const dirtyEntries = await db.entries.filter((e) => e.dirty || !e.blobSha).toArray()
-  const pendingConflicts = await db.conflicts.filter((c) => !c.synced).toArray()
-
   if (dirtyEntries.length > 0 || pendingConflicts.length > 0 || tombstones.length > 0) {
     if (!remoteRefSha) {
       throw new Error(t('errors.noRef'))
@@ -261,18 +288,30 @@ export async function pushOnly(
     const pushedShas = new Map<string, string>()
 
     for (const e of dirtyEntries) {
+      const content = serializeContent(e.body, { weather: e.weather, mood: e.mood })
       const blob = await step('step.upload', () =>
-        createBlob(token, owner, repo, serializeContent(e.body, { weather: e.weather, mood: e.mood }))
+        createBlob(token, owner, repo, useObf ? obfuscate(content) : content)
       )
       pushedShas.set(e.date, blob.sha)
-      items.push({ path: entryPath(e.date), mode: '100644', type: 'blob', sha: blob.sha })
+      items.push({ path: useObf ? entryPathEnc(e.date) : entryPath(e.date), mode: '100644', type: 'blob', sha: blob.sha })
+      // 混淆模式：清理该日期遗留的旧明文 .md 文件（迁移）
+      if (useObf) {
+        for (const p of remotePathsByDate.get(e.date) ?? []) {
+          if (p.endsWith('.md')) items.push({ path: p, mode: '100644', type: 'blob', sha: null })
+        }
+      }
     }
     for (const c of pendingConflicts) {
-      const blob = await step('step.uploadConflict', () => createBlob(token, owner, repo, c.body))
-      items.push({ path: conflictPath(c.date), mode: '100644', type: 'blob', sha: blob.sha })
+      const blob = await step('step.uploadConflict', () =>
+        createBlob(token, owner, repo, useObf ? obfuscate(c.body) : c.body)
+      )
+      items.push({ path: useObf ? conflictPathEnc(c.date) : conflictPath(c.date), mode: '100644', type: 'blob', sha: blob.sha })
     }
     for (const d of tombstones) {
-      items.push({ path: entryPath(d), mode: '100644', type: 'blob', sha: null })
+      // 删除该日期在远端的全部格式文件（.md / .enc）
+      for (const p of remotePathsByDate.get(d) ?? []) {
+        items.push({ path: p, mode: '100644', type: 'blob', sha: null })
+      }
     }
 
     const tree = await step('step.buildTree', () => createTree(token, owner, repo, remoteTreeSha || null, items))

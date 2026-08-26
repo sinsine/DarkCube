@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.0',
+    tag: 'v1.4.0',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['新增「云端混淆存储」：上传前对日记内容编码，GitHub 仓库中不再明文直读（可逆编码，非加密）', '兼容读取仓库中旧的明文日记文件，开启后自动迁移为混淆格式并清理旧文件', '同步引擎支持 .md / .enc 双格式路径与墓碑删除'],
+      'zh-TW': ['新增「雲端混淆儲存」：上傳前對日記內容編碼，GitHub 倉庫中不再明文直讀（可逆編碼，非加密）', '相容讀取倉庫中舊的明文日記檔案，開啟後自動遷移為混淆格式並清理舊檔案', '同步引擎支援 .md / .enc 雙格式路徑與墓碑刪除'],
+      en: ['New "Cloud obfuscation": entries are encoded before upload so the GitHub repo is no longer plaintext-readable (reversible encoding, not encryption)', 'Reads legacy plaintext entries from the repo; migrating to the obfuscated format and cleaning up old files automatically', 'Sync engine now supports both .md / .enc paths and tombstone deletion'],
+      ja: ['「クラウド難読化」を追加：アップロード前に日記をエンコードし、GitHub リポジトリで平文のまま読めなくなります（可逆エンコード・暗号化ではありません）', 'リポジトリ内の旧平文日記も読み込み可能。難読化形式への移行と旧ファイルの削除を自動化', '同期エンジンが .md / .enc の両形式パスと墓石削除に対応']
+    }
+  },
+  {
     version: '1.3.8',
     tag: 'v1.3.8',
     date: '2026-08',
