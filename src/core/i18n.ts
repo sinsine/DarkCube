@@ -239,6 +239,9 @@ const dict: Record<string, Strings> = {
   // ---- 弹窗 ----
   'dialog.disclaimer': { 'zh-CN': '免责声明', 'zh-TW': '免責聲明', en: 'Disclaimer', ja: '免責事項' },
   'dialog.disclaimerSub': { 'zh-CN': '请仔细阅读', 'zh-TW': '請仔細閱讀', en: 'Please read carefully', ja: 'よくお読みください' },
+  'dialog.deleteTitle': { 'zh-CN': '删除日记', 'zh-TW': '刪除日記', en: 'Delete entry', ja: '日記を削除' },
+  'dialog.delete': { 'zh-CN': '删除', 'zh-TW': '刪除', en: 'Delete', ja: '削除' },
+  'dialog.cancel': { 'zh-CN': '取消', 'zh-TW': '取消', en: 'Cancel', ja: 'キャンセル' },
   'dialog.changelog': { 'zh-CN': '历史更新日志', 'zh-TW': '歷史更新日誌', en: 'Changelog', ja: '更新履歴' },
   'dialog.changelogSub': { 'zh-CN': '点击版本号可直达该版本的 Releases 页面', 'zh-TW': '點擊版本號可直達該版本的 Releases 頁面', en: 'Click a version to open its Releases page', ja: 'バージョンをクリックするとそのリリースページへ移動します' },
   'dialog.close': { 'zh-CN': '关闭', 'zh-TW': '關閉', en: 'Close', ja: '閉じる' },

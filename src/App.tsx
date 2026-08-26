@@ -40,8 +40,8 @@ export default function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>(() =>
     localStorage.getItem('darkcube-theme') === 'dark' ? 'dark' : 'light'
   )
-  // 彩蛋皮肤开关（本地持久化）
-  const [easterEgg, setEasterEgg] = useState(() => localStorage.getItem('darkcube-easter-egg') === '1')
+  // 彩蛋皮肤开关（本地持久化，默认开启）
+  const [easterEgg, setEasterEgg] = useState(() => localStorage.getItem('darkcube-easter-egg') !== '0')
 
   // 启动：检查更新（新版本优先于免责声明；首次启动且有更新时，免责声明在更新弹窗关闭后出现）
   const updatePendingDisclaimer = useRef(false)
@@ -359,6 +359,7 @@ export default function App() {
               initialMode={editorInitialMode}
               onChangeDate={setSelectedDate}
               onEntrySaved={refreshEntries}
+              onDelete={(d) => void handleDeleteEntry(d)}
             />
           )}
           {view === 'timeline' && (

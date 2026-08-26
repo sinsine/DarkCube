@@ -3,6 +3,7 @@ import type { DiaryEntry } from '../../core/types'
 import { firstSentence } from '../../core/markdown'
 import { metaBy, MOOD_OPTIONS, WEATHER_OPTIONS } from '../../core/meta'
 import { formatWeekday, getLang, t } from '../../core/i18n'
+import { DeleteConfirmDialog } from '../components/DeleteConfirmDialog'
 
 interface TimelineViewProps {
   entries: DiaryEntry[]
@@ -42,10 +43,13 @@ interface TimelineItemProps {
   entry: DiaryEntry
   swiped: boolean
   animDelay: number
+  /** 退出动画进行中（确认删除后到真正移除前的 200ms） */
+  exiting: boolean
   onSwipeOpen: () => void
   onSwipeClose: () => void
   onNavigate: () => void
-  onDelete: () => void
+  /** 请求打开删除确认弹窗 */
+  onRequestDelete: () => void
 }
 
 /** 单条时间线卡片：左滑露出删除按钮（纵向滚动不会误触发） */
@@ -53,15 +57,13 @@ function TimelineItem({
   entry: e,
   swiped,
   animDelay,
+  exiting,
   onSwipeOpen,
   onSwipeClose,
   onNavigate,
-  onDelete
+  onRequestDelete
 }: TimelineItemProps) {
   const [dx, setDx] = useState(0)
-  // 删除确认后先播放退出动画（200ms）再真正移除
-  const [exiting, setExiting] = useState(false)
-  const exitTimer = useRef<number | undefined>(undefined)
   const startX = useRef<number | null>(null)
   const startY = useRef<number | null>(null)
 
@@ -117,25 +119,11 @@ function TimelineItem({
     }
   }
 
-  // 组件卸载时清理退出定时器（防止删除后仍触发回调）
-  useEffect(() => {
-    return () => {
-      if (exitTimer.current !== undefined) clearTimeout(exitTimer.current)
-    }
-  }, [])
-
-  function handleDelete() {
-    if (window.confirm(t('timeline.confirmDelete'))) {
-      setExiting(true)
-      exitTimer.current = window.setTimeout(() => onDelete(), 200)
-    }
-  }
-
   return (
     <div className={`timeline-item-swipe${exiting ? ' timeline-item-swipe--exiting' : ''}`}>
       <button
         className={`swipe-delete${swiped ? ' swipe-delete--open' : ''}`}
-        onClick={handleDelete}
+        onClick={onRequestDelete}
         aria-label={t('timeline.delete')}
       >
         {t('timeline.delete')}
@@ -191,6 +179,12 @@ function TimelineItem({
 
 export function TimelineView({ entries, conflictCount, onOpen, onDelete }: TimelineViewProps) {
   const [swipedDate, setSwipedDate] = useState<string | null>(null)
+  // 删除确认弹窗：待删除的日期
+  const [confirmDate, setConfirmDate] = useState<string | null>(null)
+  // 退出动画中的日期（确认后先播动画，200ms 后再真正删除）
+  const [exitingDate, setExitingDate] = useState<string | null>(null)
+  const exitTimer = useRef<number | undefined>(undefined)
+
   const sorted = [...entries].sort((a, b) => (a.date < b.date ? 1 : -1))
 
   // 按年份分组
@@ -200,6 +194,25 @@ export function TimelineView({ entries, conflictCount, onOpen, onDelete }: Timel
     const last = groups[groups.length - 1]
     if (last && last.year === year) last.items.push(e)
     else groups.push({ year, items: [e] })
+  }
+
+  // 组件卸载时清理退出定时器
+  useEffect(() => {
+    return () => {
+      if (exitTimer.current !== undefined) clearTimeout(exitTimer.current)
+    }
+  }, [])
+
+  /** 确认删除：先播退出动画，再真正删除 */
+  function confirmDelete() {
+    if (!confirmDate) return
+    const date = confirmDate
+    setConfirmDate(null)
+    setExitingDate(date)
+    exitTimer.current = window.setTimeout(() => {
+      onDelete(date)
+      setExitingDate(null)
+    }, 200)
   }
 
   if (groups.length === 0 && !conflictCount) {
@@ -240,17 +253,25 @@ export function TimelineView({ entries, conflictCount, onOpen, onDelete }: Timel
                   key={e.date}
                   entry={e}
                   swiped={swipedDate === e.date}
+                  exiting={exitingDate === e.date}
                   animDelay={delay}
                   onSwipeOpen={() => setSwipedDate(e.date)}
                   onSwipeClose={() => setSwipedDate(null)}
                   onNavigate={() => onOpen(e.date)}
-                  onDelete={() => onDelete(e.date)}
+                  onRequestDelete={() => setConfirmDate(e.date)}
                 />
               )
             })}
           </section>
         ))}
       </div>
+
+      <DeleteConfirmDialog
+        open={confirmDate !== null}
+        date={confirmDate ?? undefined}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDate(null)}
+      />
     </div>
   )
 }

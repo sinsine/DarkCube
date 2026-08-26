@@ -24,6 +24,14 @@ export function CalendarView({ entries, selectedDate, onPickDate, onOpenPreview 
   const today = todayStr()
   const [cursor, setCursor] = useState<{ year: number; month: number }>(() => savedCursor ?? todayCursor())
 
+  // 星期表头按当前语言实时计算（语言切换后立即生效）
+  const weekdayHeaders = (() => {
+    const lang = getLang()
+    if (lang === 'en') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    if (lang === 'ja') return ['月', '火', '水', '木', '金', '土', '日']
+    return ['一', '二', '三', '四', '五', '六', '日']
+  })()
+
   // 滑动翻页手势 + 左右滑动动画
   const gridRef = useRef<HTMLDivElement | null>(null)
   const touchX = useRef<number | null>(null)
@@ -211,11 +219,3 @@ export function CalendarView({ entries, selectedDate, onPickDate, onOpenPreview 
     </div>
   )
 }
-
-/** 星期表头（按语言） */
-const weekdayHeaders: string[] = (() => {
-  const lang = getLang()
-  if (lang === 'en') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  if (lang === 'ja') return ['月', '火', '水', '木', '金', '土', '日']
-  return ['一', '二', '三', '四', '五', '六', '日']
-})()

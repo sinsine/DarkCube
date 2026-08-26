@@ -22,8 +22,10 @@ export function deriveTitle(body: string): string {
 /**
  * 正文的第一句话（语言感知）：
  * - 无论语言，回车换行都视为断句；
+ * - 只要遇到标点符号就断句，包括：句号、逗号、顿号、分号、冒号、省略号、破折号、
+ *   引号（「」『』“”‘’）、括号（（）【】《》〈〉）等；
  * - 若书面语言不使用空格分词（中日文），则空格也视为断句；
- * - 英语按句子标点断句。
+ * - 英语按单词间的空格保持连续，按句子标点断句。
  */
 export function firstSentence(body: string): string {
   const plain = body.replace(/[#>*_`~\-[\]]/g, ' ').replace(/\s+/g, ' ').trim()
@@ -32,7 +34,10 @@ export function firstSentence(body: string): string {
   // 先按换行取第一行
   const firstLine = plain.split('\n')[0]?.trim() ?? ''
   if (!firstLine) return ''
-  const re = breakOnSpace ? /[。！？!?；;，,\s]/ : /[。！？!?；;.!?]/
+  // 中日文：空格与一切标点都断句；英语：仅标点断句（保持单词连续）
+  const re = breakOnSpace
+    ? /[\s。！？!?；;，,、：:…—–·“”‘’「」『』（）()【】《》〈〉]/
+    : /[.。!?！？;；:：,，()（）\[\]{}<>“”‘’「」『』…—–]/
   const sentence = firstLine.split(re)[0]?.trim() ?? ''
   return sentence.length > 28 ? `${sentence.slice(0, 28)}…` : sentence
 }

@@ -7,6 +7,7 @@ import { serializeContent } from '../../core/sync/frontmatter'
 import { MOOD_OPTIONS, WEATHER_OPTIONS, metaBy } from '../../core/meta'
 import { formatDate, t } from '../../core/i18n'
 import { MarkdownToolbar } from '../components/MarkdownToolbar'
+import { DeleteConfirmDialog } from '../components/DeleteConfirmDialog'
 
 interface EditorViewProps {
   date: string
@@ -16,6 +17,8 @@ interface EditorViewProps {
   onChangeDate: (date: string) => void
   /** 保存完成后通知上层刷新条目列表 */
   onEntrySaved: () => void
+  /** 删除当前日期日记（本地 + 云端） */
+  onDelete: (date: string) => void
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved'
@@ -28,12 +31,15 @@ export function EditorView({
   entry,
   initialMode,
   onChangeDate,
-  onEntrySaved
+  onEntrySaved,
+  onDelete
 }: EditorViewProps) {
   const [text, setText] = useState(entry?.body ?? '')
   const [mode, setMode] = useState<Mode>(initialMode ?? 'edit')
   const [status, setStatus] = useState<SaveStatus>(entry ? 'saved' : 'idle')
   const [dateJumpOpen, setDateJumpOpen] = useState(false)
+  // 预览模式删除确认弹窗
+  const [deleteOpen, setDeleteOpen] = useState(false)
   // 竖屏默认折叠 Markdown 工具栏
   const [mdToolbarOpen, setMdToolbarOpen] = useState(
     () => !(typeof window !== 'undefined' && window.matchMedia('(max-width: 720px)').matches)
@@ -274,9 +280,18 @@ export function EditorView({
           </div>
           <span style={{ flex: 1 }} />
           {mode === 'preview' && text.trim() !== '' && (
-            <button className="btn btn--sm editor__export-btn" onClick={exportMd} title={t('editor.exportMd')}>
-              {t('editor.exportMd')}
-            </button>
+            <>
+              <button className="btn btn--sm editor__export-btn" onClick={exportMd} title={t('editor.exportMd')}>
+                {t('editor.exportMd')}
+              </button>
+              <button
+                className="btn btn--sm btn--danger editor__delete-btn"
+                onClick={() => setDeleteOpen(true)}
+                title={t('dialog.deleteTitle')}
+              >
+                {t('dialog.delete')}
+              </button>
+            </>
           )}
           {words > 0 && <span className="editor__meta">{t('editor.words', { n: words })}</span>}
           {statusLabel && (
@@ -321,6 +336,19 @@ export function EditorView({
 
         {text.trim() === '' && <div className="note">{t('editor.note')}</div>}
       </div>
+
+      <DeleteConfirmDialog
+        open={deleteOpen}
+        date={date}
+        onCancel={() => setDeleteOpen(false)}
+        onConfirm={() => {
+          setDeleteOpen(false)
+          onDelete(date)
+          // 删除后清空编辑内容，回到「新日记」状态
+          setText('')
+          setStatus('idle')
+        }}
+      />
     </div>
   )
 }

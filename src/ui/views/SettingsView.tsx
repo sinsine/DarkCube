@@ -93,6 +93,8 @@ export function SettingsView({
   const [langMsg, setLangMsg] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const langFileInputRef = useRef<HTMLInputElement | null>(null)
+  // 彩蛋：快速连点「自动同步」5 次跳转到存储日记的仓库
+  const autoSyncTaps = useRef<number[]>([])
 
   /** 导入第三方语言文件 */
   async function handleImportLang(file: File) {
@@ -191,6 +193,20 @@ export function SettingsView({
   const currentLang = getLang()
   const currentLangLabel = getAllLangs().find((l) => l.id === currentLang)?.label ?? currentLang
 
+  /** 彩蛋：快速连点「自动同步」5 次 → 跳转到存储日记的仓库 */
+  function handleAutoSyncEasterEgg() {
+    const now = Date.now()
+    const taps = autoSyncTaps.current
+    // 只统计最近 1.5 秒内的点击
+    taps.push(now)
+    while (taps.length > 0 && now - taps[0] > 1500) taps.shift()
+    if (taps.length >= 5) {
+      autoSyncTaps.current = []
+      const repo = settings?.owner && settings.repo ? `https://github.com/${settings.owner}/${settings.repo}` : GITHUB_URL
+      window.open(repo, '_blank', 'noopener')
+    }
+  }
+
   return (
     <div className="view">
       <div className="settings-wrap">
@@ -247,7 +263,7 @@ export function SettingsView({
           <div className="section__title">{t('settings.syncSection')}</div>
 
           <div className="row">
-            <div className="row__main">
+            <div className="row__main" onClick={handleAutoSyncEasterEgg}>
               <div className="row__title">{t('settings.autoSync')}</div>
               <div className="row__desc">{t('settings.autoSyncDesc')}</div>
             </div>

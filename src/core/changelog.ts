@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.8',
+    tag: 'v1.3.8',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['修复日语模式下日历星期表头未切换为「月火水木金土日」', '横屏预览日记时字数左侧新增删除按钮', '断句优化：遇到任意标点（含冒号、引号、括号等）即断句', '设置中快速点击「自动同步」5 次可跳转到日记仓库', '彩蛋皮肤开关默认开启', '删除确认弹窗改为液态玻璃样式，按钮多语言适配'],
+      'zh-TW': ['修復日語模式下日曆星期表頭未切換為「月火水木金土日」', '橫式預覽日記時字數左側新增刪除按鈕', '斷句最佳化：遇到任意標點（含冒號、引號、括號等）即斷句', '設定中快速點擊「自動同步」5 次可跳轉到日記倉庫', '彩蛋皮膚開關預設開啟', '刪除確認彈窗改為液態玻璃樣式，按鈕多語言適配'],
+      en: ['Fixed Japanese calendar weekdays not switching to 月火水木金土日', 'Added a delete button left of the word count in landscape preview', 'Sentence splitting now breaks on any punctuation (colons, quotes, brackets, etc.)', 'Tap "Auto sync" 5 times quickly in Settings to open the diary repository', 'Easter egg skin toggle is now enabled by default', 'Delete confirmation now uses a liquid-glass dialog with localized buttons'],
+      ja: ['日本語モードでカレンダーの曜日が「月火水木金土日」に切り替わらない問題を修正', '横画面プレビューで文字数の左に削除ボタンを追加', '句読点（コロン・引用符・括弧など）で文を区切るよう改善', '設定で「自動同期」を5回素早くタップすると日記リポジトリを開く', 'イースターエッグスキンのスイッチを初期ONに変更', '削除確認ダイアログをリキッドグラス風にし、ボタンを多言語対応']
+    }
+  },
+  {
     version: '1.3.7',
     tag: 'v1.3.7',
     date: '2026-08',

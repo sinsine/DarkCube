@@ -1056,8 +1056,9 @@
     width: 0;
   }
 
-  /* 竖屏：浏览日记时隐藏「导出 .md」按钮 */
-  .editor__export-btn {
+  /* 竖屏：浏览日记时隐藏「导出 .md」与「删除」按钮 */
+  .editor__export-btn,
+  .editor__delete-btn {
     display: none;
   }
 

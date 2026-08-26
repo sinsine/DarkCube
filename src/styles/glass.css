@@ -167,6 +167,19 @@
   border-color: var(--line);
 }
 
+/* 删除确认弹窗 */
+.delete-dialog__body {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--ink-1);
+}
+.delete-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: var(--sp-5);
+}
+
 /* ---------- 提示条 ---------- */
 .note {
   padding: 10px 14px;
