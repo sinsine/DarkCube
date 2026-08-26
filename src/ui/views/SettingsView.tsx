@@ -18,8 +18,6 @@ interface SettingsViewProps {
   onPush: () => void
   onPull: () => void
   onToggleAutoSync: () => void
-  /** 云端混淆存储开关（上传前 Base64url 编码） */
-  onToggleObfuscate: () => void
   canInstall: boolean
   onInstall: () => void
   theme: 'dark' | 'light'
@@ -79,7 +77,6 @@ export function SettingsView({
   onPush,
   onPull,
   onToggleAutoSync,
-  onToggleObfuscate,
   canInstall,
   onInstall,
   theme,
@@ -277,22 +274,6 @@ export function SettingsView({
               onClick={onToggleAutoSync}
               disabled={!loggedIn}
               aria-label={t('settings.autoSync')}
-            />
-          </div>
-
-          {/* 云端混淆存储：上传前编码，仓库不可直读（可逆，非加密） */}
-          <div className="row">
-            <div className="row__main">
-              <div className="row__title">{t('settings.obfuscate')}</div>
-              <div className="row__desc">{t('settings.obfuscateDesc')}</div>
-            </div>
-            <button
-              className="switch"
-              role="switch"
-              aria-checked={Boolean(settings?.obfuscate)}
-              onClick={onToggleObfuscate}
-              disabled={!loggedIn}
-              aria-label={t('settings.obfuscate')}
             />
           </div>
 

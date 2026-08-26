@@ -28,7 +28,7 @@ const README_CONTENT = `# 墨辰DarkCube
 - \`diary/entries/YYYY/MM/YYYY-MM-DD.md\`：每日一篇 Markdown 日记
 - \`diary/entries/**/*.conflict.md\`：同步冲突时自动保留的本地旧内容
 
-> 说明：开启「云端混淆存储」后，日记文件以 \`.enc\` 后缀保存，内容为 Base64url 编码（可逆，非加密）。
+> 说明：日记文件以 \`.enc\` 后缀保存，内容为 Base64url 编码（可逆，非加密）。
 `
 
 /** 日记文件路径：diary/entries/YYYY/MM/YYYY-MM-DD.md */
@@ -252,8 +252,8 @@ export async function pushOnly(
     remoteTreeSha = commit.tree.sha
   }
 
-  // 是否启用混淆存储（云端内容 Base64url 编码，非加密）
-  const useObf = Boolean(settings.obfuscate)
+  // 云端混淆存储：v1.4.1 起强制开启（不可关闭），上传内容 Base64url 编码
+  const useObf = true
 
   // 墓碑只推远端确实存在的日记文件（避免删除不存在的路径报错）；
   // 混淆模式下还需要收集各日期在远端的全部路径（删除遗留的旧 .md）

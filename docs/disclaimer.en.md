@@ -5,7 +5,7 @@ Thank you for using "墨辰DarkCube" ("the Software"). By using the Software you
 ## 1. Data storage and security
 
 - The Software is **local-first**: entries are stored only on your device (browser IndexedDB) by default.
-- When GitHub sync is enabled, entries are uploaded as **plain Markdown** to the **private GitHub repository** you specify; content is **not encrypted**.
+- When GitHub sync is enabled, entries are uploaded to the **private GitHub repository** you specify, after being **Base64url-obfuscated** (not directly readable). However, this encoding is **reversible and not encryption** — the repository is not guaranteed to be fully secure; please avoid storing highly sensitive information.
 - You are responsible for the security of your GitHub account and access token. The token is stored only on your device (browser/app) — never share it.
 - The Software is not liable for data leaks, loss, or inaccessibility caused by token leaks, compromised GitHub accounts, GitHub service outages, or policy changes.
 
@@ -31,4 +31,4 @@ Thank you for using "墨辰DarkCube" ("the Software"). By using the Software you
 - If you do not agree with any of the above, please stop using the Software.
 - The final interpretation of this disclaimer belongs to the author.
 
-Last updated: 2026-08-20
+Last updated: 2026-08-26

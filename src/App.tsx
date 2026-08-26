@@ -315,17 +315,18 @@ export default function App() {
     setSettings(next)
   }, [settings])
 
-  /** 云端混淆存储开关：开启后标记全部日记待重推（重新编码为 .enc 并清理旧 .md） */
-  const handleToggleObfuscate = useCallback(async () => {
-    if (!settings) return
-    const next: GitHubSettings = { ...settings, obfuscate: !settings.obfuscate }
-    await saveSettings(next)
-    setSettings(next)
-    // 开启混淆：本地全部日记标脏，下一次推送统一重编码上传
-    if (next.obfuscate) {
-      await db.entries.toCollection().modify({ dirty: true })
+  /** 云端混淆存储：v1.4.1 起强制开启（无开关）。老用户升级后自动迁移：
+   *  置 obfuscate=true 并标脏全部日记，下一次推送统一重编码为 .enc 并清理旧明文 .md */
+  const obfMigrated = useRef(false)
+  useEffect(() => {
+    if (!settings || obfMigrated.current) return
+    if (settings.obfuscate !== true) {
+      obfMigrated.current = true
+      const next: GitHubSettings = { ...settings, obfuscate: true }
+      void saveSettings(next)
+      setSettings(next)
+      void db.entries.toCollection().modify({ dirty: true }).then(() => refreshEntries())
     }
-    refreshEntries()
   }, [settings, refreshEntries])
 
   const [editorInitialMode, setEditorInitialMode] = useState<'edit' | 'preview'>('edit')
@@ -395,7 +396,6 @@ export default function App() {
               onPush={() => void doPush()}
               onPull={() => void doPull()}
               onToggleAutoSync={() => void handleToggleAutoSync()}
-              onToggleObfuscate={() => void handleToggleObfuscate()}
               canInstall={installEvt !== null}
               onInstall={() => void handleInstall()}
               theme={theme}

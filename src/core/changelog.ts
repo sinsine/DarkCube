@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.1',
+    tag: 'v1.4.1',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['云端混淆存储改为默认开启且不再提供关闭选项：上传前统一对日记内容编码，GitHub 仓库中不再明文直读'],
+      'zh-TW': ['雲端混淆儲存改為預設開啟且不再提供關閉選項：上傳前統一對日記內容編碼，GitHub 倉庫中不再明文直讀'],
+      en: ['Cloud obfuscation is now enabled by default with no opt-out: entries are always encoded before upload, so the GitHub repo is no longer plaintext-readable'],
+      ja: ['クラウド難読化を既定で有効化し、無効化オプションを廃止：アップロード前に日記を常にエンコードし、GitHub リポジトリで平文のまま読めなくなります']
+    }
+  },
+  {
     version: '1.4.0',
     tag: 'v1.4.0',
     date: '2026-08',

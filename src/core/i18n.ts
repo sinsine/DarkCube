@@ -114,13 +114,6 @@ const dict: Record<string, Strings> = {
   'settings.reLogin': { 'zh-CN': '重新登录', 'zh-TW': '重新登入', en: 'Re-login', ja: '再ログイン' },
   'settings.logout': { 'zh-CN': '退出登录', 'zh-TW': '登出', en: 'Log out', ja: 'ログアウト' },
   'settings.autoSync': { 'zh-CN': '自动同步', 'zh-TW': '自動同步', en: 'Auto sync', ja: '自動同期' },
-  'settings.obfuscate': { 'zh-CN': '云端混淆存储', 'zh-TW': '雲端混淆儲存', en: 'Cloud obfuscation', ja: 'クラウド難読化' },
-  'settings.obfuscateDesc': {
-    'zh-CN': '上传前对日记内容编码，仓库中不可直读（可逆，非加密）',
-    'zh-TW': '上傳前對日記內容編碼，倉庫中不可直讀（可逆，非加密）',
-    en: 'Encode entries before upload so the repo is not human-readable (reversible, not encryption)',
-    ja: 'アップロード前に日記をエンコードし、リポジトリで直接読めないようにします（可逆・暗号化ではありません）'
-  },
   'settings.autoSyncDesc': {
     'zh-CN': '打开应用或恢复联网时自动拉取与推送',
     'zh-TW': '開啟應用程式或恢復連網時自動拉取與推送',
