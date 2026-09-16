@@ -6,6 +6,7 @@ import { pullOnly, pushOnly, syncNow, SyncStepError } from './core/sync/engine'
 import { friendlyGitHubError } from './core/github/api'
 import { checkLatestRelease, isNewer, RELEASES_URL, type ReleaseInfo } from './core/update'
 import { isCnyPeriod } from './core/lunar'
+import { isNativeApp } from './core/platform'
 import { t, useLang } from './core/i18n'
 import { version } from '../package.json'
 import { LiquidBackground } from './ui/components/LiquidBackground'
@@ -251,6 +252,28 @@ export default function App() {
       window.removeEventListener('offline', onOffline)
     }
   }, [])
+
+  // App 模式（Android）：系统返回键先切回首页（日历），而不是直接退出应用
+  const viewRef = useRef<ViewId>(view)
+  viewRef.current = view
+  useEffect(() => {
+    if (!isNativeApp()) return
+    const onPop = () => {
+      if (viewRef.current !== 'calendar') {
+        setView('calendar')
+        // 补一条历史记录，避免从深层页面返回时直接退出应用
+        window.history.pushState({ dc: 'calendar' }, '')
+      }
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  // 离开首页时压入一条历史记录，使系统返回键可被拦截
+  useEffect(() => {
+    if (!isNativeApp()) return
+    if (view !== 'calendar') window.history.pushState({ dc: view }, '')
+  }, [view])
 
   // PWA 安装提示
   useEffect(() => {

@@ -6,6 +6,7 @@ import { db } from '../../core/db'
 import { serializeContent } from '../../core/sync/frontmatter'
 import { MOOD_OPTIONS, WEATHER_OPTIONS, metaBy } from '../../core/meta'
 import { formatDate, t } from '../../core/i18n'
+import { isNativeApp } from '../../core/platform'
 import { MarkdownToolbar } from '../components/MarkdownToolbar'
 import { DeleteConfirmDialog } from '../components/DeleteConfirmDialog'
 
@@ -40,6 +41,8 @@ export function EditorView({
   const [dateJumpOpen, setDateJumpOpen] = useState(false)
   // 预览模式删除确认弹窗
   const [deleteOpen, setDeleteOpen] = useState(false)
+  // App 模式：预览时点击正文可直接进入编辑
+  const appMode = isNativeApp()
   // 竖屏默认折叠 Markdown 工具栏
   const [mdToolbarOpen, setMdToolbarOpen] = useState(
     () => !(typeof window !== 'undefined' && window.matchMedia('(max-width: 720px)').matches)
@@ -93,13 +96,24 @@ export function EditorView({
 
   /** 设置天气 / 心情（随正文同步：序列化为 front matter 上传） */
   async function setMeta(field: 'weather' | 'mood', value: string | undefined) {
-    const base: DiaryEntry = entry ?? {
+    // 以数据库最新记录为基准，避免用可能过期的 entry prop 覆盖字段；
+    // 正文以编辑器当前文本为准（text 始终是最新内容）
+    const existing = await db.entries.get(date)
+    const base: DiaryEntry = existing ??
+      entry ?? {
+        date,
+        title: deriveTitle(text),
+        body: text,
+        updatedAt: Date.now()
+      }
+    const next: DiaryEntry = {
+      ...base,
       date,
       title: deriveTitle(text),
       body: text,
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      dirty: true
     }
-    const next: DiaryEntry = { ...base, updatedAt: Date.now(), dirty: true }
     if (field === 'weather') next.weather = value
     else next.mood = value
     await db.entries.put(next)
@@ -121,7 +135,10 @@ export function EditorView({
           await db.entries.delete(saveDate)
         }
       } else {
+        // 合并写入：保留原有天气 / 心情 / blobSha，避免仅编辑正文时丢失这些字段
+        const existing = await db.entries.get(saveDate)
         await db.entries.put({
+          ...(existing ?? { date: saveDate }),
           date: saveDate,
           title: deriveTitle(body),
           body,
@@ -329,7 +346,8 @@ export function EditorView({
           />
         ) : (
           <div
-            className="editor__preview md-body"
+            className={`editor__preview md-body${appMode ? ' editor__preview--tap' : ''}`}
+            onClick={appMode ? () => setMode('edit') : undefined}
             dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }}
           />
         )}

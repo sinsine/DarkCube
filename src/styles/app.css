@@ -620,6 +620,13 @@
   border: 1px solid var(--line);
   overflow-wrap: break-word;
 }
+/* App 模式：点击正文进入编辑（给出可点按暗示） */
+.editor__preview--tap {
+  cursor: pointer;
+}
+.editor__preview--tap:active {
+  background: var(--glass-bg-hover);
+}
 
 /* ---------- Markdown 渲染 ---------- */
 .md-body {
@@ -823,6 +830,10 @@
   font-size: 16px;
   font-weight: 600;
   margin-top: 2px;
+  /* 标题超过一行时以省略号截断 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .timeline-item__excerpt {
   font-size: 13.5px;

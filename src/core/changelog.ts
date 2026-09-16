@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.2',
+    tag: 'v1.4.2',
+    date: '2026-08',
+    notes: {
+      'zh-CN': ['修复严重问题：仅编辑日记正文后，天气与心情信息会丢失', 'App 模式下系统返回键改为切回首页（日历），不再直接退出应用', 'App 模式下预览日记时，点击正文可直接进入编辑', '时间线标题超过一行时以省略号截断'],
+      'zh-TW': ['修復嚴重問題：僅編輯日記正文後，天氣與心情資訊會遺失', 'App 模式下系統返回鍵改為切回首頁（日曆），不再直接結束應用程式', 'App 模式下預覽日記時，點擊正文可直接進入編輯', '時間線標題超過一行時以省略號截斷'],
+      en: ['Fixed a serious issue: weather and mood were lost after editing only the entry body', 'In app mode, the system back button now returns to Home (Calendar) instead of exiting', 'In app mode, tapping the preview body switches to edit mode', 'Timeline titles are now truncated with an ellipsis when longer than one line'],
+      ja: ['重大な問題を修正：本文のみを編集すると天気と気分の情報が失われる', 'アプリモードで戻るキーを押すとアプリを終了せずホーム（カレンダー）へ戻るよう変更', 'アプリモードのプレビューで本文をタップすると編集モードに切替', 'タイムラインのタイトルが1行を超える場合は省略記号で切り詰め']
+    }
+  },
+  {
     version: '1.4.1',
     tag: 'v1.4.1',
     date: '2026-08',
