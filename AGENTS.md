@@ -29,8 +29,15 @@
 
 ## 其他约定
 
+- **禁止用 PowerShell 读写含中文的源码/配置**：`Get-Content` / `Set-Content` 在 Windows PowerShell 5.1 下按 ANSI 解码 UTF-8，
+  会静默损坏中文并可能破坏 JSON（`package.json`、`engine.ts` 均被此坑损坏过）。
+  一律使用编辑工具（read/edit/write）修改；必须用脚本时，用 Node 的 `fs.readFileSync(p, 'utf8')` / `writeFileSync(p, s, 'utf8')`。
 - 用户界面文案一律通过 `src/core/i18n.ts` 的 `t()` 输出，不要硬编码中文；新增词条需同时提供 4 种语言。
 - 文档（README / docs/）中的用户可见内容尽量中英双语。
 - 新版本发布流程：改版本号 → 更新 changelog → `npm run build` 验证 → 本地 `electron-builder --win` 打包 EXE → `gh release create vX.Y.Z`（含 EXE）→ 推标签触发 APK 云端构建。
+- 桌面端有两条构建，均复用同一份 `dist/`：
+  - 标准版（Electron）：`npm run dist:win`，产物约 100MB；
+  - 轻量版（Wails + 系统 WebView2）：`npm run dist:wails`，产物约 12MB，源码在 `desktop-wails/`，详见 `docs/desktop-lite.md`。
+  - ⚠️ 两者 IndexedDB origin 不同（`file__0` vs `http_wails.localhost_0`），本地数据不互通，切换外壳必须走「导出备份 → 导入备份」。
 - Android APK 的 versionName/versionCode 由 `scripts/sync-android-version.mjs` 自动从 `package.json` 同步，无需手动修改 `android/app/build.gradle`。
 - 不要在更新日志中提及「免责声明文案调整」等不面向用户的内部改动（如确有需要，遵循用户指示）。

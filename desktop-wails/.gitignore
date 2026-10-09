@@ -1,0 +1,6 @@
+# 前端构建产物（构建时由 scripts/build-wails.mjs 从仓库根 dist/ 复制而来）
+frontend/dist/
+
+# Wails 构建输出
+build/bin/
+build/windows/icon.ico

@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.5.0',
+    tag: 'v1.5.0',
+    date: '2026-10-09',
+    notes: {
+      'zh-CN': ['新增「轻量桌面版」（Wails + 系统 WebView2）：体积约 12MB，取代原先约 100MB 的安装包（功能与数据格式完全一致）', '注意：轻量版与标准版（Electron）的本地数据互不相通，切换外壳请先用「数据 → 导出备份」再在新版「导入备份」', '标准版（Electron）继续提供，两者共用同一份前端代码'],
+      'zh-TW': ['新增「輕量桌面版」（Wails + 系統 WebView2）：體積約 12MB，取代原先約 100MB 的安裝包（功能與資料格式完全一致）', '注意：輕量版與標準版（Electron）的本機資料互不相通，切換外殼請先用「資料 → 匯出備份」再於新版「匯入備份」', '標準版（Electron）繼續提供，兩者共用同一份前端程式碼'],
+      en: ['New "Lightweight desktop build" (Wails + system WebView2): about 12 MB instead of the previous ~100 MB installer (same features and data format)', 'Note: the lightweight and standard (Electron) builds keep separate local data — before switching, use "Data → Export backup" then "Import backup" in the new build', 'The standard (Electron) build remains available; both share the same frontend code'],
+      ja: ['「軽量デスクトップ版」（Wails + システム WebView2）を追加：約 12MB（従来の約 100MB インストーラーを置き換え。機能とデータ形式は同一）', '注意：軽量版と標準版（Electron）のローカルデータは相互に参照できません。切り替え前に「データ → バックアップ書き出し」を行い、新版で「バックアップ読み込み」してください', '標準版（Electron）も引き続き提供。両者は同じフロントエンドコードを共有します']
+    }
+  },
+  {
     version: '1.4.3',
     tag: 'v1.4.3',
     date: '2026-10-09',

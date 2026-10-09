@@ -1,7 +1,7 @@
 {
   "name": "darkcube-diary",
   "private": true,
-  "version": "1.4.3",
+  "version": "1.5.0",
   "type": "module",
   "description": "墨辰DarkCube — 黑白玻璃风格的本地优先日记，GitHub 私有仓库云存档",
   "main": "electron/main.cjs",
@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "icons": "node scripts/gen-icons.mjs",
     "icons:android": "node scripts/gen-android-icons.mjs",
-    "dist:win": "npm run build && electron-builder --win"
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:wails": "npm run build && node scripts/build-wails.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.0",

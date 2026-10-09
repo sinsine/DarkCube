@@ -1,0 +1,20 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "darkcube-wails",
+  "outputfilename": "墨辰DarkCube-Lite",
+  "frontend:install": "cmd /c echo skip-install",
+  "frontend:build": "cmd /c echo skip-build",
+  "frontend:dev:watcher": "cmd /c echo skip",
+  "frontend:dev:serverUrl": "auto",
+  "info": {
+    "companyName": "sinsine",
+    "productName": "墨辰DarkCube",
+    "productVersion": "1.5.0",
+    "copyright": "Copyright © 2026 sinsine",
+    "comments": "本地优先日记 · GitHub 私有仓库云存档（轻量桌面版）"
+  },
+  "author": {
+    "name": "sinsine",
+    "email": "sinzri@qq.com"
+  }
+}
