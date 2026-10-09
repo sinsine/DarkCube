@@ -33,6 +33,13 @@
   会静默损坏中文并可能破坏 JSON（`package.json`、`engine.ts` 均被此坑损坏过）。
   一律使用编辑工具（read/edit/write）修改；必须用脚本时，用 Node 的 `fs.readFileSync(p, 'utf8')` / `writeFileSync(p, s, 'utf8')`。
 - 用户界面文案一律通过 `src/core/i18n.ts` 的 `t()` 输出，不要硬编码中文；新增词条需同时提供 4 种语言。
+- README 分语言独立维护，四份文件**结构必须保持一致**（章节顺序、表格、代码块一一对应）：
+  - `README.md`：英文，GitHub 仓库默认展示
+  - `README.zh-CN.md` / `README.zh-TW.md` / `README.ja.md`：简中 / 繁中 / 日文
+  - 顶部语言切换行格式固定：`[English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md)`，当前语言用加粗而不是链接。
+  - **改动 README 内容时必须同步更新四份**，不要只改英文版。
+  - 说明性文字按各语言翻译；命令、JSON、字段名、文件路径、仓库名保持原文不译。
+  - 不使用 emoji（章节标题与正文均不加）。
 - 文档（README / docs/）中的用户可见内容尽量中英双语。
 - 新版本发布流程：改版本号 → 更新 changelog → `npm run build` 验证 → `npm run dist:desktop` 打包桌面版 → `gh release create vX.Y.Z`（含 exe）→ 推标签触发 APK 云端构建。
 - 桌面端**只有一个构建**：Wails + 系统 WebView2，源码在 `desktop-wails/`，产物约 12MB，详见 `docs/desktop.md`（Electron 已于 v2.0.0 彻底下线）。
