@@ -34,12 +34,12 @@
   一律使用编辑工具（read/edit/write）修改；必须用脚本时，用 Node 的 `fs.readFileSync(p, 'utf8')` / `writeFileSync(p, s, 'utf8')`。
 - 用户界面文案一律通过 `src/core/i18n.ts` 的 `t()` 输出，不要硬编码中文；新增词条需同时提供 4 种语言。
 - 文档（README / docs/）中的用户可见内容尽量中英双语。
-- 新版本发布流程：改版本号 → 更新 changelog → `npm run build` 验证 → 本地 `electron-builder --win` 打包 EXE → `gh release create vX.Y.Z`（含 EXE）→ 推标签触发 APK 云端构建。
-- 桌面端有两条构建，均复用同一份 `dist/`：
-  - 标准版（Electron）：`npm run dist:win`，产物约 100MB；
-  - 轻量版（Wails + 系统 WebView2）：`npm run dist:wails`，产物约 12MB，源码在 `desktop-wails/`，详见 `docs/desktop-lite.md`。
-  - 轻量版的 exe 版本信息取自 `desktop-wails/wails.json` 的 `info.productVersion`，**每次发版需与 `package.json` 同步修改**（该文件不经脚本同步，易漏）。
-  - 轻量版构建需要 Go 1.21+ 与 wails CLI（`go install github.com/wailsapp/wails/v2/cmd/wails@latest`），CI 尚未自动化（目前本地构建后手动上传 Release）。
-  - ⚠️ 两者 IndexedDB origin 不同（`file__0` vs `http_wails.localhost_0`），本地数据不互通，切换外壳必须走「导出备份 → 导入备份」。
+- 新版本发布流程：改版本号 → 更新 changelog → `npm run build` 验证 → `npm run dist:desktop` 打包桌面版 → `gh release create vX.Y.Z`（含 exe）→ 推标签触发 APK 云端构建。
+- 桌面端**只有一个构建**：Wails + 系统 WebView2，源码在 `desktop-wails/`，产物约 12MB，详见 `docs/desktop.md`（Electron 已于 v2.0.0 彻底下线）。
+  - 构建命令：`npm run dist:desktop`（需 Go 1.21+ 与 wails CLI：`go install github.com/wailsapp/wails/v2/cmd/wails@latest`）。
+  - exe 版本信息取自 `desktop-wails/wails.json` 的 `info.productVersion`，**每次发版需与 `package.json` 同步修改**（不经脚本同步，易漏）。
+  - WebView2 数据目录固定为 `%APPDATA%\DarkCube`（`main.go` 的 `WebviewUserDataPath`），**不要改动**，否则用户本地数据会"消失"。
+  - ⚠️ 与旧版本（Electron / 1.5.0 轻量版）的 IndexedDB origin 不同，数据不互通；升级必须走「导出备份 → 导入备份」，应用启动时会自动提示。
+  - CI 尚未自动化桌面构建（需要 Go + Wails 工具链），发版时本地构建后上传 Release。
 - Android APK 的 versionName/versionCode 由 `scripts/sync-android-version.mjs` 自动从 `package.json` 同步，无需手动修改 `android/app/build.gradle`。
 - 不要在更新日志中提及「免责声明文案调整」等不面向用户的内部改动（如确有需要，遵循用户指示）。

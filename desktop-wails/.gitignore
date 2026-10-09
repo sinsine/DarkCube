@@ -1,6 +1,8 @@
-# 前端构建产物（构建时由 scripts/build-wails.mjs 从仓库根 dist/ 复制而来）
+# 前端构建产物（构建时由 scripts/build-desktop.mjs 从仓库根 dist/ 复制而来）
 frontend/dist/
 
-# Wails 构建输出
+# Wails 自动生成的绑定与构建输出（wails build 会重新生成）
+frontend/wailsjs/
 build/bin/
 build/windows/icon.ico
+build/windows/*.syso

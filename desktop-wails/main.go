@@ -10,10 +10,13 @@ package main
 import (
 	"context"
 	"embed"
+	"os"
+	"path/filepath"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -66,9 +69,14 @@ func main() {
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 244, G: 244, B: 244, A: 1},
+		// 固定 WebView2 数据目录：默认按 exe 文件名建目录，改名会导致本地日记“消失”。
+		// 固定为 %APPDATA%\DarkCube 后，后续升级/改名都不会换存储位置。
+		Windows: &windows.Options{
+			WebviewUserDataPath: filepath.Join(os.Getenv("APPDATA"), "DarkCube"),
+		},
 		// 单实例：避免多开互相干扰本地数据与同步状态
 		SingleInstanceLock: &options.SingleInstanceLock{
-			UniqueId: "com.darkcube.diary.wails",
+			UniqueId: "com.darkcube.diary",
 		},
 		OnStartup:  app.startup,
 		OnDomReady: app.domReady,
@@ -80,11 +88,6 @@ func main() {
 	if err != nil {
 		println("Error:", err.Error())
 	}
-}
-
-// startup 保存运行上下文
-func (a *App) startup(ctx context.Context) {
-	a.ctx = ctx
 }
 
 // domReady 注入外链桥接脚本（在页面脚本之前执行）

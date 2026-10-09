@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outDir = join(__dirname, '..', 'public', 'icons')
-const buildDir = join(__dirname, '..', 'build')
+// 桌面版（Wails）应用图标目录
+const buildDir = join(__dirname, '..', 'desktop-wails', 'build')
 mkdirSync(outDir, { recursive: true })
 mkdirSync(buildDir, { recursive: true })
 
@@ -141,8 +142,8 @@ for (const size of [192, 512]) {
   writeFileSync(join(outDir, `icon-${size}.png`), encodePNG(size, size, drawIcon(size)))
 }
 writeFileSync(join(outDir, 'apple-touch-icon.png'), encodePNG(180, 180, drawIcon(180)))
-// electron-builder 使用 build/icon.png（512）
-writeFileSync(join(buildDir, 'icon.png'), encodePNG(512, 512, drawIcon(512)))
+// 桌面版（Wails）使用 desktop-wails/build/appicon.png（512）
+writeFileSync(join(buildDir, 'appicon.png'), encodePNG(512, 512, drawIcon(512)))
 writeFileSync(
   join(outDir, 'icon.svg'),
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +

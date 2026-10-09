@@ -646,8 +646,7 @@
 }
 .editor__status--error {
   color: var(--danger);
-}
-@keyframes pulse {
+}@keyframes pulse {
   50% { opacity: 0.4; }
 }
 

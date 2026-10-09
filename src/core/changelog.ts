@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.0.0',
+    tag: 'v2.0.0',
+    date: '2026-10-09',
+    notes: {
+      'zh-CN': ['桌面版更换为 Wails + 系统 WebView2 单一构建，安装体积由约 315MB 降至约 12MB（Electron 已彻底下线）', '桌面版新增旧版本数据检测：启动时若本机存在旧版日记且当前为空，会提示迁移步骤', '桌面版 WebView2 数据目录固定为 %APPDATA%\\DarkCube，此后修改文件名不再影响本地数据位置', '⚠️ 升级必读：旧版（Electron / 1.5.0 轻量版）本地数据无法被本版直接读取，请先用旧版「设置 → 数据 → 导出备份」，再在本版「导入备份」'],
+      'zh-TW': ['桌面版更換為 Wails + 系統 WebView2 單一建置，安裝體積由約 315MB 降至約 12MB（Electron 已徹底下線）', '桌面版新增舊版本資料偵測：啟動時若本機存在舊版日記且當前為空，會提示遷移步驟', '桌面版 WebView2 資料目錄固定為 %APPDATA%\\DarkCube，此後修改檔案名稱不再影響本機資料位置', '⚠️ 升級必讀：舊版（Electron / 1.5.0 輕量版）本機資料無法被本版直接讀取，請先用舊版「設定 → 資料 → 匯出備份」，再於本版「匯入備份」'],
+      en: ['Desktop is now a single Wails + system WebView2 build: installed size drops from ~315 MB to ~12 MB (Electron has been fully retired)', 'Desktop now detects older-version data: on startup, if old entries exist but the app is empty, migration steps are shown', 'The desktop WebView2 data directory is now pinned to %APPDATA%\\DarkCube, so renaming the executable no longer moves your data', '⚠️ Required for upgrades: local data from older builds (Electron / 1.5.0 lightweight) cannot be read directly — first use "Settings → Data → Export backup" in the old build, then "Import backup" here'],
+      ja: ['デスクトップ版を Wails + システム WebView2 の単一ビルドに変更。インストールサイズは約 315MB から約 12MB に削減（Electron は完全に廃止）', 'デスクトップ版に旧バージョンのデータ検出を追加：起動時に旧版の日記があり本版が空の場合、移行手順を表示', 'デスクトップ版の WebView2 データディレクトリを %APPDATA%\\DarkCube に固定。今後ファイル名を変更してもデータ位置は変わりません', '⚠️ アップグレード時の必須事項：旧版（Electron / 1.5.0 軽量版）のローカルデータは本版から直接読み込めません。旧版で「設定 → データ → バックアップ書き出し」を行い、本版で「バックアップ読み込み」してください']
+    }
+  },
+  {
     version: '1.5.0',
     tag: 'v1.5.0',
     date: '2026-10-09',

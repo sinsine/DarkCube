@@ -6,7 +6,7 @@ import { pullOnly, pushOnly, syncNow, SyncStepError } from './core/sync/engine'
 import { friendlyGitHubError } from './core/github/api'
 import { checkLatestRelease, isNewer, RELEASES_URL, type ReleaseInfo } from './core/update'
 import { isCnyPeriod } from './core/lunar'
-import { isNativeApp } from './core/platform'
+import { isNativeApp, getLegacyDataPath } from './core/platform'
 import { t, useLang } from './core/i18n'
 import { version } from '../package.json'
 import { LiquidBackground } from './ui/components/LiquidBackground'
@@ -14,6 +14,7 @@ import { TopBar, BottomNav } from './ui/components/TopBar'
 import { LoginDialog } from './ui/components/LoginDialog'
 import { DisclaimerDialog } from './ui/components/DisclaimerDialog'
 import { UpdateDialog } from './ui/components/UpdateDialog'
+import { LegacyDataNotice } from './ui/components/LegacyDataNotice'
 import { CalendarView } from './ui/views/CalendarView'
 import { EditorView } from './ui/views/EditorView'
 import { TimelineView } from './ui/views/TimelineView'
@@ -110,6 +111,17 @@ export default function App() {
     void db.syncState.get(1).then(setSyncState)
     void db.conflicts.count().then(setConflictCount)
   }, [])
+
+  // 桌面版：本地无日记但检测到旧版本数据时，提示迁移（避免误以为数据丢失）
+  const [legacyPath, setLegacyPath] = useState('')
+  const legacyChecked = useRef(false)
+  useEffect(() => {
+    if (legacyChecked.current || entries.length > 0) return
+    legacyChecked.current = true
+    void getLegacyDataPath().then((p) => {
+      if (p) setLegacyPath(p)
+    })
+  }, [entries.length])
 
   const loggedIn = Boolean(settings?.token && settings?.userLogin)
 
@@ -447,6 +459,11 @@ export default function App() {
         onGo={handleUpdateGo}
         onLater={closeUpdate}
         onDismiss={handleUpdateDismiss}
+      />
+      <LegacyDataNotice
+        open={legacyPath !== ''}
+        path={legacyPath}
+        onClose={() => setLegacyPath('')}
       />
     </div>
   )

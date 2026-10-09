@@ -275,6 +275,29 @@ const dict: Record<string, Strings> = {
     ja: '画面でエラーが発生しました。日記は端末に安全に保存されています。再読み込みして続行してください。'
   },
   'crash.reload': { 'zh-CN': '重新载入', 'zh-TW': '重新載入', en: 'Reload', ja: '再読み込み' },
+
+  // ---- 旧版本数据迁移 ----
+  'legacy.title': { 'zh-CN': '检测到旧版本数据', 'zh-TW': '偵測到舊版本資料', en: 'Previous version data found', ja: '旧バージョンのデータを検出' },
+  'legacy.sub': { 'zh-CN': '本机存在旧版的本地日记', 'zh-TW': '本機存在舊版的本機日記', en: 'Older local diary data exists on this device', ja: 'この端末に旧バージョンの日記データがあります' },
+  'legacy.desc': {
+    'zh-CN': '检测到旧版本（Electron 版或 1.5.0 轻量版）的日记数据，但当前版本无法直接读取它。请按以下步骤迁移，数据不会丢失：',
+    'zh-TW': '偵測到舊版本（Electron 版或 1.5.0 輕量版）的日記資料，但當前版本無法直接讀取。請依下列步驟遷移，資料不會遺失：',
+    en: 'Diary data from an older build (Electron or the 1.5.0 lightweight build) was found, but this version cannot read it directly. Follow these steps — nothing will be lost:',
+    ja: '旧バージョン（Electron 版または 1.5.0 軽量版）のデータを検出しましたが、このバージョンからは直接読み込めません。以下の手順で移行してください（データは失われません）：'
+  },
+  'legacy.step1': {
+    'zh-CN': '打开旧版本 →「设置 → 数据 → 导出备份」，生成 JSON 备份文件',
+    'zh-TW': '開啟舊版本 →「設定 → 資料 → 匯出備份」，產生 JSON 備份檔案',
+    en: 'Open the older build → "Settings → Data → Export backup" to create a JSON file',
+    ja: '旧バージョンを開き「設定 → データ → バックアップ書き出し」で JSON を作成'
+  },
+  'legacy.step2': {
+    'zh-CN': '回到本版本 →「设置 → 数据 → 导入备份」，选择该 JSON 文件',
+    'zh-TW': '回到本版本 →「設定 → 資料 → 匯入備份」，選擇該 JSON 檔案',
+    en: 'Return here → "Settings → Data → Import backup" and select that JSON file',
+    ja: 'このバージョンで「設定 → データ → バックアップ読み込み」から JSON を選択'
+  },
+  'legacy.gotIt': { 'zh-CN': '我知道了', 'zh-TW': '我知道了', en: 'Got it', ja: '了解しました' },
   'errors.repoExists': { 'zh-CN': '仓库「{name}」已存在但无法访问，或创建失败：请更换仓库名或检查 Token 权限', 'zh-TW': '倉庫「{name}」已存在但無法存取，或建立失敗：請更換倉庫名稱或檢查 Token 權限', en: 'Repo "{name}" exists but is inaccessible, or creation failed: change the repo name or check token permissions', ja: 'リポジトリ「{name}」は存在しますがアクセスできないか、作成に失敗しました：名前を変えるか権限を確認してください' },
   'errors.initFailed': { 'zh-CN': '仓库初始化失败，请稍后重试', 'zh-TW': '倉庫初始化失敗，請稍後重試', en: 'Repository initialization failed, please retry', ja: 'リポジトリの初期化に失敗しました。後でもう一度お試しください' },
   'errors.noRef': { 'zh-CN': '缺少远端分支引用，无法提交（请重试）', 'zh-TW': '缺少遠端分支參照，無法提交（請重試）', en: 'Missing remote branch reference, cannot commit (retry)', ja: 'リモートブランチ参照がありません。コミットできません（再試行）' },
