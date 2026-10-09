@@ -2,6 +2,16 @@ export function pad2(n: number): string {
   return String(n).padStart(2, '0')
 }
 
+/** 校验严格 YYYY-MM-DD（并确认真实存在的日期）。
+ *  用于导入备份等外部数据：日记文件路径由日期拼接而成，必须防御路径穿越。 */
+export function isValidDateStr(s: unknown): s is string {
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false
+  const [y, m, d] = s.split('-').map(Number)
+  if (m < 1 || m > 12 || d < 1 || d > 31) return false
+  const dt = new Date(y, m - 1, d)
+  return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d
+}
+
 /** 本地时区的今天，YYYY-MM-DD */
 export function todayStr(): string {
   const d = new Date()

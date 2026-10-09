@@ -48,6 +48,7 @@ const dict: Record<string, Strings> = {
   'editor.words': { 'zh-CN': '{n} 字', 'zh-TW': '{n} 字', en: '{n} chars', ja: '{n}字' },
   'editor.saving': { 'zh-CN': '保存中…', 'zh-TW': '儲存中…', en: 'Saving…', ja: '保存中…' },
   'editor.saved': { 'zh-CN': '已保存', 'zh-TW': '已儲存', en: 'Saved', ja: '保存済み' },
+  'editor.saveFailed': { 'zh-CN': '保存失败，请重试', 'zh-TW': '儲存失敗，請重試', en: 'Save failed, please retry', ja: '保存に失敗しました。再試行してください' },
   'editor.collapseToolbar': { 'zh-CN': '收起格式栏 ▴', 'zh-TW': '收起格式列 ▴', en: 'Collapse toolbar ▴', ja: 'ツールバーを閉じる ▴' },
   'editor.expandToolbar': { 'zh-CN': '展开格式栏 ▾', 'zh-TW': '展開格式列 ▾', en: 'Expand toolbar ▾', ja: 'ツールバーを開く ▾' },
   'editor.jumpDate': { 'zh-CN': '跳转到指定日期', 'zh-TW': '跳轉到指定日期', en: 'Jump to date', ja: '日付へ移動' },
@@ -258,6 +259,22 @@ const dict: Record<string, Strings> = {
   'errors.invalid422': { 'zh-CN': '请求无效（422）：文件或仓库已存在，或仓库状态异常，请重试', 'zh-TW': '請求無效（422）：檔案或倉庫已存在，或倉庫狀態異常，請重試', en: 'Invalid request (422): file/repo already exists or state is abnormal, please retry', ja: 'リクエストが無効です（422）：ファイルまたはリポジトリが既に存在するか、状態が異常です' },
   'errors.network': { 'zh-CN': '网络连接失败，请检查网络后重试', 'zh-TW': '網路連線失敗，請檢查網路後重試', en: 'Network error, please check your connection and retry', ja: 'ネットワーク接続に失敗しました。接続を確認して再試行してください' },
   'errors.unknown': { 'zh-CN': '发生未知错误', 'zh-TW': '發生未知錯誤', en: 'An unknown error occurred', ja: '不明なエラーが発生しました' },
+  'errors.timeout': {
+    'zh-CN': '请求超时：网络较慢或连接中断，请重试',
+    'zh-TW': '請求逾時：網路較慢或連線中斷，請重試',
+    en: 'Request timed out: slow network or connection lost, please retry',
+    ja: 'リクエストがタイムアウトしました。通信が遅いか切断されています。再試行してください'
+  },
+
+  // ---- 异常兜底 ----
+  'crash.title': { 'zh-CN': '出了点问题', 'zh-TW': '出了點問題', en: 'Something went wrong', ja: '問題が発生しました' },
+  'crash.desc': {
+    'zh-CN': '界面遇到异常，你的日记仍安全保存在本机。重新载入即可继续。',
+    'zh-TW': '介面遇到異常，你的日記仍安全保存在本機。重新載入即可繼續。',
+    en: 'The interface hit an error. Your entries are still safe on this device — reload to continue.',
+    ja: '画面でエラーが発生しました。日記は端末に安全に保存されています。再読み込みして続行してください。'
+  },
+  'crash.reload': { 'zh-CN': '重新载入', 'zh-TW': '重新載入', en: 'Reload', ja: '再読み込み' },
   'errors.repoExists': { 'zh-CN': '仓库「{name}」已存在但无法访问，或创建失败：请更换仓库名或检查 Token 权限', 'zh-TW': '倉庫「{name}」已存在但無法存取，或建立失敗：請更換倉庫名稱或檢查 Token 權限', en: 'Repo "{name}" exists but is inaccessible, or creation failed: change the repo name or check token permissions', ja: 'リポジトリ「{name}」は存在しますがアクセスできないか、作成に失敗しました：名前を変えるか権限を確認してください' },
   'errors.initFailed': { 'zh-CN': '仓库初始化失败，请稍后重试', 'zh-TW': '倉庫初始化失敗，請稍後重試', en: 'Repository initialization failed, please retry', ja: 'リポジトリの初期化に失敗しました。後でもう一度お試しください' },
   'errors.noRef': { 'zh-CN': '缺少远端分支引用，无法提交（请重试）', 'zh-TW': '缺少遠端分支參照，無法提交（請重試）', en: 'Missing remote branch reference, cannot commit (retry)', ja: 'リモートブランチ参照がありません。コミットできません（再試行）' },

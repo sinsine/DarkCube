@@ -4,6 +4,8 @@ import { t } from '../i18n'
 
 const GH_API = 'https://api.github.com'
 const GH_VERSION = '2022-11-28'
+/** 单次请求超时（毫秒）：避免网络挂起导致同步卡死 */
+const REQUEST_TIMEOUT = 30_000
 
 export class GitHubError extends Error {
   status: number
@@ -17,15 +19,30 @@ export class GitHubError extends Error {
 
 /** 底层请求：统一认证头与错误解析（供 api / git 模块共用） */
 export async function ghApiFetch(path: string, token: string, init?: RequestInit): Promise<Response> {
-  const res = await fetch(`${GH_API}${path}`, {
-    ...init,
-    headers: {
-      Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${token}`,
-      'X-GitHub-Api-Version': GH_VERSION,
-      ...(init?.headers ?? {})
+  // 超时中断：网络异常时不会无限等待
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
+  let res: Response
+  try {
+    res = await fetch(`${GH_API}${path}`, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token}`,
+        'X-GitHub-Api-Version': GH_VERSION,
+        ...(init?.headers ?? {})
+      }
+    })
+  } catch (e) {
+    // 主动中断 → 明确的超时提示；其余网络错误交给上层转成「网络连接失败」
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new GitHubError(0, t('errors.timeout'))
     }
-  })
+    throw e
+  } finally {
+    clearTimeout(timer)
+  }
   if (!res.ok) {
     let msg = `${res.status} ${res.statusText}`
     try {

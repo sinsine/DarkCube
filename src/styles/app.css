@@ -55,6 +55,43 @@
 }
 
 /* ---------- 应用外壳 ---------- */
+.crash {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-5);
+}
+.crash__card {
+  width: min(420px, 100%);
+  padding: var(--sp-6) var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  text-align: center;
+}
+.crash__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ink-0);
+  color: var(--bg-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.crash__title {
+  font-size: 17px;
+  font-weight: 600;
+}
+.crash__desc {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
 .offline-banner {
   padding: 7px 14px;
   border-radius: 10px;
@@ -606,6 +643,9 @@
 .editor__status--busy {
   color: var(--ink-0);
   animation: pulse 1.2s ease-in-out infinite;
+}
+.editor__status--error {
+  color: var(--danger);
 }
 @keyframes pulse {
   50% { opacity: 0.4; }

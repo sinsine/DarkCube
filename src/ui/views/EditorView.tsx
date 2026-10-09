@@ -22,7 +22,7 @@ interface EditorViewProps {
   onDelete: (date: string) => void
 }
 
-type SaveStatus = 'idle' | 'saving' | 'saved'
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 type Mode = 'edit' | 'preview'
 
 const SAVE_DELAY = 600
@@ -148,8 +148,10 @@ export function EditorView({
       }
       setStatus('saved')
       onEntrySaved()
-    } catch {
-      setStatus('saved')
+    } catch (e) {
+      // 保存失败必须提示，不能静默当作成功（否则用户以为已保存）
+      console.error('[DarkCube] save failed:', e)
+      setStatus('error')
     }
   }
 
@@ -174,7 +176,14 @@ export function EditorView({
   }
 
   const words = countWords(text)
-  const statusLabel = status === 'saving' ? t('editor.saving') : status === 'saved' ? t('editor.saved') : ''
+  const statusLabel =
+    status === 'saving'
+      ? t('editor.saving')
+      : status === 'saved'
+        ? t('editor.saved')
+        : status === 'error'
+          ? t('editor.saveFailed')
+          : ''
   const w = metaBy(WEATHER_OPTIONS, entry?.weather)
   const m = metaBy(MOOD_OPTIONS, entry?.mood)
 
@@ -312,7 +321,11 @@ export function EditorView({
           )}
           {words > 0 && <span className="editor__meta">{t('editor.words', { n: words })}</span>}
           {statusLabel && (
-            <span className={`editor__status${status === 'saving' ? ' editor__status--busy' : ''}`}>
+            <span
+              className={`editor__status${status === 'saving' ? ' editor__status--busy' : ''}${
+                status === 'error' ? ' editor__status--error' : ''
+              }`}
+            >
               {statusLabel}
             </span>
           )}

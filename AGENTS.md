@@ -13,7 +13,19 @@
 
 2. **版本号统一**：`package.json` 的 `version` 与 `changelog.ts` 新条目的 `version`/`tag` 必须一致，且与即将发布的 Releases 标签（`vX.Y.Z`）一致。
 
-> 历史教训：v1.3.3 曾因漏更新日志而被用户指出。请在提交新版本代码前自查 `git diff src/core/changelog.ts`。
+### 更新日志日期规则（强制）
+
+- `date` 字段必须写**完整日期 `YYYY-MM-DD`**，不要只写年份月份（如 `2026-09`）——月份粒度无法核对，曾出现把 9 月发布的版本写成 8 月的错误。
+- 日期取**实际发布当天的本地日期**（本机时区），即创建 git tag / 发布 Release 的那一天。
+- 发布后可自查一致性：
+
+  ```bash
+  git for-each-ref --sort=creatordate --format='%(refname:short) %(creatordate:format:%Y-%m-%d)' refs/tags
+  ```
+
+  该输出应与 `changelog.ts` 中对应条目的 `date` 完全一致；不一致即为错误，必须修正。
+
+> 历史教训：v1.3.3 曾因漏更新日志而被用户指出；v1.4.2 的日期曾被误写为 `2026-08`（实际发布于 2026-09-17）。请在提交新版本代码前自查 `git diff src/core/changelog.ts`。
 
 ## 其他约定
 

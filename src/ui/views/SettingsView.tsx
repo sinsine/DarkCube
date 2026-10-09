@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { GitHubSettings, SyncState } from '../../core/types'
-import { todayStr } from '../../core/date'
+import { todayStr, isValidDateStr } from '../../core/date'
 import { db } from '../../core/db'
 import { GITHUB_URL, RELEASES_URL, checkLatestRelease, isNewer, type ReleaseInfo } from '../../core/update'
 import { addCustomLang, getAllLangs, getLang, removeCustomLang, setLang, t, type CustomLang } from '../../core/i18n'
@@ -157,7 +157,8 @@ export function SettingsView({
       let n = 0
       for (const raw of data.entries) {
         const e = raw as { date?: unknown; title?: unknown; body?: unknown; updatedAt?: unknown; weather?: unknown; mood?: unknown }
-        if (typeof e?.date !== 'string') continue
+        // 日期必须为合法 YYYY-MM-DD：日记文件路径由日期拼接，防止路径穿越
+        if (!isValidDateStr(e?.date)) continue
         await db.entries.put({
           date: e.date,
           title: typeof e.title === 'string' ? e.title : '',
@@ -173,7 +174,7 @@ export function SettingsView({
       if (Array.isArray(data.conflicts)) {
         for (const raw of data.conflicts) {
           const c = raw as { date?: unknown; title?: unknown; body?: unknown; updatedAt?: unknown; synced?: unknown }
-          if (typeof c?.date !== 'string') continue
+          if (!isValidDateStr(c?.date)) continue
           await db.conflicts.put({
             date: c.date,
             title: typeof c.title === 'string' ? c.title : '',

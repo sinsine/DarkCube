@@ -1,12 +1,40 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+
+/** 内容安全策略（仅生产构建注入，避免影响开发态 HMR/内联注入脚本） */
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://avatars.githubusercontent.com https://github.com",
+  "font-src 'self' data:",
+  "connect-src 'self' https://api.github.com",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+  "frame-ancestors 'none'"
+].join('; ')
+
+function cspPlugin(): Plugin {
+  return {
+    name: 'darkcube-csp',
+    apply: 'build',
+    transformIndexHtml(html) {
+      const tag = `    <meta http-equiv="Content-Security-Policy" content="${CSP}" />\n`
+      return html.replace('  </head>', `${tag}  </head>`)
+    }
+  }
+}
 
 export default defineConfig({
   // 相对路径：可部署到 GitHub Pages 子路径（username.github.io/repo/），本地开发不受影响
   base: './',
   plugins: [
     react(),
+    cspPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
