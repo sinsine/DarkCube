@@ -8,7 +8,7 @@
 
 ---
 
-## ✨ 功能 / Features
+## 功能 / Features
 
 - **写日记 / Write**: 一天一篇，用 Markdown 写，边写边看效果，带字数统计，停下就自动保存。One entry per day. Write in Markdown with a live preview, a word count, and auto-save as you type.
 - **天气与心情 / Weather & Mood**: 记下当天的天气和心情，会跟正文一起同步到 GitHub，存在 front matter 里。Pick the day's weather and mood; they sync to GitHub alongside the entry as front matter.
@@ -24,7 +24,7 @@
 
 ---
 
-## 🖥 技术栈 / Tech Stack
+## 技术栈 / Tech Stack
 
 | 层 / Layer | 技术 / Tech |
 |---|---|
@@ -39,7 +39,7 @@
 
 ---
 
-## 🚀 快速开始 / Quick Start
+## 快速开始 / Quick Start
 
 ```bash
 npm install
@@ -50,7 +50,7 @@ npm run dist:desktop  # 打包 Windows 桌面版（Wails，需 Go）/ package de
 
 ---
 
-## ☁️ GitHub 配置 / GitHub Setup
+## GitHub 配置 / GitHub Setup
 
 ### 生成细粒度 Token / Create a fine-grained token
 
@@ -64,7 +64,7 @@ npm run dist:desktop  # 打包 Windows 桌面版（Wails，需 Go）/ package de
 
 点顶栏的「登录 GitHub」，粘贴 Token，填仓库名（默认 `darkcube-diary`，不存在就自动建一个私有仓库）。Open “Login GitHub” in the top bar, paste the token, and enter a repository name. It defaults to `darkcube-diary` and creates a private repository if that name is free.
 
-> 详细图文教程在应用内的「📖 新手登录教程」，文档在 [docs/login-tutorial.md](docs/login-tutorial.md)（另有 .en/.ja/.zh-TW 版本）。
+> 详细图文教程在应用内的「新手登录教程」，文档在 [docs/login-tutorial.md](docs/login-tutorial.md)（另有 .en/.ja/.zh-TW 版本）。
 > A full illustrated tutorial is in the app; the docs are at [docs/login-tutorial.md](docs/login-tutorial.md) (also .en/.ja/.zh-TW).
 
 ### 同步 / Sync
@@ -76,7 +76,7 @@ npm run dist:desktop  # 打包 Windows 桌面版（Wails，需 Go）/ package de
 
 ---
 
-## 📲 部署到 GitHub Pages / Deploy to GitHub Pages
+## 部署到 GitHub Pages / Deploy to GitHub Pages
 
 1. 把代码推到公开仓库 / Push code to a public repo
 2. 仓库 **Settings → Pages → Source: GitHub Actions**（自带 [deploy.yml](.github/workflows/deploy.yml)）
@@ -86,7 +86,7 @@ npm run dist:desktop  # 打包 Windows 桌面版（Wails，需 Go）/ package de
 
 ---
 
-## 🌐 多语言与自定义翻译 / Languages & Custom Translations
+## 多语言与自定义翻译 / Languages & Custom Translations
 
 内置简体中文、繁體中文、English、日本語。第一次打开会按系统语言自动选，也可以在设置里的「语言」一项切换，每种语言独占一行，选项可以折叠。
 
@@ -123,7 +123,7 @@ Import in-app: Settings → Language → expand the options → Import language,
 
 ---
 
-## 📁 项目结构 / Project Structure
+## 项目结构 / Project Structure
 
 ```
 ├── .github/workflows/       # Pages 部署 + APK 云端构建 / Pages deploy + APK build
@@ -141,12 +141,12 @@ Import in-app: Settings → Language → expand the options → Import language,
 
 ---
 
-## 📄 免责声明 / Disclaimer
+## 免责声明 / Disclaimer
 
 用这个软件就表示你同意 [docs/disclaimer.md](docs/disclaimer.md)（另有 .en/.ja/.zh-TW 版本），第一次启动会自动弹出来。
 
 By using this app you agree to [docs/disclaimer.md](docs/disclaimer.md) (also .en/.ja/.zh-TW); it appears automatically on first launch.
 
-## 📜 License
+## License
 
 MIT
