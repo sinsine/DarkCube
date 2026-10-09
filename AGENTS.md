@@ -38,6 +38,8 @@
 - 桌面端有两条构建，均复用同一份 `dist/`：
   - 标准版（Electron）：`npm run dist:win`，产物约 100MB；
   - 轻量版（Wails + 系统 WebView2）：`npm run dist:wails`，产物约 12MB，源码在 `desktop-wails/`，详见 `docs/desktop-lite.md`。
+  - 轻量版的 exe 版本信息取自 `desktop-wails/wails.json` 的 `info.productVersion`，**每次发版需与 `package.json` 同步修改**（该文件不经脚本同步，易漏）。
+  - 轻量版构建需要 Go 1.21+ 与 wails CLI（`go install github.com/wailsapp/wails/v2/cmd/wails@latest`），CI 尚未自动化（目前本地构建后手动上传 Release）。
   - ⚠️ 两者 IndexedDB origin 不同（`file__0` vs `http_wails.localhost_0`），本地数据不互通，切换外壳必须走「导出备份 → 导入备份」。
 - Android APK 的 versionName/versionCode 由 `scripts/sync-android-version.mjs` 自动从 `package.json` 同步，无需手动修改 `android/app/build.gradle`。
 - 不要在更新日志中提及「免责声明文案调整」等不面向用户的内部改动（如确有需要，遵循用户指示）。
