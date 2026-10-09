@@ -32,7 +32,7 @@
 | PWA | vite-plugin-pwa（Workbox） |
 | 本地存储 / Local | IndexedDB（Dexie.js） |
 | 云同步 / Sync | GitHub REST API（Git Data，纯 HTTP） |
-| 桌面 / Desktop | Electron + electron-builder |
+| 桌面 / Desktop | Wails v2 + 系统 WebView2（产物约 12MB / ~12MB single binary） |
 | Android | Capacitor 8 + GitHub Actions 云端构建 / cloud builds |
 | Markdown | marked + DOMPurify |
 | 国际化 / i18n | 自研词典 + 自定义语言导入 / custom dictionary + language packs |
@@ -45,7 +45,7 @@
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # 生产构建 / production build (dist/)
-npm run dist:win   # 打包 Windows 桌面应用 / package Windows desktop app
+npm run dist:desktop  # 打包 Windows 桌面版（Wails，需 Go）/ package desktop (Wails, needs Go)
 ```
 
 ---
@@ -124,7 +124,7 @@ Import in-app: **设置 → 语言 → 展开语言选项 → 导入语言**, pi
 ```
 ├── .github/workflows/       # Pages 部署 + APK 云端构建 / Pages deploy + APK build
 ├── docs/                    # 教程 / 免责声明（多语言）/ tutorials & disclaimers (multi-lang)
-├── electron/                # Windows 桌面主进程 / desktop main process
+├── desktop-wails/           # Windows 桌面壳（Wails + WebView2）/ desktop shell
 ├── android/                 # Capacitor Android 工程 / Android project
 ├── scripts/                 # 图标与工具脚本 / icon & tooling scripts
 ├── src/
